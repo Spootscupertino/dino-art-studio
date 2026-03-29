@@ -1,0 +1,32 @@
+# Database files — regenerate with setup_db.py
+dino_art.db
+dino_art.db-shm
+dino_art.db-wal
+*.db
+*.db-shm
+*.db-wal
+
+# Reference images — large binary files, store separately (see species_reference/*/README.md)
+species_reference/**/*.jpg
+species_reference/**/*.jpeg
+species_reference/**/*.png
+species_reference/**/*.tif
+species_reference/**/*.tiff
+species_reference/**/*.webp
+species_reference/**/*.raw
+species_reference/**/*.cr2
+species_reference/**/*.cr3
+species_reference/**/*.arw
+species_reference/**/*.nef
+species_reference/**/*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
