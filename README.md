@@ -87,3 +87,4 @@ dino_art/
 ```
 
 The database (`dino_art.db`) is not tracked in git — regenerate it with `setup_db.py`.
+
