@@ -69,23 +69,23 @@ SPECIES_REF_DIR = Path(__file__).parent / "species_reference"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".webp", ".raw", ".cr2", ".cr3", ".arw", ".nef"}
 OUTDATED_THRESHOLD = 2020  # flag species whose last_scientific_update is before this year
 
-# Period → evocative environment phrase
+# Period → evocative environment phrase (one tight setting, no stacked sub-clauses)
 ENVIRONMENTS = {
     # Terrestrial
-    "Triassic":            "arid Triassic floodplain, sparse conifer groves, early cycads and ferns",
-    "Jurassic":            "lush Jurassic forest, towering conifers and giant tree ferns, morning mist",
-    "Cretaceous":          "Late Cretaceous river delta, flowering plants, open floodplain under vast sky",
-    "Other":               "ancient prehistoric landscape, primordial terrain",
+    "Triassic":            "arid Triassic floodplain, sparse conifers and ferns",
+    "Jurassic":            "lush Jurassic forest, towering conifers, morning mist",
+    "Cretaceous":          "Late Cretaceous river delta, open floodplain, flowering plants",
+    "Other":               "ancient prehistoric landscape",
     # Marine
-    "marine_Jurassic":     "warm shallow Jurassic sea, shafts of golden surface light piercing turquoise water, ammonite shells and crinoids below, sunlit upper ocean",
-    "marine_Cretaceous":   "Late Cretaceous Western Interior Seaway, dark deep-water column above a pale seafloor, surface light refracting in shifting curtains, vast open ocean",
-    "marine_Triassic":     "ancient Triassic ocean, warm shallow tropical sea, coral reefs and early marine life, clear turquoise water",
-    "marine_Other":        "ancient prehistoric ocean, dark deep water, surface light far above, primordial sea",
+    "marine_Jurassic":     "warm shallow Jurassic sea, turquoise water, sunlit upper ocean",
+    "marine_Cretaceous":   "Late Cretaceous Western Interior Seaway, open ocean, surface light above",
+    "marine_Triassic":     "ancient Triassic shallow sea, clear tropical water",
+    "marine_Other":        "ancient prehistoric ocean, open deep water",
     # Aerial
-    "aerial_Jurassic":     "vast Jurassic sky above forest canopy, towering cumulus clouds, warm thermals rising, horizon of green treetops below",
-    "aerial_Cretaceous":   "enormous Late Cretaceous sky, golden thermals above open floodplain, cloud formations stretching to horizon, river delta visible far below",
-    "aerial_Triassic":     "open Triassic sky, hazy ancient atmosphere, sparse land below, primordial aerial vista",
-    "aerial_Other":        "vast prehistoric sky, ancient atmosphere, open aerial expanse",
+    "aerial_Jurassic":     "vast Jurassic sky, forest canopy below, warm thermals",
+    "aerial_Cretaceous":   "Late Cretaceous sky, open floodplain below, horizon stretching wide",
+    "aerial_Triassic":     "open Triassic sky, sparse land far below",
+    "aerial_Other":        "vast prehistoric sky, open aerial expanse",
 }
 
 CATEGORIES = ["lighting", "camera", "mood", "condition"]
@@ -94,7 +94,7 @@ CATEGORIES = ["lighting", "camera", "mood", "condition"]
 HYPERREALISM_STYLE = {
     "id":    24,
     "name":  "hyperrealism",
-    "value": "hyperrealistic, anatomically accurate, photogrammetry skin detail, subsurface scattering, 8K texture",
+    "value": "hyperrealistic, anatomically accurate, living animal skin texture, subsurface scattering, 8K texture",
 }
 
 # ---------------------------------------------------------------------------
@@ -102,14 +102,11 @@ HYPERREALISM_STYLE = {
 # ---------------------------------------------------------------------------
 
 MOUTH_TEETH_CARNIVORE = (
-    "heavy saliva stranding between teeth, drool pulling from lower jaw in long strings, "
-    "wet interior mouth catching light, yellowed uneven teeth chipped and worn from bone contact, "
-    "brown staining at gum line, no two teeth the same length"
+    "yellowed uneven teeth, wet interior mouth, heavy saliva stranding between teeth"
 )
 
 MOUTH_TEETH_HERBIVORE = (
-    "wet lips parted, tongue visible and moist, grinding teeth worn flat and uneven, "
-    "saliva line catching light along jaw, gum line darkened from constant plant contact"
+    "wet lips parted, grinding teeth worn flat, saliva catching light along jaw"
 )
 
 # ---------------------------------------------------------------------------
@@ -117,8 +114,7 @@ MOUTH_TEETH_HERBIVORE = (
 # ---------------------------------------------------------------------------
 
 FEET_CLAWS = (
-    "each toe pad individually weight-bearing and visible, claw sheaths showing natural keratin wear, "
-    "claw tips asymmetrically worn from ground contact, dirt and debris caught between digits"
+    "individual toe pads weight-bearing, natural keratin wear on claws, dirt caught between digits"
 )
 
 # ---------------------------------------------------------------------------
@@ -144,15 +140,17 @@ NEGATIVE_PROMPT = (
     "studio background, seamless backdrop, portrait lighting, gradient background, "
     "grey background, controlled lighting, specimen photography, museum display, "
     "exhibit lighting, black background, white background, studio flash, "
-    "specimen mount, display case, diorama, natural history exhibit"
+    "specimen mount, display case, diorama, natural history exhibit, "
+    # Fossil / skeletal blockers
+    "fossil, fossilized, skeleton, skeletal, bones, bone structure, excavation, "
+    "petrified, paleontology specimen, museum specimen, rock matrix, sediment, "
+    "dinosaur fossil, fossil record, prehistoric bones, mineralized, stone cast, "
+    "osteoderms, osteoderm"
 )
 
 # Species-specific additions that only apply in canvas / full-body modes
 CANVAS_SPECIES_EXTRAS = {
-    "Velociraptor": (
-        "full feathered body visible, sickle claw raised off ground, "
-        "palms facing inward correct wrist anatomy, tail counterbalance extended"
-    ),
+    "Velociraptor": "sickle claw raised, palms inward, tail extended for balance",
 }
 
 # ---------------------------------------------------------------------------
@@ -175,10 +173,7 @@ OUTPUT_MODES: dict[str, dict] = {
     "canvas": {
         "display":       "Full body canvas print",
         "desc":          "mid-range lens, 60/40 negative space, print-ready",
-        "fixed_camera":  (
-            "Canon EOS R5 24-70mm f/4, mid-range lens, "
-            "full environmental context visible, habitat in frame, not telephoto"
-        ),
+        "fixed_camera":  "Canon EOS R5 24-70mm f/4, mid-range, habitat in frame",
         "composition":   "PLACEMENT",
         "canvas_print":  True,
         "full_body":     True,
@@ -187,14 +182,8 @@ OUTPUT_MODES: dict[str, dict] = {
     "environmental": {
         "display":       "Environmental wide shot",
         "desc":          "animal small in vast landscape, habitat dominant",
-        "fixed_camera":  (
-            "Canon EOS R5 16-35mm f/2.8, ultra-wide, "
-            "animal occupies less than 20% of frame, environment fills the rest"
-        ),
-        "composition":   (
-            "animal small in vast prehistoric landscape, overwhelming sense of habitat scale, "
-            "environment dominant, creature dwarfed by its world"
-        ),
+        "fixed_camera":  "Canon EOS R5 16-35mm f/2.8, ultra-wide, animal under 20% of frame",
+        "composition":   "animal small in vast prehistoric landscape, habitat dominant",
         "canvas_print":  False,
         "full_body":     True,
         "needs_placement": False,
@@ -202,14 +191,8 @@ OUTPUT_MODES: dict[str, dict] = {
     "extreme_closeup": {
         "display":       "Extreme detail close-up",
         "desc":          "macro, single surface dominant, texture abstracted",
-        "fixed_camera":  (
-            "Canon EOS R5 100mm macro f/8, razor-thin depth of field, "
-            "inch-level surface detail, background fully dissolved"
-        ),
-        "composition":   (
-            "single anatomical surface fills frame, abstract and close, "
-            "no full animal visible, texture and form dominant, painterly depth of field"
-        ),
+        "fixed_camera":  "Canon EOS R5 100mm macro f/8, razor-thin depth of field",
+        "composition":   "single anatomical surface fills frame, texture dominant",
         "canvas_print":  False,
         "full_body":     False,
         "needs_placement": False,
@@ -217,14 +200,8 @@ OUTPUT_MODES: dict[str, dict] = {
     "action_freeze": {
         "display":       "Action freeze frame",
         "desc":          "motion stopped at peak energy, every detail sharp",
-        "fixed_camera":  (
-            "Canon EOS R5 400mm f/2.8, implied 1/2000s freeze, "
-            "motion arrested at peak, sharp throughout"
-        ),
-        "composition":   (
-            "frozen mid-action, motion stopped at peak explosive moment, "
-            "every detail sharp, kinetic force implied in held pose, no motion blur"
-        ),
+        "fixed_camera":  "Canon EOS R5 400mm f/2.8, 1/2000s freeze, sharp throughout",
+        "composition":   "frozen mid-action at peak moment, kinetic force implied",
         "canvas_print":  False,
         "full_body":     False,
         "needs_placement": False,
@@ -232,14 +209,8 @@ OUTPUT_MODES: dict[str, dict] = {
     "silhouette": {
         "display":       "Silhouette against sky",
         "desc":          "backlit, form only, no surface detail",
-        "fixed_camera":  (
-            "Canon EOS R5, exposed for bright background, "
-            "subject in complete dark silhouette, strong rim"
-        ),
-        "composition":   (
-            "animal in pure silhouette against bright sky or water surface, "
-            "no surface texture detail visible, pure form and outline, stark contrast"
-        ),
+        "fixed_camera":  "Canon EOS R5, exposed for bright background, strong rim light",
+        "composition":   "pure silhouette against sky, stark contrast, form only",
         "canvas_print":  False,
         "full_body":     True,
         "needs_placement": False,
@@ -247,15 +218,8 @@ OUTPUT_MODES: dict[str, dict] = {
     "tracking_side": {
         "display":       "Tracking side profile",
         "desc":          "panning shot, sharp subject, motion-blurred background",
-        "fixed_camera":  (
-            "Canon EOS R5 400mm f/2.8, panning technique, "
-            "subject sharp against motion-blurred background"
-        ),
-        "composition":   (
-            "lateral tracking shot, animal in sharp side profile, "
-            "background streaked by panning, lateral motion energy, "
-            "animal crossing the frame"
-        ),
+        "fixed_camera":  "Canon EOS R5 400mm f/2.8, panning, subject sharp on blurred background",
+        "composition":   "lateral tracking shot, sharp side profile, background streaked",
         "canvas_print":  False,
         "full_body":     True,
         "needs_placement": False,
@@ -263,15 +227,8 @@ OUTPUT_MODES: dict[str, dict] = {
     "ground_level": {
         "display":       "Ground-level upward",
         "desc":          "camera at ground, animal towers above lens",
-        "fixed_camera":  (
-            "Canon EOS R5 24mm f/2.8, camera placed at ground between the feet, "
-            "extreme upward angle, animal looms above"
-        ),
-        "composition":   (
-            "camera at ground level, extreme upward perspective, "
-            "animal towers over the lens, feet and legs dominate foreground, "
-            "sky behind, overwhelming physical scale"
-        ),
+        "fixed_camera":  "Canon EOS R5 24mm f/2.8, camera at ground, extreme upward angle",
+        "composition":   "ground-level upward, animal towers overhead, sky behind",
         "canvas_print":  False,
         "full_body":     True,
         "needs_placement": False,
@@ -279,14 +236,8 @@ OUTPUT_MODES: dict[str, dict] = {
     "aerial_overhead": {
         "display":       "Aerial overhead",
         "desc":          "direct overhead, dorsal surface visible, habitat below",
-        "fixed_camera":  (
-            "Canon EOS R5 35mm, directly overhead bird's-eye, "
-            "camera looking straight down at dorsal surface"
-        ),
-        "composition":   (
-            "directly overhead view, dorsal surface of animal fills centre of frame, "
-            "terrain and habitat visible around the animal, moving through its environment"
-        ),
+        "fixed_camera":  "Canon EOS R5 35mm, directly overhead, dorsal surface",
+        "composition":   "overhead view, dorsal surface centred, habitat visible around animal",
         "canvas_print":  False,
         "full_body":     True,
         "needs_placement": False,
@@ -294,14 +245,8 @@ OUTPUT_MODES: dict[str, dict] = {
     "dusk_long_exp": {
         "display":       "Dusk long exposure",
         "desc":          "motion blur, ambient light only, atmospheric",
-        "fixed_camera":  (
-            "Canon EOS R5 50mm f/5.6, tripod-mounted, long exposure at dusk, "
-            "moving elements rendered as blur, no flash"
-        ),
-        "composition":   (
-            "long exposure at last light, moving elements blurred, static elements sharp, "
-            "ambient dusk light only, atmospheric, painterly motion"
-        ),
+        "fixed_camera":  "Canon EOS R5 50mm f/5.6, tripod, long exposure at dusk",
+        "composition":   "long exposure, moving elements blurred, static elements sharp",
         "canvas_print":  False,
         "full_body":     False,
         "needs_placement": False,
@@ -564,7 +509,9 @@ def assemble_prompt(
     # Coloration: only inject when observed coloration data exists — skip "no known" lines
     if science and science["known_coloration_evidence"]:
         ce = science["known_coloration_evidence"]
-        if not ce.lower().startswith("no direct") and not ce.lower().startswith("no known"):
+        if (not ce.lower().startswith("no direct")
+                and not ce.lower().startswith("no known")
+                and ce.lower() != "unknown"):
             subject_parts.append(ce)
 
     # Required anatomy/accuracy params (e.g. full_body_accuracy for Velociraptor)
@@ -577,7 +524,7 @@ def assemble_prompt(
             extra = CANVAS_SPECIES_EXTRAS.get(species["name"])
             if extra:
                 subject_parts.append(extra)
-        subject_parts.append("full body visible, entire animal head to tail tip in frame")
+        subject_parts.append("full body visible head to tail")
 
     subject_parts.append(style_param["value"])
     subject = ", ".join(p for p in subject_parts if p)
@@ -616,25 +563,18 @@ def assemble_prompt(
     if comp_template == "PLACEMENT":
         subject_phrase, space_side = placement
         if subject_phrase == "dead_center":
-            composition = (
-                "animal perfectly centred in frame, symmetrical composition, "
-                "direct eye contact, static alert pose, equal negative space on both sides, "
-                "as if caught by a camera trap, horizon line visible"
-            )
+            composition = "animal centred, symmetrical, direct eye contact, horizon visible"
         elif space_side in ("right", "left"):
-            composition = (
-                f"60% frame occupation, 40% negative space, {subject_phrase}, "
-                f"negative space on {space_side} side, horizon line visible"
-            )
+            composition = f"{subject_phrase}, negative space {space_side}, horizon visible"
         else:
-            composition = f"{subject_phrase}, horizon line visible"
+            composition = f"{subject_phrase}, horizon visible"
         prose_parts.append(composition)
     elif comp_template:
         prose_parts.append(comp_template)
 
-    # Single lighting choice
-    prose_parts.append(weather_param["value"])
+    # One lighting condition, one weather — no duplication
     prose_parts.append(lighting_param["value"])
+    prose_parts.append(weather_param["value"])
 
     # Camera — use mode's fixed camera if set, otherwise use the user's DB pick
     camera_text = mode_cfg["fixed_camera"] or camera_param["value"]
@@ -645,7 +585,6 @@ def assemble_prompt(
 
     prose_parts.append(mood_param["value"])
     prose_parts.append(condition_param["value"])
-    prose_parts.extend(global_rules)
 
     prose = ", ".join(prose_parts)
 
