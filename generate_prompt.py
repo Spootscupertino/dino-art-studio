@@ -145,7 +145,9 @@ NEGATIVE_PROMPT = (
     "fossil, fossilized, skeleton, skeletal, bones, bone structure, excavation, "
     "petrified, paleontology specimen, museum specimen, rock matrix, sediment, "
     "dinosaur fossil, fossil record, prehistoric bones, mineralized, stone cast, "
-    "osteoderms, osteoderm"
+    "osteoderms, osteoderm, "
+    # Indoor / built environment blockers
+    "indoors, interior, building, warehouse, arena, concrete floor"
 )
 
 # Species-specific additions that only apply in canvas / full-body modes
@@ -269,7 +271,7 @@ def connect(db_path: Path) -> sqlite3.Connection:
 
 def fetch_species(conn: sqlite3.Connection) -> list:
     return conn.execute(
-        "SELECT id, name, common_name, period, size_class, description, notes, habitat FROM species ORDER BY name"
+        "SELECT id, name, common_name, period, diet, size_class, description, notes, habitat FROM species ORDER BY name"
     ).fetchall()
 
 
@@ -535,7 +537,7 @@ def assemble_prompt(
         skin_block = science["skin_texture_type"]
 
     # BLOCK 3 — Mouth / teeth / saliva (diet-aware)
-    diet = species.get("diet") or ""
+    diet = species["diet"] or ""
     mouth_block = MOUTH_TEETH_CARNIVORE if diet in ("Carnivore", "Piscivore") else MOUTH_TEETH_HERBIVORE
 
     # BLOCK 4 — Feet / claws
@@ -551,12 +553,12 @@ def assemble_prompt(
         environment = ENVIRONMENTS.get(period, ENVIRONMENTS["Other"])
 
     # --- Assemble prose in priority order ---
-    # 1. Species/body  2. Skin texture  3. Mouth/teeth/saliva  4. Feet/claws
-    # 5. Behavior      6. Environment   7. Lighting            8. Camera
-    prose_parts = [subject.strip()]
+    # 1. Environment   2. Species/body  3. Skin texture  4. Mouth/teeth/saliva
+    # 5. Feet/claws    6. Behavior      7. Lighting      8. Camera
+    prose_parts = [environment, subject.strip()]
     if skin_block:
         prose_parts.append(skin_block)
-    prose_parts.extend([mouth_block, feet_block, behavior_param["value"], environment])
+    prose_parts.extend([mouth_block, feet_block, behavior_param["value"]])
 
     # Composition block — mode-driven (inserted after environment)
     comp_template = mode_cfg["composition"]

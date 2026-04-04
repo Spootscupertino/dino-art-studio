@@ -58,7 +58,7 @@ SEED_PARAMETERS = [
 
     # --- lighting: MJ responds strongly to lighting cues ---
     ("lighting", "golden_hour",     "golden hour, warm low-angle sunlight, long shadows, lens flare", 1.0),
-    ("lighting", "dramatic_rim",    "dramatic rim lighting, deep shadows, chiaroscuro, cinematic",    1.1),
+    ("lighting", "dramatic_rim",    "strong rim lighting, deep shadows, high contrast",               1.1),
     ("lighting", "overcast",        "overcast sky, soft diffused light, muted tones, moody atmosphere",1.0),
     ("lighting", "bioluminescent",  "bioluminescent markings, night scene, glowing blues and greens", 1.0),
     ("lighting", "stormy",          "storm light, dark cumulonimbus, dramatic rays through clouds",   1.1),
@@ -71,7 +71,7 @@ SEED_PARAMETERS = [
     ("camera", "medium_shot",     "medium shot, three-quarter view, natural pose",                    1.0),
 
     # --- mood: emotional/atmospheric tone ---
-    ("mood", "epic",       "epic scale, awe-inspiring, cinematic grandeur",                           1.2),
+    ("mood", "epic",       "vast scale, awe-inspiring, monumental presence",                           1.2),
     ("mood", "serene",     "peaceful and serene, nature documentary atmosphere",                      1.0),
     ("mood", "menacing",   "menacing and predatory, tense atmosphere, primal danger",                 1.1),
     ("mood", "whimsical",  "whimsical and colorful, children's book illustration style",              1.0),
