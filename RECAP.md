@@ -1,70 +1,143 @@
-# Prompt Engineering Changes — Session Recap
+# RECAP — Dinosaur Art Prompt Generator
 
-## Problem
-Generated images consistently looked like museum specimens or fossil displays rather than living animals in natural environments.
+## System
+- **Machine:** Mac mini, Terminal, Python 3.9.6
+- **Main files:** `/Users/ericeldridge/dino_art/`
+- **Script:** `generate_prompt.py`
+- **Database:** `dino_art.db`
+- **Run with:** `python3 /Users/ericeldridge/dino_art/generate_prompt.py`
+- **With references:** `python3 /Users/ericeldridge/dino_art/generate_prompt.py --sref [URL] --cref [URL]`
 
-## Root Causes Found
+## Goal
+Generate Midjourney images that look like **real wildlife photography** — benchmark is a Cuban crocodile zoo photo, plus komodo dragon hand, ostrich stride, and flamingo foot close-up reference photos. Natural light, animal just existing in habitat, muted color, telephoto bokeh, imperfect focus, film grain. No painterly/illustrated/CGI quality.
 
-### 1. `photogrammetry skin detail` (generate_prompt.py + setup_db.py)
-Midjourney associates "photogrammetry" with 3D fossil/specimen scanning. Replaced with `living animal skin texture` everywhere.
+## Database Stats
+- **30 species** (all with diet + habitat populated)
+- **83 parameters:** 31 anatomy, 15 behavior, 14 camera, 4 condition, 4 lighting, 4 mood, 1 style, 10 weather
+- Behaviors have a `habitat` column — marine/aerial behaviors only show for matching species
+- All anatomy blocks compressed to ~20 words each (down from ~50)
 
-### 2. `skin_texture_type` DB values (migrate_scientific.py + live DB)
-Every species had specimen/fossil language embedded in their skin block:
-- `osteoderms, keeled scutes, dense armor (extensively documented)` → `interlocking bony armor plates covering back and flanks, each raised scute with a keeled ridge, thick leathery living hide between plates, heavily armored skin`
-- `pebbly scales (mummified specimens of close relatives)` → `pebbly mosaic scales across body, smooth rounded scale texture, hide loose and folded at joints`
-- `conical scales (specimens known)` → `conical raised scales covering body, rough interlocking hide, each scale individually defined`
-- All 10 species updated in both migrate_scientific.py and the live DB.
+## Current Architecture
 
-### 3. Style parameter names (setup_db.py)
-- `natural history plate` → `wildlife field illustration`
-- `natural history illustration` → `wildlife ecology illustration`
+### CLI Arguments
+| Flag | Default | Purpose |
+|------|---------|---------|
+| `--style` | `raw` | MJ style mode |
+| `--stylize` | `50` | MJ stylize (lowered from 100 for realism) |
+| `--chaos` | `0` | MJ chaos |
+| `--quality` | `1.0` | MJ quality |
+| `--sref` | None | Style reference image URL (biggest realism lever) |
+| `--cref` | None | Character reference image URL |
+| `--db` | `dino_art.db` | Database path |
 
-### 4. Prompt length (350+ words)
-Midjourney loses the "living wild animal" signal when the positive prompt is bloated. Individual DB parameter values were 40–80 words each.
+### Prompt Assembly Priority Order
+1. Environment (period + habitat aware)
+2. Subject/anatomy (species description + required params + style)
+3. **Feet/claws** (front-loaded — MJ's weakest area)
+4. Mouth/teeth/saliva (diet-aware: carnivore vs herbivore)
+5. Skin texture (from DB + "different scale sizes, dirty uneven hide")
+6. Behavior (habitat-filtered)
+7. Composition (mode-driven)
+8. Lighting
+9. Weather
+10. Camera (fixed per mode, or user-selected)
+11. Canvas print extras (if applicable)
+12. Mood
+13. Condition
+- Deduplication pass runs before final join — strips exact repeated clauses
 
-## Fixes Applied
+### Hardcoded Constants (not in DB)
+- **Style:** Always hyperrealism — `"real wildlife photograph, telephoto lens bokeh, background out of focus, muted natural colour, slightly overexposed sky, camera sensor noise, film grain"`
+- **Mouth (carnivore):** `"yellowed uneven teeth each a different size, wet pink raw mouth interior, thick saliva stranding between jaws, drool hanging from lower lip, gum line raw and receded"`
+- **Mouth (herbivore):** `"grinding teeth worn flat and stained brown, wet pink mouth interior, thick saliva pooling at jaw hinge, drool strand catching light"`
+- **Feet/claws:** `"each toe separately gripping ground at different angles, each claw a different length and curvature, visible knuckle joints bending, cracked worn keratin, caked mud between digits, wrinkled leathery toe pads like a komodo dragon foot photographed up close"`
+- **Negative prompt:** `"fused digits, blob hands, extra fingers, melted feet, CGI, 3D render, digital art, concept art, illustration, smooth skin, painted sky, gradient sky, cinematic color grading, studio background, black background, white background, fossil, skeleton, museum, diorama, indoors"`
 
-### generate_prompt.py
-- `HYPERREALISM_STYLE`: replaced `photogrammetry skin detail` with `living animal skin texture`
-- `MOUTH_TEETH_CARNIVORE`: trimmed from 36 to 12 words
-- `MOUTH_TEETH_HERBIVORE`: trimmed from 22 to 11 words
-- `FEET_CLAWS`: trimmed from 26 to 13 words
-- `ENVIRONMENTS` dict: all values cut to one tight phrase, 4–7 words each
-- `CANVAS_SPECIES_EXTRAS`: trimmed
-- All `OUTPUT_MODES` composition and fixed_camera strings trimmed to 8–12 words
-- Inline placement composition strings trimmed to 8–10 words
-- `global_rules` removed from positive prose (redundant with `--no` block)
-- Removed malformed word-slice cap; budget controlled at source instead
-- Fixed coloration filter to also skip bare `"unknown"` values
-- Fixed `species.get("diet")` → `species["diet"]` (`sqlite3.Row` has no `.get()`)
-- Added `diet` to `fetch_species` SELECT query (was missing, caused KeyError)
-- Environment block now assembles FIRST in `prose_parts`, before species/anatomy — forces MJ to establish the outdoor setting before processing anatomy detail
-- `NEGATIVE_PROMPT`: added fossil/skeleton blockers — `fossil, fossilized, skeleton, skeletal, bones, bone structure, excavation, petrified, museum specimen, rock matrix, sediment, dinosaur fossil, fossil record, prehistoric bones, mineralized, stone cast, osteoderms, osteoderm`
-- `NEGATIVE_PROMPT`: added indoor/built environment blockers — `indoors, interior, building, warehouse, arena, concrete floor`
+### Vary Region Feet-Fix
+- After every prompt, the script outputs a **second prompt** for Vary Region inpainting of feet/claws only
+- Workflow: generate → upscale best image → Vary Region → paint over feet → paste feet-fix prompt
+- Diet-aware (carnivore talons vs herbivore hooves), marine species get flipper version
+- Uses `--stylize 20` (lower than main prompt) for more literal adherence
+- Anchored with "komodo dragon foot reference"
 
-### setup_db.py
-- Added `behavior` (15 params), `condition` (4 params), `weather` (10 params) to `SEED_PARAMETERS` with all values ≤15 words
-- Added fossil/skeleton/osteoderm blockers to `NEGATIVE_PROMPT` seed
-- Replaced museum-adjacent style names
-- Added `SEED_SKIN_CORRECTIONS` dict — 5 species whose skin textures were seeded outside `migrate_scientific.py`; applied as UPDATEs during seeding so a fresh re-seed produces living-animal language
-- Removed studio/indoor lighting words from seed values: `cinematic`, `chiaroscuro`, `dramatic rim lighting`, `cinematic grandeur`, `epic scale`
+### Output Modes (9 total)
+portrait, canvas, environmental, extreme_closeup, action_freeze, tracking_side, ground_level, aerial_overhead, dusk_long_exp
 
-### migrate_scientific.py
-- All 10 `skin_texture_type` values rewritten to living-animal language
-- Removed all parenthetical specimen/source notes from skin descriptions
+### Mood Options (4, all documentary realism)
+- `quiet_power` — "animal simply existing, no drama, mundane moment caught on camera"
+- `serene` — "calm resting moment, no awareness of camera, documentary stillness"
+- `menacing` — "tense predatory stillness, locked gaze, caught mid-hunt by camera"
+- `closed_mouth_natural` — "closed mouth, natural resting behavior, no threat display"
 
-### Live DB (`dino_art.db`)
-- All 29 behavior/condition/weather parameter values updated directly
-- All 15 species `skin_texture_type` values updated directly (10 via migrate_scientific.py path + 5 via direct SQL)
-- Removed `cinematic`, `chiaroscuro`, `cinematic grandeur`, `epic scale` from 4 parameter values (`dramatic_rim`, `epic`, `dawn_plains`, `tracking_panning`)
+### Environments
+- Cretaceous: `"Late Cretaceous mudflat, sparse reed beds, bare river bank, grey silt ground"`
+- Weather values with sky anchored to "real photographed sky with atmospheric haze at horizon"
 
-## Verified Output (Ankylosaurus portrait, rim lighting, epic mood, weathered adult, scanning territory)
+## All Changes Made Across Both Sessions
 
-**172 words — positive prompt only, environment leads:**
+### Session 1 — Museum Aesthetic Fix
+- Replaced `photogrammetry skin detail` with `living animal skin texture` everywhere
+- Rewrote all 10 species `skin_texture_type` DB values from specimen language to living-animal language
+- Added behavior (15), condition (4), weather (10) parameter categories
+- Added fossil/skeleton/indoor blockers to negative prompt
+- Removed `cinematic`, `chiaroscuro`, `epic scale` from parameter values
+- Environment block moved to position 1 in prompt assembly
+- Fixed `species["diet"]` KeyError (sqlite3.Row has no `.get()`)
+- Added `diet` to `fetch_species` SELECT query
 
-```
-Late Cretaceous river delta, open floodplain, flowering plants, large Ankylosaurus, Armored dinosaur with club tail, tail posture: horizontal, club actively swung, five-toed forefeet with short stubby rounded hooflike nails each individually visible, four-toed hindfeet with short blunt claws separately defined, columnar pillar limbs supporting armored weight, toes compact but each one distinctly separated, no merged or fused digits, hyperrealistic, anatomically accurate, living animal skin texture, subsurface scattering, 8K texture, interlocking bony armor plates covering back and flanks, each raised scute with a keeled ridge, thick leathery living hide between plates, heavily armored skin, wet lips parted, grinding teeth worn flat, saliva catching light along jaw, individual toe pads weight-bearing, natural keratin wear on claws, dirt caught between digits, head raised, body still, eyes on middle distance, nostrils flared, territorial survey, strong rim lighting, deep shadows, high contrast, cloudless sky, hard directional light, crisp shadows, fully saturated colours, shot on medium shot, three-quarter view, natural pose, vast scale, awe-inspiring, monumental presence, weathered hide, healed scratches on flanks, thickened skin at joints, subtle asymmetry
-```
+### Session 2 — Realism Overhaul
 
-## Outstanding
-None — all known museum-aesthetic sources resolved.
+#### Removed Non-Realism Options
+- **Deleted from DB:** whimsical mood, eerie mood, bioluminescent lighting, oil_painting, watercolor, concept_art, ink_etching, paleontology_art styles
+- **Removed** silhouette output mode from script
+- **Replaced** epic mood → quiet_power
+- **Toned down** all camera options (killed cretaceous_bloom entirely; stripped cinematic language from remaining 13)
+- **Rewrote** all mood values for documentary wildlife tone
+
+#### Bug Fixes
+- **Diet field populated** for all 30 species (20 were blank → carnivores got herbivore mouth text)
+- **Behavior habitat filtering** — added `habitat` column to parameters table; marine behaviors only for marine, aerial only for aerial
+- **Python 3.9 compatibility** — removed `str | None` union syntax
+- **Deduplication engine** — catches repeated clauses from overlapping required params
+- **Velociraptor params merged** — full_body_accuracy removed as redundant with raptor_extremity_anatomy
+
+#### Prompt Compression
+- **All 31 anatomy blocks compressed** ~60% shorter (removed filler; negative prompt handles "no fused digits")
+- **Negative prompt** 144 words → 36 words
+- **Canvas print block trimmed**
+- **Skin imperfection block** 7 clauses → 2
+
+#### Realism Push (based on komodo/ostrich/flamingo reference photos)
+- **Style rewritten:** telephoto bokeh, muted colour, overexposed sky, sensor noise, film grain
+- **Feet/claws front-loaded** to prompt position 3 (was 5)
+- **Asymmetry language:** "each claw a different length and curvature", "each tooth a different size"
+- **Scale variation:** "different scale sizes on different body regions"
+- **Komodo dragon foot anchor** in feet block
+- **Sky realism:** negative prompt blocks painted/gradient/illustrated sky; weather values anchor real sky
+- **Anti-CGI negatives:** CGI, 3D render, digital art, concept art, cinematic color grading, smooth skin
+
+#### Features Added
+- `--sref` CLI flag for style reference image URL
+- `--cref` CLI flag for character reference image URL
+- Reference URLs displayed in output banner
+- Vary Region feet-fix prompt auto-generated after every main prompt
+
+## Current Status
+- **Environment, feathering, body, mood, color palette, bokeh:** Solved. Images read as wildlife photography.
+- **Claws/toes:** Improved but still MJ's fundamental weakness. Prompt text has hit its ceiling. Remaining levers: `--sref` with real foot photos, and Vary Region inpainting.
+- **Sky:** Much improved with atmospheric haze anchors and negative prompt blockers.
+
+## Next Priorities
+1. **Test `--sref` with real wildlife photo URLs** — komodo foot, flamingo foot, ostrich stride. Single biggest untapped lever.
+2. **Test Vary Region feet-fix workflow** — generate → upscale → paint feet → paste feet-fix prompt
+3. **Test `--cref`** with specific paleoart to lock body proportions
+4. **Try `--stylize` values below 50** — lower = more literal, might help claws
+5. **Try other species** — T. rex, Triceratops, Spinosaurus to verify changes work broadly
+6. **Build out `species_reference/`** with real animal analogue photos (crocodile skin for theropods, elephant feet for sauropods, etc.)
+7. **Consider prompt weight syntax** — MJ `::` weighting on feet block if `--sref` isn't enough
+
+## Reference Photos Identified This Session
+- Komodo dragon hand/foot (digits separated, claws at different angles)
+- Ostrich pair mid-stride (muted color, overcast, telephoto bokeh, messy feathers)
+- Flamingo foot close-up (scale size transition shin→toe, worn keratin, leathery pad)
+- Monitor lizard yawning (wet pink mouth, individual claws on rock, bokeh background)

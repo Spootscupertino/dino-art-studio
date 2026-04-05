@@ -110,11 +110,14 @@ MOUTH_TEETH_HERBIVORE = (
 )
 
 # ---------------------------------------------------------------------------
-# Feet / claws — injected as a dedicated prompt block for every species
+# Ground interaction — feet/claws as a spatial relationship block, not anatomy.
+# Kept separate from the subject section so MJ reads it as contact with ground.
 # ---------------------------------------------------------------------------
 
-FEET_CLAWS = (
-    "individual toe pads weight-bearing, natural keratin wear on claws, dirt caught between digits"
+GROUND_INTERACTION = (
+    "feet fully weight-bearing, each toe contacting ground at a different angle, "
+    "visible pressure on toe pads, natural keratin wear on claw tips, "
+    "packed dirt between digits, knuckle joints slightly bent under load"
 )
 
 # ---------------------------------------------------------------------------
@@ -469,6 +472,90 @@ def pick_parameter(conn: sqlite3.Connection, category: str, name_only: bool = Fa
 
 
 # ---------------------------------------------------------------------------
+# Vary Region fix prompts — modular inpainting prompts for step 2 / 3 / 4
+# ---------------------------------------------------------------------------
+
+def validate_prompt(prompt: str, allow_mj_params: bool, label: str) -> None:
+    """Raise ValueError if prompt violates its schema.
+
+    Main prompts  (allow_mj_params=True)  — must contain at least one -- flag.
+    Fix prompts   (allow_mj_params=False) — must contain no -- flags.
+    """
+    has_params = ' --' in prompt
+    if allow_mj_params and not has_params:
+        raise ValueError(f"[{label}] main prompt is missing MJ parameters (--style, --stylize, etc.)")
+    if not allow_mj_params and has_params:
+        import re
+        found = re.findall(r'--\S+', prompt)
+        raise ValueError(f"[{label}] fix prompt must not contain MJ parameters, found: {found}")
+
+
+def strip_mj_params(prompt: str) -> str:
+    """Remove all Midjourney parameters (--flag ...) from a prompt string.
+    MJ flags are always appended at the end, so everything from the first -- onward is dropped."""
+    idx = prompt.find(' --')
+    return prompt[:idx].strip() if idx != -1 else prompt.strip()
+
+
+def make_feet_fix_prompt(species, mj_style: str, stylize: int = 20) -> str:
+    """Vary Region prompt for feet/claws. Paint over feet, paste this prompt."""
+    diet    = species["diet"] or ""
+    habitat = species["habitat"] or "terrestrial"
+    name    = species["name"]
+
+    if habitat == "marine":
+        core = (
+            f"extreme close-up of {name} flipper, paddle limb, "
+            "individual digit bones visible under skin tension, wet glistening skin, "
+            "natural wear on flipper tip, real wildlife photograph"
+        )
+    elif diet in ("Carnivore", "Piscivore"):
+        core = (
+            f"extreme close-up of {name} foot, each toe individually separated gripping ground, "
+            "recurved talons each a different length and curvature, "
+            "visible knuckle joints bending under weight, "
+            "dark worn keratin with cracks and chips, caked mud between digits, "
+            "wrinkled leathery toe pads, komodo dragon foot reference, "
+            "real wildlife photograph of reptile foot"
+        )
+    else:
+        core = (
+            f"extreme close-up of {name} foot, column-like toes weight-bearing, "
+            "blunt rounded toenails with natural wear, "
+            "wrinkled leathery skin at toe joints, caked mud between digits, "
+            "elephant foot reference, real wildlife photograph"
+        )
+
+    flags = f"--no {NEGATIVE_PROMPT} --style {mj_style} --stylize {stylize}"
+    return f"{core}, telephoto macro, shallow depth of field, muted colour, film grain {flags}"
+
+
+def make_environment_fix_prompt(species, environment: str, weather_param, lighting_param,
+                                 mj_style: str, stylize: int = 30) -> str:
+    """Vary Region prompt for background/habitat. Paint over background, paste this prompt."""
+    habitat = species["habitat"] or "terrestrial"
+
+    if habitat == "marine":
+        ground = "water surface texture, underwater light refraction, natural ocean colour"
+    elif habitat == "aerial":
+        ground = "real photographed sky, atmospheric haze, natural cloud formation"
+    else:
+        ground = "ground texture, soil and rock detail, sparse prehistoric vegetation in background"
+
+    core = (
+        f"{environment}, {ground}, "
+        f"{lighting_param['value']}, {weather_param['value']}, "
+        "real photographed sky with atmospheric haze at horizon, "
+        "telephoto background bokeh, muted natural colour, film grain, "
+        "no animal in frame, habitat only"
+    )
+
+    neg = "painted sky, gradient sky, CGI sky, illustration, studio background, digital art, animal, dinosaur"
+    flags = f"--no {neg} --style {mj_style} --stylize {stylize}"
+    return f"{core} {flags}"
+
+
+# ---------------------------------------------------------------------------
 # Prompt assembly
 # ---------------------------------------------------------------------------
 
@@ -490,60 +577,73 @@ def assemble_prompt(
     quality: float,
     output_mode: str = "portrait",
     placement: tuple[str, str] = ("", ""),  # (subject_side, space_side) from select_placement()
+    has_sref: bool = False,
 ) -> str:
-    mode_cfg = OUTPUT_MODES.get(output_mode, OUTPUT_MODES["portrait"])
+    mode_cfg     = OUTPUT_MODES.get(output_mode, OUTPUT_MODES["portrait"])
     full_body    = mode_cfg["full_body"]
     canvas_print = mode_cfg["canvas_print"]
 
-    # --- Subject block ---
+    # ── SECTION 1: SUBJECT ───────────────────────────────────────────────────
+    # Anatomy, pose, skin, mouth, behavior, condition, mood.
+    # Richest section — MJ weights early tokens most heavily.
+    # Rule: no environment, no lighting, no camera language here.
+
     size = species["size_class"].lower() if species["size_class"] else ""
     subject_parts = [f"{size} {species['name']}", species["description"] or ""]
+
     if species["notes"]:
         subject_parts.append(species["notes"])
 
-    # --- Science data injection (anatomy only — skin texture pulled into own block below) ---
-    # Feathering: only if animal actually has feathers/pycnofibres
+    # Anatomy from science table
     if science and science["feathering_coverage"] and science["feathering_coverage"].lower() != "none":
         subject_parts.append(science["feathering_coverage"])
-    # Tail posture: critical for anatomical correctness
-    if science and science["tail_posture"] and science["tail_posture"].lower() != "not applicable — pterosaur":
-        subject_parts.append(f"tail posture: {science['tail_posture']}")
-    # Coloration: only inject when observed coloration data exists — skip "no known" lines
+    if science and science["tail_posture"] and science["tail_posture"].lower() not in ("not applicable — pterosaur", ""):
+        subject_parts.append(science["tail_posture"])  # no "tail posture:" label — reads as descriptor
     if science and science["known_coloration_evidence"]:
         ce = science["known_coloration_evidence"]
-        if (not ce.lower().startswith("no direct")
-                and not ce.lower().startswith("no known")
-                and ce.lower() != "unknown"):
+        if not any(ce.lower().startswith(p) for p in ("no direct", "no known", "unknown")):
             subject_parts.append(ce)
 
-    # Required anatomy/accuracy params (e.g. full_body_accuracy for Velociraptor)
+    # Required species params (e.g. raptor sickle claw accuracy)
     for rp in required_params:
         subject_parts.append(rp["value"])
 
-    # Full-body modes: species-specific extras + framing requirement
-    if full_body:
+    # Canvas species extras (pose specifics for full-body modes)
+    if full_body or has_sref:
         if output_mode == "canvas":
             extra = CANVAS_SPECIES_EXTRAS.get(species["name"])
             if extra:
                 subject_parts.append(extra)
         subject_parts.append("full body visible head to tail")
 
+    # Skin texture (body surface — belongs in subject)
+    if science and science["skin_texture_type"]:
+        subject_parts.append(science["skin_texture_type"])
+
+    # Mouth / teeth (body surface — diet-aware)
+    diet = species["diet"] or ""
+    subject_parts.append(MOUTH_TEETH_CARNIVORE if diet in ("Carnivore", "Piscivore") else MOUTH_TEETH_HERBIVORE)
+
+    # Behavior (what the animal is doing — pose/action)
+    subject_parts.append(behavior_param["value"])
+
+    # Condition and mood (body state and demeanor)
+    subject_parts.append(condition_param["value"])
+    subject_parts.append(mood_param["value"])
+
+    # Hyperrealism style anchor — appended last so it applies to the whole subject block
     subject_parts.append(style_param["value"])
+
     subject = ", ".join(p for p in subject_parts if p)
 
-    # BLOCK 2 — Living skin texture (separate from subject block so MJ weights it early)
-    skin_block = ""
-    if science and science["skin_texture_type"]:
-        skin_block = science["skin_texture_type"]
+    # ── SECTION 2: INTERACTION ────────────────────────────────────────────────
+    # Feet/claws as a spatial relationship with the ground, not anatomy.
+    # Shorter than subject — focused on contact mechanics only.
+    interaction = GROUND_INTERACTION
 
-    # BLOCK 3 — Mouth / teeth / saliva (diet-aware)
-    diet = species["diet"] or ""
-    mouth_block = MOUTH_TEETH_CARNIVORE if diet in ("Carnivore", "Piscivore") else MOUTH_TEETH_HERBIVORE
-
-    # BLOCK 4 — Feet / claws
-    feet_block = FEET_CLAWS
-
-    # --- Environment --- (habitat-aware: marine/aerial get matching environments)
+    # ── SECTION 3: ENVIRONMENT ────────────────────────────────────────────────
+    # Habitat and period setting. Composition framing appended here.
+    # No subject descriptors, no lighting language.
     habitat = species["habitat"] or "terrestrial"
     period  = species["period"] or "Other"
     if habitat in ("marine", "aerial"):
@@ -552,45 +652,44 @@ def assemble_prompt(
     else:
         environment = ENVIRONMENTS.get(period, ENVIRONMENTS["Other"])
 
-    # --- Assemble prose in priority order ---
-    # 1. Environment   2. Species/body  3. Skin texture  4. Mouth/teeth/saliva
-    # 5. Feet/claws    6. Behavior      7. Lighting      8. Camera
-    prose_parts = [environment, subject.strip()]
-    if skin_block:
-        prose_parts.append(skin_block)
-    prose_parts.extend([mouth_block, feet_block, behavior_param["value"]])
-
-    # Composition block — mode-driven (inserted after environment)
     comp_template = mode_cfg["composition"]
     if comp_template == "PLACEMENT":
         subject_phrase, space_side = placement
         if subject_phrase == "dead_center":
-            composition = "animal centred, symmetrical, direct eye contact, horizon visible"
+            comp = "animal centred, symmetrical, horizon visible"
         elif space_side in ("right", "left"):
-            composition = f"{subject_phrase}, negative space {space_side}, horizon visible"
+            comp = f"{subject_phrase}, negative space {space_side}, horizon visible"
         else:
-            composition = f"{subject_phrase}, horizon visible"
-        prose_parts.append(composition)
+            comp = f"{subject_phrase}, horizon visible"
+        environment = f"{environment}, {comp}"
     elif comp_template:
-        prose_parts.append(comp_template)
+        environment = f"{environment}, {comp_template}"
 
-    # One lighting condition, one weather — no duplication
-    prose_parts.append(lighting_param["value"])
-    prose_parts.append(weather_param["value"])
+    # ── SECTION 4: LIGHTING ───────────────────────────────────────────────────
+    # One lighting condition + one weather phrase. Short and supportive.
+    lighting = f"{lighting_param['value']}, {weather_param['value']}"
 
-    # Camera — use mode's fixed camera if set, otherwise use the user's DB pick
+    # ── SECTION 5: CAMERA ─────────────────────────────────────────────────────
+    # Minimal — lens spec only. Everything else is in sections 1–4.
     camera_text = mode_cfg["fixed_camera"] or camera_param["value"]
-    prose_parts.append(f"shot on {camera_text}")
+    camera = f"shot on {camera_text}"
 
+    # ── ASSEMBLE ──────────────────────────────────────────────────────────────
+    sections = [subject, interaction, environment, lighting, camera]
     if canvas_print:
-        prose_parts.append(CANVAS_PRINT)
+        sections.append(CANVAS_PRINT)
 
-    prose_parts.append(mood_param["value"])
-    prose_parts.append(condition_param["value"])
+    # Deduplication — strip exact repeated clauses that can arise from overlapping params
+    seen, deduped_clauses = set(), []
+    for clause in ", ".join(s for s in sections if s).split(", "):
+        key = clause.strip().lower()
+        if key and key not in seen:
+            seen.add(key)
+            deduped_clauses.append(clause.strip())
 
-    prose = ", ".join(prose_parts)
+    prose = ", ".join(deduped_clauses)
 
-    # --- MJ flags ---
+    # ── MJ FLAGS ──────────────────────────────────────────────────────────────
     flags = f"--no {NEGATIVE_PROMPT} --style {mj_style} --stylize {stylize} --q {quality:g}"
     if chaos > 0:
         flags += f" --chaos {chaos}"
@@ -721,6 +820,8 @@ def main() -> None:
     parser.add_argument("--stylize",  type=int,   default=100,  metavar="N",   help="--stylize 0-1000 (default: 100)")
     parser.add_argument("--chaos",    type=int,   default=0,    metavar="N",   help="--chaos 0-100 (default: 0)")
     parser.add_argument("--quality",  type=float, default=1.0,  choices=[0.25, 0.5, 1.0], help="--q (default: 1.0)")
+    parser.add_argument("--sref",     type=str,   default=None, metavar="URL", help="Style reference image URL appended as --sref")
+    parser.add_argument("--cref",     type=str,   default=None, metavar="URL", help="Character reference image URL appended as --cref")
     args = parser.parse_args()
 
     conn = connect(args.db)
@@ -795,6 +896,7 @@ def main() -> None:
         quality=args.quality,
         output_mode=output_mode,
         placement=placement,
+        has_sref=bool(args.sref),
     )
 
     title = make_title(species, mood_param, output_mode=output_mode)
@@ -802,16 +904,64 @@ def main() -> None:
                       condition_param=condition_param, behavior_param=behavior_param,
                       weather_param=weather_param, output_mode=output_mode)
 
+    # --- Append reference URLs to prompt ---
+    if args.sref:
+        prompt_text += f" --sref {args.sref}"
+    if args.cref:
+        prompt_text += f" --cref {args.cref}"
+
+    # --- Build fix prompts ---
+    habitat = species["habitat"] or "terrestrial"
+    period  = species["period"] or "Other"
+    if habitat in ("marine", "aerial"):
+        env_key     = f"{habitat}_{period}"
+        environment = ENVIRONMENTS.get(env_key, ENVIRONMENTS.get(f"{habitat}_Other", ENVIRONMENTS["Other"]))
+    else:
+        environment = ENVIRONMENTS.get(period, ENVIRONMENTS["Other"])
+
+    feet_fix_prompt = make_feet_fix_prompt(species, mj_style=args.style)
+    env_fix_prompt  = make_environment_fix_prompt(
+        species, environment, weather_param, lighting_param, mj_style=args.style
+    )
+
     # --- Display ---
     mode_label = mode_cfg["display"].upper()
+
+    # STEP 1 — Main prompt
     print(f"\n{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
-    print(f"  {C.BOLD_CYAN}GENERATED PROMPT{C.RESET}  {C.DIM}[{mode_label}]{C.RESET}")
+    print(f"  {C.BOLD_CYAN}STEP 1 — MAIN PROMPT{C.RESET}  {C.DIM}[{mode_label}]{C.RESET}")
     print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
     print(f"\n  {C.WHITE}Title :{C.RESET} {C.BRIGHT_WHITE}{title}{C.RESET}")
-    print(f"  {C.WHITE}Tags  :{C.RESET} {dim(tags)}\n")
+    print(f"  {C.WHITE}Tags  :{C.RESET} {dim(tags)}")
+    if args.sref:
+        print(f"  {C.WHITE}sref  :{C.RESET} {dim(args.sref)}")
+    if args.cref:
+        print(f"  {C.WHITE}cref  :{C.RESET} {dim(args.cref)}")
+    print()
+    validate_prompt(prompt_text, allow_mj_params=True,  label="STEP 1 main")
     print_prompt_box(prompt_text)
     print(f"\n  {hdr('/imagine prompt:')}")
     print(f"  {C.BRIGHT_WHITE}{prompt_text}{C.RESET}\n")
+
+    # STEP 2 — Feet fix
+    feet_fix_clean = strip_mj_params(feet_fix_prompt)
+    validate_prompt(feet_fix_clean, allow_mj_params=False, label="STEP 2 feet fix")
+    print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
+    print(f"  {C.BOLD_CYAN}STEP 2 — FEET FIX{C.RESET}  {C.DIM}[Vary Region → paint over feet]{C.RESET}")
+    print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
+    print_prompt_box(feet_fix_clean)
+    print(f"\n  {hdr('/imagine prompt:')}")
+    print(f"  {C.BRIGHT_WHITE}{feet_fix_clean}{C.RESET}\n")
+
+    # STEP 3 — Environment fix
+    env_fix_clean = strip_mj_params(env_fix_prompt)
+    validate_prompt(env_fix_clean, allow_mj_params=False, label="STEP 3 environment fix")
+    print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
+    print(f"  {C.BOLD_CYAN}STEP 3 — ENVIRONMENT FIX{C.RESET}  {C.DIM}[Vary Region → paint over background]{C.RESET}")
+    print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
+    print_prompt_box(env_fix_clean)
+    print(f"\n  {hdr('/imagine prompt:')}")
+    print(f"  {C.BRIGHT_WHITE}{env_fix_clean}{C.RESET}\n")
 
     # --- Save ---
     saved_param_ids = (
