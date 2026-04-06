@@ -193,28 +193,99 @@ When `--sref` is passed, forces `"full body visible head to tail"` into subject 
 - `migrate_scientific.py` updated with `habitat` column for species and `habitats` column for parameters
 - Habitat overrides for Pteranodon (→ aerial) and Spinosaurus (→ marine)
 
+### Session 5 — Context-Reactive Branching + Invalid Combo Blocking
+
+#### Core Change
+Every menu now shows a `★ SUGGESTED` banner (5 picks, highlighted in the numbered list) driven by what has already been selected. Invalid combinations are blocked at selection time with a red `✗ reason` — the user is re-prompted rather than allowed to assemble a scientifically incoherent prompt.
+
+#### Architecture
+- **`get_suggestions(category, context) → list[str]`** — habitat-agnostic dispatcher; routes to `get_marine_suggestions`, `get_terrestrial_suggestions`, `get_aerial_suggestions`
+- **`get_blocked(category, context) → dict[str, str]`** — habitat-agnostic dispatcher; routes to per-habitat blocked functions
+- **`ctx` dict** in `main()` tracks all selections in order: species → lighting → mood → condition → behavior → weather
+- **`_cpick(category, slabel)`** helper in `main()` — injects suggestions + blocked into every `pick_parameter` call; works identically for all three habitats
+- **`pick()`** upgraded: shows `★ SUGGESTED` box at top, highlights suggested rows with `★`, shows blocked rows greyed with `✗ reason`, refuses selection of blocked items
+
+#### Suggestion Logic (per habitat)
+
+**Marine:**
+- Lighting: species-specific (e.g. Mosasaurus → `surface_dapple`, `murk_glow`; Liopleurodon → `deep_water_fade`, `bioluminescent`); mode overrides for `underwater` and `surface_break`
+- Mood: driven by lighting choice; Carnivore diet boosts hunting/menacing moods to front
+- Behavior: driven by mood (e.g. `ambush_still` → `hovering_still`, `resting_on_seafloor`; `surfacing_breath` → `spy_hopping`, `breaching_surface`)
+- Condition: species-specific baseline; shifts on active hunting/menacing → `blood_on_muzzle`, `battle_scarred`; post-feed → `blood_on_muzzle`, `belly_scars`
+- Camera: mode-based; behavior overrides (breaching → `breach_freeze`, `split_waterline`; jaw strike → `jaw_level`, `murk_emerge`; seafloor → `below_looking_up`, `deep_telephoto`)
+- Weather: mood-based (storm moods → `ocean_storm`, `tidal_surge`; serene → `calm_surface`, `dawn_glass`; deep patrol → `thermocline_shift`, `deep_current_cold`)
+
+**Terrestrial:**
+- Lighting: species-specific (T. rex → `dramatic_rim`, `harsh_midday`; Velociraptor → `dappled_canopy`, `shaft_light`; herbivores → `golden_hour`, `overcast`); mode overrides for `ground_level`, `action_freeze`, `dusk_long_exp`
+- Mood: lighting-driven; Carnivore diet boosts `menacing`, `post_kill_pause`, `territorial_hold` to front
+- Behavior: mood-driven (e.g. `heat_rest` → `basking_flat`, `resting_alert`; `post_kill_pause` → `carcass_standing`; `dust_bath` → `dust_rolling`)
+- Condition: species baseline; post-kill/feeding → `blood_on_muzzle`, `fly_attention`; menacing/charge → `battle_scarred`, `embedded_tooth`; heat rest/basking → `parasite_ticks`, `moulting_skin`
+- Camera: mode-based; behavior overrides (charging/stride → `dynamic_low`, `tracking_pan`; drinking → `waterhole_edge`, `hidden_blind`; threat display → `walking_toward`, `ground_level_up`)
+- Weather: mood-based (menacing → `storm_approaching`, `volcanic_ash_fall`; heat rest → `heat_haze`, `hot_still_air`; scent tracking → `ground_mist`, `cold_fog`)
+
+**Aerial:**
+- Lighting: species-specific (Quetzalcoatlus → `dramatic_rim`, `storm_flash`; Pteranodon → `golden_hour`, `halo_backlit`); mode overrides for `soaring_thermal` → `thermal_shimmer`, `halo_backlit`; `dive_strike` → `storm_flash`, `dramatic_rim`
+- Mood: lighting-driven; Carnivore diet boosts `menacing`, `hunting_scan`, `territorial_display` to front
+- Behavior: mood-driven (e.g. `thermal_drift` → `thermal_soaring`, `glide_coast`; `wind_buffet` → `wind_correction`, `headwind_struggle`; `hunting_scan` → `diving_strike`, `fish_snatch`)
+- Condition: species baseline; hunting/diving → `fish_oil_stain`, `torn_membrane`; exhausted/headwind → `wing_joint_swollen`, `lean_season`; perched → `wind_worn_crest`, `talon_worn`
+- Camera: mode-based; behavior overrides (perched → `cliff_perch`, `wing_detail`; diving → `stoop_above`, `head_on_approach`; soaring → `below_up_wings`, `thermal_circle`)
+- Weather: mood-based (thermal drift → `thermal_column`, `high_altitude_clear`; menacing → `storm_anvil_top`, `updraft_turbulence`; dusk roost → `sunset_altitude`, `calm_dead_air`)
+
+#### Invalid Combo Blocking
+
+**Marine (15 cross-category + mode blocks):**
+- Surface behaviors (`breaching_surface`, `spy_hopping`) ↔ deep moods (`resting_on_bottom`, `deep_patrol`) and deep lighting (`deep_water_fade`, `bioluminescent`)
+- Seafloor behaviors (`resting_on_seafloor`, `deep_sinking`) ↔ surface lighting (`surface_dapple`) and surface moods (`surfacing_breath`)
+- Still behaviors (`hovering_still`) ↔ `burst_acceleration` mood
+- `jaw_snap_strike` ↔ `post_feed_drift` (just ate but now striking)
+- Mode blocks: `underwater` mode blocks all surface behaviors/moods; `surface_break` blocks all seafloor behaviors/moods
+
+**Terrestrial (28 cross-category + mode blocks):**
+- Combat/charge behaviors (`charging_full`, `head_butt_spar`, `tail_swipe`) ↔ passive moods (`heat_rest`, `serene`, `dusk_settling`)
+- `basking_flat` ↔ `moonlit`/`twilight_fade`/`forest_floor_shade` lighting (ectotherm solar thermoregulation — needs direct sun) and ↔ `monsoon_heavy`/`storm_approaching` weather
+- `basking_flat` ↔ `menacing`/`mid_stride`/`territorial_hold` moods
+- `carcass_standing` ↔ `heat_rest`/`serene`/`herd_grazing`/`grooming` (contextually incoherent)
+- `dust_rolling` ↔ `menacing`/`scent_tracking` and wet weather conditions
+- `drinking_at_water` ↔ `dust_storm` weather
+- Mode block: `action_freeze` blocks passive/static behaviors (basking, resting, jaw cleaning)
+
+**Aerial (19 cross-category + mode blocks):**
+- Perched behaviors (`cliff_perching`, `preening_perched`, `morning_stretch`) ↔ in-flight moods (`thermal_drift`, `effortless_cruise`, `wind_buffet`, `hunting_scan`)
+- In-flight behaviors (`thermal_soaring`, `diving_strike`, `level_cruise`) ↔ `perched_alert` mood
+- `headwind_struggle` ↔ `thermal_drift`/`effortless_cruise`/`serene` (flight physics — can't struggle and drift effortlessly)
+- `diving_strike` ↔ `thermal_drift` (contradictory flight mechanics)
+- `landing_approach` ↔ `thermal_drift`/`hunting_scan`
+- Mode blocks: `soaring_thermal` blocks all perched/ground behaviors; `dive_strike` blocks soaring, hovering, perching, landing, and drifting moods
+
+#### Implementation Notes
+- `pick()` upgraded to accept `suggestions` (list), `blocked` (dict), `suggest_label` (str) — backward-compatible, all non-marine/terrestrial/aerial paths pass empty values
+- `pick_parameter()` and `pick_weather()` both accept and pass through the same params
+- `setdefault` used for blocked dict accumulation — first-matched reason wins (mood rule beats lighting rule when both fire)
+- `_cpick()` closure in `main()` captures `ctx` by reference — context updates are reflected in subsequent picks without re-passing
+
 ---
 
 ## Current Status
-- **Habitat-first architecture:** Fully implemented — Terrestrial / Marine / Aerial gates all menus.
-- **20 options per category per habitat:** Verified across all 6 parameter categories.
-- **Lighting → weather filtering:** Working — incompatible weather hidden based on sky state.
-- **All 3 habitat flows tested end-to-end** — terrestrial, marine, aerial all produce 4-step output.
-- **Anatomy, feathering, body, color palette, bokeh:** Solved.
-- **Modular 4-step workflow:** Fully working with habitat-aware step labels.
+- **Context-reactive branching:** Fully implemented across all 3 habitats — suggestions visible in every menu.
+- **Invalid combo blocking:** Active across all 3 habitats — incoherent selections refused at pick time.
+- **Habitat-first architecture:** Unchanged — Terrestrial / Marine / Aerial still gates all menus.
+- **20 options per category per habitat:** Unchanged.
+- **Lighting → weather filtering:** Unchanged — still active as the base layer under weather suggestions.
+- **Modular 4-step workflow:** Unchanged — all 4 steps still output per run.
+- **Images reported looking fantastic** — scientific realism approach validated.
 
 ## Next Priorities
-1. **Test marine species in Midjourney** — run Mosasaurus/Elasmosaurus prompts, verify underwater realism
-2. **Test aerial species in Midjourney** — run Pteranodon/Quetzalcoatlus prompts, verify flight realism
-3. **Test Vary Region steps** — feet fix (terrestrial), flipper fix (marine), wing fix (aerial)
+1. **Test beat-up condition stacks** — `split_claw` + `lean_season` + suggested condition combo to see if layering works
+2. **Test suggestion quality in practice** — note any menus where the ★ picks feel wrong; tune the dicts
+3. **Test `--sref` with komodo/flamingo foot URLs** — confirm full-body framing override still works with new flow
 4. **Kill the CGI background** — `environmental` mode + `overcast`/`broken_cloud` lighting for flat light
-5. **Try beat-up condition stacks** — `split_claw` + `lean_season` + `freeze_detect`
-6. **Build `species_reference/` folder** — real animal analogue photos per species
-7. **Test `--sref` with komodo/flamingo foot URLs** — confirm full-body framing override works
+5. **Build `species_reference/` folder** — real animal analogue photos per species (reference for `--sref` workflow)
+6. **Tune aerial perched behaviors** — consider adding a `perched` output mode that unblocks perched behaviors intentionally
+7. **Add `--sref` suggestion integration** — after species select, prompt whether to load a known reference URL
 
 ## Reference Photos to Use as `--sref`
 - Komodo dragon foot (digits separated, claws at different angles, leathery pads)
 - Ostrich mid-stride (muted color, overcast, telephoto bokeh, messy feathers)
 - Flamingo foot close-up (scale transition shin→toe, worn keratin)
 - Monitor lizard yawning (wet pink mouth, individual claws, bokeh background)
-- **Saltwater crocodile jaw** (tooth decay/staining, twig between teeth, algae on jaw, flies, water glistening) ← new this session
+- **Saltwater crocodile jaw** (tooth decay/staining, twig between teeth, algae on jaw, flies, water glistening)
