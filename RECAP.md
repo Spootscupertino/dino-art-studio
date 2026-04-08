@@ -12,7 +12,7 @@
 Generate Midjourney images that look like **real wildlife photography** — benchmark is a Cuban crocodile zoo photo, plus komodo dragon hand, ostrich stride, and flamingo foot close-up reference photos. Natural light, animal just existing in habitat, muted color, telephoto bokeh, imperfect focus, film grain. No painterly/illustrated/CGI quality.
 
 ## Database Stats
-- **18 species** — 8 terrestrial, 6 marine, 4 aerial (all with diet + habitat populated)
+- **26 species** — 8 terrestrial, 14 marine, 4 aerial (all with diet + habitat populated)
 - **308 parameters** — exactly 20 per habitat per category (behavior, camera, condition, lighting, mood, weather) + anatomy + style
 
 ## Current Architecture
@@ -94,14 +94,17 @@ When `--sref` is passed, forces `"full body visible head to tail"` into subject 
 ### Output Modes (13 total, habitat-filtered)
 - **All habitats:** `portrait`, `canvas`, `environmental`, `extreme_closeup`, `action_freeze`, `tracking_side`, `ground_level`, `aerial_overhead`, `dusk_long_exp`
 - **Marine only:** `surface_break`, `underwater`
-- **Aerial only:** `soaring_thermal`, `dive_strike`
+- **Aerial only:** `soaring_thermal`, `dive_strike`, `perched`
 
 ### Species Roster
 
 | Habitat | Species |
 |---------|---------|
 | Terrestrial | T. rex, Velociraptor, Triceratops, Stegosaurus, Ankylosaurus, Brachiosaurus, Parasaurolophus, Dilophosaurus |
-| Marine | Mosasaurus, Elasmosaurus, Ichthyosaurus, Liopleurodon, Kronosaurus, Spinosaurus |
+| Marine — Reptiles | Mosasaurus, Elasmosaurus, Ichthyosaurus, Liopleurodon, Kronosaurus, Spinosaurus |
+| Marine — Sharks | Megalodon, Cretoxyrhina (Ginsu Shark), Helicoprion |
+| Marine — Fish | Dunkleosteus, Xiphactinus (Bulldog Fish), Leedsichthys |
+| Marine — Other | Archelon (giant sea turtle), Ammonite (cephalopod) |
 | Aerial | Pteranodon, Quetzalcoatlus, Rhamphorhynchus, Dimorphodon |
 
 ---
@@ -263,25 +266,79 @@ Every menu now shows a `★ SUGGESTED` banner (5 picks, highlighted in the numbe
 - `setdefault` used for blocked dict accumulation — first-matched reason wins (mood rule beats lighting rule when both fire)
 - `_cpick()` closure in `main()` captures `ctx` by reference — context updates are reflected in subsequent picks without re-passing
 
+### Session 6 — Anti-CGI Overhaul, Marine Expansion, --sref Integration, Perched Mode
+
+#### Anti-CGI Background Fix
+- Removed CG rendering terms from `HYPERREALISM_STYLE`: "subsurface scattering, 8K texture" → "natural imperfections, photographed in the wild"
+- Rewrote all 14 `ENVIRONMENTS` entries with photo-grounded language (no fantasy adjectives, real-location feel)
+- Added anti-CGI anchor to every environment section: "real outdoor location, imperfect natural detail, uneven terrain"
+- Added 11 CGI blockers to `NEGATIVE_PROMPT`: "digital matte painting, rendered background, CGI environment, concept art, 3D render, Unreal Engine, volumetric god rays, hyper-saturated, fantasy landscape, perfect symmetry, smooth gradient sky"
+- Updated environment fix prompt (Step 3) with matching anti-CGI negatives
+
+#### --sref Suggestion Integration
+- Created `sref_urls.json` — per-species URL registry supporting `{label, url}` objects or bare URL strings
+- After species select, if `--sref` not on CLI, shows available reference URLs and lets user pick or skip
+- Selected URL auto-appends to prompt output
+- All 26 species have entries (empty by default — user populates as they upload reference photos to Discord)
+
+#### Aerial Perched Mode
+- Added `perched` output mode (aerial-only) — "Perched on cliff / roost"
+- Camera: Canon EOS R5 600mm f/4, telephoto, cliff-level angle
+- Composition: "perched on rocky outcrop or cliff edge, wings folded at sides, talons gripping rock"
+- Perched interaction block: "talons gripping rocky edge, each digit wrapped around stone, wings folded tight against body"
+- Blocks 8 in-flight behaviors + 4 in-flight moods; leaves perched/preening/stretch behaviors unblocked
+- Removes "folded wings" from aerial negative prompt in perched mode
+- Added to lighting, camera suggestion dicts
+
+#### Marine Species Expansion (6 → 14)
+- **Sharks:** Megalodon (Miocene), Cretoxyrhina/Ginsu Shark (Cretaceous), Helicoprion (Permian)
+- **Fish:** Dunkleosteus (Devonian), Xiphactinus/Bulldog Fish (Cretaceous), Leedsichthys (Jurassic)
+- **Other:** Archelon/giant sea turtle (Cretaceous), Ammonite/cephalopod (Jurassic)
+- Expanded schema `period` CHECK constraint: added Devonian, Carboniferous, Permian, Miocene
+- Expanded schema `diet` CHECK constraint: added Filter-feeder
+- Added `ENVIRONMENTS` entries for new periods: `marine_Devonian`, `marine_Permian`, `marine_Miocene`
+- Added all 8 species to `MARINE_LIGHTING_BY_SPECIES` and `MARINE_CONDITION_BY_SPECIES`
+- Species-specific mouth fix prompts: shark jaw (great white reference), Helicoprion spiral whorl, Dunkleosteus bony blades, Archelon/Ammonite beaks
+
+#### Marine Waterline Refraction Fix
+- Updated `HABITAT_INTERACTION` marine block: above-waterline body "sharp and dry" vs below-waterline "colour-shifted blue-green and slightly distorted by refraction"
+- Mode-specific interaction overrides: `underwater` gets "fully submerged" physics, `surface_break` gets "body erupting through surface" physics
+- Marine mouth fix (Step 4) now describes jaw split by waterline with explicit refraction difference
+
+#### Mosasaurus Variety Fix
+- Rewrote description: removed pose-locking "massive elongated jaw, powerful tail fluke" → body-shape descriptors that don't dictate angle
+- Rewrote notes: removed "crocodilian" (triggered MJ's crocodile recognition) → "keeled scales, rounded snout, conical teeth varying in size, loose jaw hinge"
+
+#### Species Reference Folders
+- Created 8 new folders for Session 4 marine/aerial species (mosasaurus through dimorphodon)
+- Created 8 new folders for Session 6 marine species (megalodon through ammonite)
+- Each folder has README with real animal analogues for `--sref` photography guidance
+- Total: 26 species reference folders
+
 ---
 
 ## Current Status
-- **Context-reactive branching:** Fully implemented across all 3 habitats — suggestions visible in every menu.
-- **Invalid combo blocking:** Active across all 3 habitats — incoherent selections refused at pick time.
-- **Habitat-first architecture:** Unchanged — Terrestrial / Marine / Aerial still gates all menus.
-- **20 options per category per habitat:** Unchanged.
-- **Lighting → weather filtering:** Unchanged — still active as the base layer under weather suggestions.
-- **Modular 4-step workflow:** Unchanged — all 4 steps still output per run.
-- **Images reported looking fantastic** — scientific realism approach validated.
+- **26 species** across 3 habitats — 8 terrestrial, 14 marine, 4 aerial
+- **Anti-CGI measures:** Active in style constant, environment section, and negative prompt
+- **--sref suggestion system:** Live — prompts user after species select when URLs are available in `sref_urls.json`
+- **Perched mode:** Active for aerial species — unblocks perched behaviors, blocks flight behaviors
+- **Marine waterline refraction:** Explicit above/below visual difference in interaction and mouth fix prompts
+- **Context-reactive branching:** Fully implemented across all 3 habitats
+- **Invalid combo blocking:** Active across all 3 habitats
+- **Modular 4-step workflow:** All 4 steps still output per run, now with species-specific mouth fixes
+- **Images looking very close to real wildlife photography** — Triceratops and Kronosaurus validated
 
 ## Next Priorities
-1. **Test beat-up condition stacks** — `split_claw` + `lean_season` + suggested condition combo to see if layering works
-2. **Test suggestion quality in practice** — note any menus where the ★ picks feel wrong; tune the dicts
-3. **Test `--sref` with komodo/flamingo foot URLs** — confirm full-body framing override still works with new flow
-4. **Kill the CGI background** — `environmental` mode + `overcast`/`broken_cloud` lighting for flat light
-5. **Build `species_reference/` folder** — real animal analogue photos per species (reference for `--sref` workflow)
-6. **Tune aerial perched behaviors** — consider adding a `perched` output mode that unblocks perched behaviors intentionally
-7. **Add `--sref` suggestion integration** — after species select, prompt whether to load a known reference URL
+1. **Printify automation** — user needs to regenerate API key, then build folder-watcher → upscale → upload → draft pipeline
+2. **Populate `sref_urls.json`** — upload real animal analogue photos to Discord, collect URLs per species
+3. **Test new marine species** — run Megalodon, Dunkleosteus, Helicoprion, Ammonite and check for anatomy issues
+4. **Test waterline refraction fix** — compare Kronosaurus/Mosasaurus jaw before/after
+5. **Test anti-CGI changes** — run environmental mode with overcast lighting, compare backgrounds
+6. **Add terrestrial species** — consider Pachycephalosaurus, Carnotaurus, Therizinosaurus, Allosaurus
+7. **Add Paleozoic terrestrial species** — Dimetrodon (Permian), giant insects (Carboniferous)
+8. **Build batch mode** — generate N prompts unattended with randomized selections for variety
+9. **Canvas print formatting script** — upscale + bleed margins for Printify canvas sizes (8×10, 12×18, 20×24, 24×32)
+10. **Add scene composition presets** — "predator/prey encounter", "herd at waterhole", "two species sharing habitat" for multi-subject scenes
 
 ## Reference Photos to Use as `--sref`
 - Komodo dragon foot (digits separated, claws at different angles, leathery pads)
@@ -289,3 +346,7 @@ Every menu now shows a `★ SUGGESTED` banner (5 picks, highlighted in the numbe
 - Flamingo foot close-up (scale transition shin→toe, worn keratin)
 - Monitor lizard yawning (wet pink mouth, individual claws, bokeh background)
 - **Saltwater crocodile jaw** (tooth decay/staining, twig between teeth, algae on jaw, flies, water glistening)
+- **Great white shark jaw** (triangular teeth rows, replacement teeth, pink gums) — for Megalodon/Cretoxyrhina
+- **Nautilus shell** (spiral pattern, iridescent nacre, ribbed surface) — for Ammonite
+- **Leatherback turtle** (leathery shell, barnacles, massive flippers) — for Archelon
+- **Whale shark** (filter-feeding posture, mottled skin, wide mouth) — for Leedsichthys

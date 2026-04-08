@@ -37,8 +37,8 @@ SEED_SPECIES = [
     ("Parasaurolophus",     "Para",        "Cretaceous", "Herbivore", "Large",   "Crested hadrosaur",                              None, "terrestrial"),
     ("Dilophosaurus",       "Dilopho",     "Jurassic",   "Carnivore", "Medium",  "Double-crested early theropod",                  None, "terrestrial"),
     # Marine species
-    ("Mosasaurus",          "Mosasaur",    "Cretaceous", "Carnivore", "Massive", "Apex marine predator, massive elongated jaw, powerful tail fluke",
-     "fully aquatic, no legs visible, flippers only, crocodilian-scaled body, bilobed tail fluke like a shark", "marine"),
+    ("Mosasaurus",          "Mosasaur",    "Cretaceous", "Carnivore", "Massive", "Large marine reptile, elongated body, four short flippers, deep laterally compressed tail",
+     "fully aquatic, keeled scales along back, rounded snout, conical teeth varying in size, loose jaw hinge allowing wide gape, barrel-shaped torso tapering to crescent tail fin", "marine"),
     ("Elasmosaurus",        "Elasmosaur",  "Cretaceous", "Piscivore", "Large",   "Extremely long-necked plesiosaur, small head, four broad flippers",
      "fully aquatic, neck longer than body, small head with needle-like teeth, four paddle-shaped flippers", "marine"),
     ("Ichthyosaurus",       "Ichthyosaur", "Jurassic",   "Piscivore", "Medium",  "Dolphin-shaped marine reptile, large eyes, streamlined body",
@@ -47,6 +47,42 @@ SEED_SPECIES = [
      "fully aquatic, enormous head relative to body, four large flippers, powerful bite, robust body", "marine"),
     ("Kronosaurus",         "Kronosaurus", "Cretaceous", "Carnivore", "Large",   "Giant pliosaur, massive jaws, short neck, powerful build",
      "fully aquatic, enormous skull, short thick neck, four broad flippers, barrel-shaped body", "marine"),
+    # Marine — sharks
+    ("Megalodon",           "Megalodon",   "Miocene",    "Carnivore", "Massive", "Largest predatory shark, broad heavy body, massive triangular teeth",
+     "fully aquatic, great white shark body plan scaled up, thick conical snout, dark eyes set wide, "
+     "serrated triangular teeth each the size of a human hand, powerful crescent tail, "
+     "heavy scarring on snout from prey, countershaded grey above white below", "marine"),
+    ("Cretoxyrhina",        "Ginsu Shark", "Cretaceous", "Carnivore", "Large",   "Fast open-ocean predator shark, sleek and muscular",
+     "fully aquatic, streamlined torpedo body, large dark eye, smooth skin, "
+     "rows of blade-like teeth with no serrations, powerful tail fin, "
+     "mako shark body plan, built for speed and ambush", "marine"),
+    ("Helicoprion",         "Helicoprion", "Permian",    "Carnivore", "Large",   "Bizarre shark-relative with spiral tooth whorl in lower jaw",
+     "fully aquatic, ratfish-like body, single spiral whorl of teeth curling under lower jaw like a circular saw, "
+     "older smaller teeth at centre of spiral and newest largest teeth at outer edge, "
+     "no upper teeth, smooth cartilaginous body, deep ocean dweller", "marine"),
+    # Marine — fish
+    ("Dunkleosteus",        "Dunkleosteus","Devonian",   "Carnivore", "Large",   "Armored predatory fish with bony head plates and guillotine jaw",
+     "fully aquatic, massive bony head shield with interlocking plates, "
+     "no true teeth but self-sharpening bony jaw blades, heavy armored front half, "
+     "unarmored muscular rear half, broad flat head, small eyes set forward", "marine"),
+    ("Xiphactinus",         "Bulldog Fish","Cretaceous", "Piscivore", "Large",   "Large predatory bony fish with upturned jaw and fangs",
+     "fully aquatic, elongated torpedo body up to 6m, large upturned lower jaw with prominent fangs, "
+     "bulldog-like underbite, forked tail, silvery scaled body, large pectoral fins", "marine"),
+    ("Leedsichthys",        "Leedsichthys","Jurassic",   "Filter-feeder", "Massive", "Largest bony fish ever, whale-sized filter feeder",
+     "fully aquatic, enormous body up to 16m, wide gaping mouth for filter feeding, "
+     "gill rakers instead of teeth, broad paddle-like pectoral fins, "
+     "dark mottled skin, whale shark-like feeding posture", "marine"),
+    # Marine — other
+    ("Archelon",            "Archelon",    "Cretaceous", "Omnivore",  "Large",   "Giant sea turtle with leathery shell and wide flippers",
+     "fully aquatic, leathery skin-covered shell not hard scutes, "
+     "massive front flippers for open-ocean swimming, hooked beak, "
+     "shell up to 4m wide, barnacles and algae growing on shell, "
+     "resembles oversized leatherback turtle", "marine"),
+    ("Ammonite",            "Ammonite",    "Jurassic",   "Carnivore", "Medium",  "Spiral-shelled cephalopod with tentacles and iridescent shell",
+     "fully aquatic, coiled chambered shell with ribbed surface, "
+     "soft tentacles extending from shell opening, large intelligent eye, "
+     "iridescent nacre sheen on shell surface, jet propulsion swimming, "
+     "squid-like body inside shell, shell patterns vary — ridged and knobbed", "marine"),
     # Aerial species
     ("Quetzalcoatlus",      "Quetzal",     "Cretaceous", "Carnivore", "Massive", "Largest known flying animal, giraffe-sized pterosaur with enormous wingspan",
      "enormous wingspan, long stiff neck, toothless pointed beak, walked quadrupedally on ground, launched from all fours", "aerial"),
