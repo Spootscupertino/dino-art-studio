@@ -999,24 +999,30 @@ def get_blocked(category: str, context: dict) -> dict:
     return {}
 
 
-# Style is always hyperrealism — never ask the user
-HYPERREALISM_STYLE = {
-    "id":    24,
-    "name":  "hyperrealism",
-    "value": "hyperrealistic, anatomically accurate, living animal skin texture, natural imperfections, photographed in the wild",
+# Style is always hyperrealism — never ask the user.
+# Per-clade style anchors so plant/arthropod prompts don't inherit
+# vertebrate "living animal skin texture" language.
+# Session 11: realism stack stripped from active output. The dict structure
+# stays for save_prompt/parameter-id wiring; values are blank so nothing
+# flows into the prose.
+CLADE_STYLE = {
+    "terrestrial": {"id": 24, "name": "hyperrealism", "value": ""},
+    "marine":      {"id": 24, "name": "hyperrealism", "value": ""},
+    "aerial":      {"id": 24, "name": "hyperrealism", "value": ""},
+    "arthropod":   {"id": 24, "name": "hyperrealism", "value": ""},
+    "plant":       {"id": 24, "name": "hyperrealism", "value": ""},
 }
+
+# Backward-compatible default for any code path that asks for the constant
+# without a clade — defaults to vertebrate language.
+HYPERREALISM_STYLE = CLADE_STYLE["terrestrial"]
 
 # ---------------------------------------------------------------------------
 # Mouth / teeth / saliva — diet-aware, injected as a dedicated prompt block
 # ---------------------------------------------------------------------------
 
-MOUTH_TEETH_CARNIVORE = (
-    "yellowed uneven teeth, wet interior mouth, heavy saliva stranding between teeth"
-)
-
-MOUTH_TEETH_HERBIVORE = (
-    "wet lips parted, grinding teeth worn flat, saliva catching light along jaw"
-)
+MOUTH_TEETH_CARNIVORE = "yellowed uneven teeth"
+MOUTH_TEETH_HERBIVORE = "grinding teeth worn flat"
 
 # ---------------------------------------------------------------------------
 # Habitat-specific interaction blocks — replaces the old single GROUND_INTERACTION.
@@ -1024,36 +1030,16 @@ MOUTH_TEETH_HERBIVORE = (
 # relationship between the animal and its medium.
 # ---------------------------------------------------------------------------
 
+# Marine default is UNDERWATER, not waterline. Most marine species in the DB
+# are fully aquatic — defaulting to surface language created the contradiction
+# "fully aquatic, body partially submerged" on canvas/portrait/environmental
+# modes. Surface-state modes (`shoreline`, `surface_break`) override below.
 HABITAT_INTERACTION = {
-    "terrestrial": (
-        "feet fully weight-bearing, each toe contacting ground at a different angle, "
-        "visible pressure on toe pads, natural keratin wear on claw tips, "
-        "packed dirt between digits, knuckle joints slightly bent under load"
-    ),
-    "marine": (
-        "body partially submerged, waterline crossing torso, "
-        "body above waterline sharp and dry with water beading on skin, "
-        "body below waterline colour-shifted blue-green and slightly distorted by refraction, "
-        "water surface tension visible against skin, "
-        "ripples radiating from body movement, wet skin above waterline glistening"
-    ),
-    "aerial": (
-        "wing membrane taut and translucent against light, individual finger bones "
-        "visible as structural ridges, air current shaping membrane surface, "
-        "body suspended in open sky, no ground contact"
-    ),
-    "arthropod": (
-        "massive body weight pressing into ground, legs thick as branches, "
-        "exoskeleton scratched and weathered from age, "
-        "body segments clearly defined, towering over surrounding ferns and plants, "
-        "photographed at ground level looking up at the creature"
-    ),
-    "plant": (
-        "rooted in soil, trunk base widening at ground, "
-        "visible root buttresses or root flare, "
-        "leaf litter and fallen fronds around base, "
-        "moss or lichen growing on lower bark"
-    ),
+    "terrestrial": "feet fully weight-bearing",
+    "marine":      "fully submerged",
+    "aerial":      "body suspended in open sky",
+    "arthropod":   "massive body weight pressing into ground",
+    "plant":       "rooted in soil",
 }
 
 # ---------------------------------------------------------------------------
@@ -1061,32 +1047,16 @@ HABITAT_INTERACTION = {
 # to push MJ toward the right kind of wildlife photography per domain.
 # ---------------------------------------------------------------------------
 
+# Session 11: "wildlife photography" variants stripped from active output —
+# they were biasing MJ toward staged specimen-style composition. Dict
+# structure preserved for save_prompt/parameter wiring; values are blank
+# so nothing flows into the prose.
 HABITAT_REALISM = {
-    "terrestrial": (
-        "National Geographic wildlife photography, telephoto bokeh, "
-        "muted natural colour, film grain, dust particles in air"
-    ),
-    "marine": (
-        "National Geographic ocean wildlife photography, underwater caustics, "
-        "water surface refraction, natural ocean colour, water droplets on lens, "
-        "wet skin detail, marine biology documentary"
-    ),
-    "aerial": (
-        "National Geographic bird-in-flight photography, atmospheric haze, "
-        "thermal shimmer, open sky negative space, motion-sharp wings, "
-        "raptor flight documentary"
-    ),
-    "arthropod": (
-        "National Geographic wildlife photography, telephoto bokeh, "
-        "visible chitin texture, iridescent exoskeleton detail, "
-        "muted natural colour, film grain, "
-        "photographed like a large animal not a small insect"
-    ),
-    "plant": (
-        "National Geographic botanical photography, natural light filtering through canopy, "
-        "shallow depth of field, bark texture detail, leaf venation visible, "
-        "botanical field photograph, muted natural colour"
-    ),
+    "terrestrial": "",
+    "marine":      "",
+    "aerial":      "",
+    "arthropod":   "",
+    "plant":       "",
 }
 
 # ---------------------------------------------------------------------------
@@ -1120,38 +1090,104 @@ HABITAT_NEGATIVE = {
 # Canvas print mode constants
 # ---------------------------------------------------------------------------
 
-CANVAS_PRINT = (
-    "high dynamic range, shadow detail retained, highlight detail retained, "
-    "print-ready detail, no blown highlights"
-)
+# CANVAS_PRINT removed in Session 10 — was 5 phrases of HDR/print-ready
+# language that did almost nothing for MJ. The print-readiness happens at
+# upscale time, not in the prompt. The canvas_print flag is kept on
+# OUTPUT_MODES for tag/saved-record purposes only.
+CANVAS_PRINT = ""
 
 # ---------------------------------------------------------------------------
-# Negative prompt — appended as --no flag to fight Midjourney's extremity slop
+# Negative prompt — modular blocks assembled per-clade by build_negative_prompt().
+# Each clade only gets the negatives that actually apply to its anatomy.
+# This stops "fused digits, missing claws" from being injected into plant
+# and arthropod prompts (where digits/claws don't exist) — wasted MJ tokens
+# that dilute attention from the negatives that matter.
 # ---------------------------------------------------------------------------
 
-NEGATIVE_PROMPT = (
-    # Anatomy / extremity errors
+# Vertebrate extremity errors — only relevant to clades with toes/fingers/claws
+# osteoderms live here (not in fossil block) because they are a vertebrate skin
+# feature; arthropods/plants don't have them so should never see them in --no.
+NEG_VERTEBRATE_ANATOMY = (
     "fused digits, merged toes, webbed feet, blob hands, extra fingers, "
     "missing claws, undefined claw tips, floating toes, amputated digits, "
     "incorrect toe count, melted feet, smooth footpad with no digit separation, "
     "smeared claws, indistinct talons, CGI smoothness on extremities, "
-    # Studio / controlled environment blockers
+    "osteoderms, osteoderm"
+)
+
+# Arthropod-specific anatomy errors — segmented chitin, jointed legs, mandibles
+NEG_ARTHROPOD_ANATOMY = (
+    "fused leg segments, missing limb joints, smooth chitin with no segmentation, "
+    "mammalian limbs, vertebrate hands, fingers, toes, claws, talons, footpads, "
+    "rubbery skin, fleshy limbs, melted exoskeleton"
+)
+
+# Studio / controlled environment blockers — universal to all clades
+NEG_STUDIO = (
     "studio background, seamless backdrop, portrait lighting, gradient background, "
     "grey background, controlled lighting, specimen photography, museum display, "
     "exhibit lighting, black background, white background, studio flash, "
-    "specimen mount, display case, diorama, natural history exhibit, "
-    # Fossil / skeletal blockers
+    "specimen mount, display case, diorama, natural history exhibit"
+)
+
+# Fossil / skeletal blockers — for vertebrate clades (skeleton/bones apply)
+NEG_FOSSIL_VERTEBRATE = (
     "fossil, fossilized, skeleton, skeletal, bones, bone structure, excavation, "
     "petrified, paleontology specimen, museum specimen, rock matrix, sediment, "
-    "dinosaur fossil, fossil record, prehistoric bones, mineralized, stone cast, "
-    "osteoderms, osteoderm, "
-    # Indoor / built environment blockers
-    "indoors, interior, building, warehouse, arena, concrete floor, "
-    # CGI / digital environment blockers
+    "dinosaur fossil, fossil record, prehistoric bones, mineralized, stone cast"
+)
+
+# Fossil blockers for arthropods — drop "skeleton/bones" (no internal skeleton)
+NEG_FOSSIL_ARTHROPOD = (
+    "fossil, fossilized, petrified, paleontology specimen, museum specimen, "
+    "rock matrix, sediment, mineralized, stone cast, amber inclusion"
+)
+
+# Fossil blockers for plants — drop "skeleton/bones/osteoderms" (not applicable),
+# keep "petrified / fossil" since petrified plants are a real failure mode
+NEG_FOSSIL_PLANT = (
+    "fossil, fossilized, petrified, paleontology specimen, museum specimen, "
+    "rock matrix, mineralized, stone cast, dried herbarium specimen, pressed leaf"
+)
+
+# Indoor / built environment blockers — universal
+NEG_INDOOR = (
+    "indoors, interior, building, warehouse, arena, concrete floor"
+)
+
+# CGI / digital environment blockers — universal
+NEG_CGI = (
     "digital matte painting, rendered background, CGI environment, concept art, "
     "illustration, painted background, 3D render, Unreal Engine, volumetric god rays, "
     "hyper-saturated, fantasy landscape, perfect symmetry, smooth gradient sky"
 )
+
+
+def build_negative_prompt(habitat: str) -> str:
+    """Assemble the --no clause from clade-appropriate blocks only.
+
+    Plants get studio + plant-fossil + indoor + CGI + plant-specific —
+    no vertebrate digits, no skeleton, no osteoderms.
+
+    Arthropods get arthropod anatomy + studio + animal-fossil + indoor + CGI +
+    arthropod-specific — no vertebrate digit/talon language.
+
+    Vertebrate clades (terrestrial / marine / aerial) get the full set.
+    """
+    if habitat == "plant":
+        blocks = [NEG_STUDIO, NEG_FOSSIL_PLANT, NEG_INDOOR, NEG_CGI]
+    elif habitat == "arthropod":
+        blocks = [NEG_ARTHROPOD_ANATOMY, NEG_STUDIO, NEG_FOSSIL_ARTHROPOD, NEG_INDOOR, NEG_CGI]
+    else:
+        blocks = [NEG_VERTEBRATE_ANATOMY, NEG_STUDIO, NEG_FOSSIL_VERTEBRATE, NEG_INDOOR, NEG_CGI]
+
+    base = ", ".join(blocks)
+    extra = HABITAT_NEGATIVE.get(habitat, "")
+    return f"{base}, {extra}" if extra else base
+
+
+# Back-compat shim for any external reference: vertebrate-flavoured default.
+NEGATIVE_PROMPT = build_negative_prompt("terrestrial")
 
 # Species-specific additions that only apply in canvas / full-body modes
 CANVAS_SPECIES_EXTRAS = {
@@ -1179,7 +1215,7 @@ OUTPUT_MODES: dict[str, dict] = {
     "canvas": {
         "display":       "Full body canvas print",
         "desc":          "mid-range lens, 60/40 negative space, print-ready",
-        "fixed_camera":  "Canon EOS R5 24-70mm f/4, mid-range, habitat in frame",
+        "fixed_camera":  "Canon EOS R5 24-70mm f/4",
         "composition":   "PLACEMENT",
         "canvas_print":  True,
         "full_body":     True,
@@ -1280,8 +1316,8 @@ OUTPUT_MODES: dict[str, dict] = {
     "underwater": {
         "display":       "Underwater",
         "desc":          "fully submerged, caustics, murky depth",
-        "fixed_camera":  "Canon EOS R5 in underwater housing, 16-35mm f/2.8, natural light from above",
-        "composition":   "fully submerged, light filtering from surface above, murky water depth",
+        "fixed_camera":  "Canon EOS R5 in underwater housing, 16-35mm f/2.8",
+        "composition":   "fully submerged",
         "canvas_print":  False,
         "full_body":     True,
         "needs_placement": False,
@@ -1317,6 +1353,57 @@ OUTPUT_MODES: dict[str, dict] = {
         "full_body":     True,
         "needs_placement": False,
         "habitats":      ["aerial"],
+    },
+    # --- Cross-clade additions (gives arthropod + plant a richer menu) ---
+    "shoreline": {
+        "display":       "Shoreline / water edge",
+        "desc":          "subject at water transition, half-wet half-dry",
+        "fixed_camera":  "Canon EOS R5 200mm f/4, low water-level angle, telephoto bokeh",
+        "composition":   "subject at edge of water, transition zone between dry and wet, horizon visible",
+        "canvas_print":  False,
+        "full_body":     True,
+        "needs_placement": False,
+        "habitats":      ["terrestrial", "marine", "plant"],
+    },
+    "camera_trap": {
+        "display":       "Camera trap / trail cam",
+        "desc":          "off-centre, candid, motion-triggered framing",
+        "fixed_camera":  "trail camera, fixed wide angle, off-centre framing, subject unaware of lens",
+        "composition":   "candid camera trap angle, subject off-centre, motion-triggered moment, natural unposed framing",
+        "canvas_print":  False,
+        "full_body":     True,
+        "needs_placement": False,
+        "habitats":      ["terrestrial", "arthropod", "plant"],
+    },
+    "canopy_upward": {
+        "display":       "Canopy upward",
+        "desc":          "looking straight up, branches frame sky",
+        "fixed_camera":  "Canon EOS R5 14mm f/2.8, vertical upward angle, deep depth of field",
+        "composition":   "camera pointed straight up, canopy and sky overhead, subject framed against light from above",
+        "canvas_print":  False,
+        "full_body":     False,
+        "needs_placement": False,
+        "habitats":      ["terrestrial", "plant", "arthropod", "aerial"],
+    },
+    "misty_dawn": {
+        "display":       "Misty dawn",
+        "desc":          "soft fog, atmospheric depth, cool early light",
+        "fixed_camera":  "Canon EOS R5 70-200mm f/2.8, dawn light through fog, layered depth",
+        "composition":   "subject emerging from morning mist, layered atmospheric depth, cool blue light",
+        "canvas_print":  False,
+        "full_body":     True,
+        "needs_placement": False,
+        "habitats":      ["terrestrial", "marine", "aerial", "arthropod", "plant"],
+    },
+    "group_cluster": {
+        "display":       "Group / cluster",
+        "desc":          "two or more subjects in frame, social or natural grouping",
+        "fixed_camera":  "Canon EOS R5 200mm f/2.8, mid-range telephoto, group framing",
+        "composition":   "multiple individuals of same species in frame, natural spacing, social grouping or grove cluster",
+        "canvas_print":  False,
+        "full_body":     True,
+        "needs_placement": False,
+        "habitats":      ["terrestrial", "marine", "aerial", "arthropod", "plant"],
     },
 }
 
@@ -1516,7 +1603,7 @@ def select_mode(habitat: str) -> str:
     print(f"  {C.DIM}" + "─" * 60 + C.RESET)
     for i, key in enumerate(keys, 1):
         cfg = OUTPUT_MODES[key]
-        print(f"  {C.DIM}{i:>2}.{C.RESET}  {C.BRIGHT_WHITE}{cfg['display']:<26}{C.RESET}  {dim(cfg['desc'])}")
+        print(f"  {C.DIM}{i:>2}.{C.RESET}  {C.BRIGHT_WHITE}{cfg['display']}{C.RESET}")
     print()
     while True:
         raw = input(f"  {C.BOLD_CYAN}Choose 1–{len(keys)}:{C.RESET} ").strip()
@@ -1530,12 +1617,15 @@ def select_mode(habitat: str) -> str:
 def select_canvas_placement() -> tuple[str, str]:
     """Ask how the animal is positioned in frame.
     Returns (composition_phrase, space_side).
-    'dead_center' is a sentinel that triggers symmetric composition text."""
+    'dead_center' is a sentinel that triggers symmetric composition text.
+    'wide' is a sentinel that triggers environmental-scale framing —
+    suppresses full-body language, no camera language added."""
     OPTIONS = [
         # (composition_phrase injected into prompt,  space_side label for display)
         ("animal positioned left of centre, rule of thirds",                "right"),
         ("animal positioned right of centre, rule of thirds",               "left"),
         ("dead_center",                                                      ""),
+        ("wide",                                                             "all"),
         ("animal filling lower foreground, environment stretching above",   "above"),
         ("animal in far distance, tiny against vast landscape",             "all"),
         ("animal emerging from dense vegetation, partially obscured",       "right"),
@@ -1548,6 +1638,7 @@ def select_canvas_placement() -> tuple[str, str]:
         "Rule of thirds — left",
         "Rule of thirds — right",
         "Dead centre — symmetrical, camera trap",
+        "Wide scale — environment dominant, distant subject",
         "Foreground dominant — animal fills lower frame",
         "Distant figure — tiny in vast landscape",
         "Emerging from cover — partially obscured",
@@ -1763,7 +1854,7 @@ def make_feet_fix_prompt(species, mj_style: str, stylize: int = 20) -> str:
             "elephant foot reference, real wildlife photograph"
         )
 
-    flags = f"--no {NEGATIVE_PROMPT} --style {mj_style} --stylize {stylize}"
+    flags = f"--no {build_negative_prompt(habitat)} --style {mj_style} --stylize {stylize}"
     return f"{core}, telephoto macro, shallow depth of field, muted colour, film grain {flags}"
 
 
@@ -1902,7 +1993,7 @@ def make_mouth_fix_prompt(species, mj_style: str, stylize: int = 20) -> str:
             "real wildlife photograph"
         )
 
-    flags = f"--no {NEGATIVE_PROMPT} --style {mj_style} --stylize {stylize}"
+    flags = f"--no {build_negative_prompt(habitat)} --style {mj_style} --stylize {stylize}"
     return f"{core}, telephoto macro, shallow depth of field, muted colour, film grain {flags}"
 
 
@@ -1934,6 +2025,12 @@ def assemble_prompt(
     mode_cfg     = OUTPUT_MODES.get(output_mode, OUTPUT_MODES["portrait"])
     full_body    = mode_cfg["full_body"]
     canvas_print = mode_cfg["canvas_print"]
+    # Wide-scale placement variant: detected from the placement sentinel so
+    # it works regardless of the mode's composition template (canvas, underwater,
+    # environmental, etc). When active: subject becomes small in frame,
+    # environment dominant, full-body language is suppressed. No camera
+    # language is added. Other placement modes are unaffected.
+    wide_mode = bool(placement) and placement[0] == "wide"
 
     # ── SECTION 1: SUBJECT ───────────────────────────────────────────────────
     # Anatomy, pose, skin, mouth, behavior, condition, mood.
@@ -1960,8 +2057,10 @@ def assemble_prompt(
     for rp in required_params:
         subject_parts.append(rp["value"])
 
-    # Canvas species extras (pose specifics for full-body modes)
-    if full_body or has_sref:
+    # Canvas species extras (pose specifics for full-body modes).
+    # Wide-scale variant suppresses "full body visible head to tail" because
+    # the subject is meant to read small/distant, not anatomically resolved.
+    if (full_body or has_sref) and not wide_mode:
         if output_mode == "canvas":
             extra = CANVAS_SPECIES_EXTRAS.get(species["name"])
             if extra:
@@ -1972,26 +2071,39 @@ def assemble_prompt(
     if science and science["skin_texture_type"]:
         subject_parts.append(science["skin_texture_type"])
 
-    # Mouth / teeth (body surface — diet-aware, skipped for arthropods and plants)
+    # Mouth / teeth (body surface — diet-aware, skipped for arthropods, plants,
+    # and toothless beaked species like pterosaurs / Archelon / Ammonite —
+    # injecting "yellowed uneven teeth" on a toothless beak is a contradiction).
     diet = species["diet"] or ""
+    desc_blob = ((species["description"] or "") + " " + (species["notes"] or "")).lower()
+    is_toothless = "toothless" in desc_blob or ("beak" in desc_blob and "tooth" not in desc_blob)
     if habitat == "arthropod":
         subject_parts.append("mandibles or chelicerae visible, no vertebrate mouth")
-    elif habitat != "plant":
+    elif habitat != "plant" and not is_toothless:
         subject_parts.append(MOUTH_TEETH_CARNIVORE if diet in ("Carnivore", "Piscivore") else MOUTH_TEETH_HERBIVORE)
 
-    # Behavior (what the animal is doing — pose/action)
-    subject_parts.append(behavior_param["value"])
+    # Behavior — FIRST PHRASE ONLY (Session 10). Action verbs were the main
+    # source of "narrative clutter" the user flagged: "jaw working on prey,
+    # fragments drifting" reads like an event, not a static portrait.
+    subject_parts.append(behavior_param["value"].split(", ")[0])
 
-    # Condition and mood (body state and demeanor)
-    subject_parts.append(condition_param["value"])
-    subject_parts.append(mood_param["value"])
+    # Condition — first 2 phrases only (Session 10). Multi-injury chains like
+    # "healed bite scars on ribcage, claw marks on neck, torn eyelid, powerful
+    # survivor" overstate character. Two phrases gives anatomy wear without
+    # turning every shot into a war veteran portrait.
+    condition_short = ", ".join(condition_param["value"].split(", ")[:2])
+    subject_parts.append(condition_short)
 
-    # Hyperrealism style anchor — appended last so it applies to the whole subject block
-    subject_parts.append(style_param["value"])
+    # Mood is intentionally NOT injected into prose. It overlaps with behavior
+    # and was the single biggest source of redundant action language. Mood is
+    # still selected (drives context-reactive suggestions) and saved as a tag.
 
-    # Habitat-specific realism anchor
-    habitat_realism = HABITAT_REALISM.get(habitat, HABITAT_REALISM["terrestrial"])
-    subject_parts.append(habitat_realism)
+    # Session 11: style_param["value"] and HABITAT_REALISM are NOT injected
+    # into the prose. The DB-stored style rows contain the full realism stack
+    # ("anatomically accurate, living animal skin texture, shot on Canon EOS,
+    # National Geographic wildlife photography, ...") which was biasing MJ
+    # toward staged specimen-style composition. The params are still passed
+    # through the function signature so save_prompt / tag wiring is intact.
 
     subject = ", ".join(p for p in subject_parts if p)
 
@@ -2000,23 +2112,13 @@ def assemble_prompt(
     # Terrestrial: feet/ground. Marine: water surface. Aerial: wing/air.
     # Mode overrides prevent repetitive compositions.
     if output_mode == "perched":
-        interaction = (
-            "talons gripping rocky edge, each digit wrapped around stone, "
-            "wings folded tight against body, visible wing joint angles, "
-            "weight settled on feet, perched posture"
-        )
+        interaction = "talons gripping rocky edge, wings folded"
     elif output_mode == "underwater":
-        interaction = (
-            "fully submerged, water pressing against body from all sides, "
-            "light filtering from surface above, suspended in open water, "
-            "particulate and sediment drifting past"
-        )
+        interaction = "fully submerged"
     elif output_mode == "surface_break":
-        interaction = (
-            "body erupting through water surface, spray and foam around torso, "
-            "water sheeting off skin, split between air and water, "
-            "surface tension breaking around body"
-        )
+        interaction = "body erupting through water surface"
+    elif output_mode == "shoreline" and habitat == "marine":
+        interaction = "body partially submerged, waterline crossing torso"
     else:
         interaction = HABITAT_INTERACTION.get(habitat, HABITAT_INTERACTION["terrestrial"])
 
@@ -2030,30 +2132,56 @@ def assemble_prompt(
     else:
         environment = ENVIRONMENTS.get(period, ENVIRONMENTS["Other"])
 
-    # Anti-CGI anchor — force real-location photography feel on every background
-    environment = f"{environment}, real outdoor location, imperfect natural detail, uneven terrain"
+    # Cap environment to first 3 phrases — the dict has some 4-phrase entries
+    # and the trailing phrase is usually filler ("dim ambient light from above"
+    # duplicates lighting; "still water in background" overlaps interaction).
+    environment = ", ".join(environment.split(", ")[:3])
+
+    # (Anti-CGI anchor removed — was 3 phrases of bloat per prompt.
+    # The negative prompt + style anchor already cover the same ground.)
 
     comp_template = mode_cfg["composition"]
-    if comp_template == "PLACEMENT":
+    # "horizon visible" is a contradiction underwater — drop it for marine
+    # modes EXCEPT the two surface-state modes (shoreline + surface_break).
+    marine_underwater = habitat == "marine" and output_mode not in ("shoreline", "surface_break")
+    horizon_phrase = "" if marine_underwater else ", horizon visible"
+    if wide_mode:
+        # Wide-scale framing block — overrides whatever the mode's
+        # composition template would have produced. Pure scale language,
+        # no camera/lens phrasing.
+        wide_comp = ("subject small in frame, environment dominant, "
+                     "large negative space, distant subject, "
+                     "scale emphasized over detail")
+        environment = f"{environment}, {wide_comp}{horizon_phrase}"
+    elif comp_template == "PLACEMENT":
         subject_phrase, space_side = placement
+        # Session 11: "animal centred, symmetrical" stripped — was biasing
+        # MJ toward staged specimen-style framing. Dead-center sentinel
+        # now contributes only the horizon hint (when applicable).
         if subject_phrase == "dead_center":
-            comp = "animal centred, symmetrical, horizon visible"
+            comp = horizon_phrase.lstrip(", ")
         elif space_side in ("right", "left"):
-            comp = f"{subject_phrase}, negative space {space_side}, horizon visible"
+            comp = f"{subject_phrase}, negative space {space_side}{horizon_phrase}"
         else:
-            comp = f"{subject_phrase}, horizon visible"
-        environment = f"{environment}, {comp}"
+            comp = f"{subject_phrase}{horizon_phrase}"
+        if comp:
+            environment = f"{environment}, {comp}"
     elif comp_template:
         environment = f"{environment}, {comp_template}"
 
     # ── SECTION 4: LIGHTING ───────────────────────────────────────────────────
-    # One lighting condition + one weather phrase. Short and supportive.
-    lighting = f"{lighting_param['value']}, {weather_param['value']}"
+    # ONE lead phrase of lighting only. DB values often pile on 4+ descriptors
+    # ("light fading with depth, animal lit from above, dark water below,
+    # natural light gradient") which dilute MJ attention. Weather is NOT
+    # injected — almost always duplicates lighting. Both stay in tags / branching.
+    lighting = lighting_param["value"].split(", ")[0]
 
     # ── SECTION 5: CAMERA ─────────────────────────────────────────────────────
-    # Minimal — lens spec only. Everything else is in sections 1–4.
-    camera_text = mode_cfg["fixed_camera"] or camera_param["value"]
-    camera = f"shot on {camera_text}"
+    # Session 11: camera brands and lens specs stripped from active output —
+    # they were pushing MJ toward staged product-shot/specimen framing.
+    # mode_cfg["fixed_camera"] + camera_param are still consulted upstream
+    # for tag/save-record purposes; nothing flows into the prose.
+    camera = ""
 
     # ── ASSEMBLE ──────────────────────────────────────────────────────────────
     sections = [subject, interaction, environment, lighting, camera]
@@ -2071,14 +2199,21 @@ def assemble_prompt(
     prose = ", ".join(deduped_clauses)
 
     # ── MJ FLAGS ──────────────────────────────────────────────────────────────
-    neg = NEGATIVE_PROMPT
+    # Clade-aware negative prompt — plants don't get vertebrate digit blockers,
+    # arthropods don't get talon/footpad blockers, etc.
     if output_mode == "perched":
-        # Perched mode: don't block folded wings or grounded poses
-        habitat_neg = ""
+        # Perched mode: skip the aerial habitat extras (which block "folded wings"
+        # and grounded poses — both wanted in a perched shot). Build base + clade
+        # anatomy/studio/fossil/indoor/CGI without the habitat-specific overlay.
+        if habitat == "plant":
+            base_blocks = [NEG_STUDIO, NEG_FOSSIL_PLANT, NEG_INDOOR, NEG_CGI]
+        elif habitat == "arthropod":
+            base_blocks = [NEG_ARTHROPOD_ANATOMY, NEG_STUDIO, NEG_FOSSIL_ARTHROPOD, NEG_INDOOR, NEG_CGI]
+        else:
+            base_blocks = [NEG_VERTEBRATE_ANATOMY, NEG_STUDIO, NEG_FOSSIL_VERTEBRATE, NEG_INDOOR, NEG_CGI]
+        neg = ", ".join(base_blocks)
     else:
-        habitat_neg = HABITAT_NEGATIVE.get(habitat, "")
-    if habitat_neg:
-        neg = f"{neg}, {habitat_neg}"
+        neg = build_negative_prompt(habitat)
     flags = f"--no {neg} --style {mj_style} --stylize {stylize} --q {quality:g}"
     if chaos > 0:
         flags += f" --chaos {chaos}"
@@ -2310,8 +2445,10 @@ def main() -> None:
         print(f"  {ok('AUTO-APPLIED')} {dim(f'(full-body extras for {sname})')}:")
         print(f"    {ok('+')} {dim('[anatomy]')} {C.WHITE}{extra_preview}{C.RESET}")
 
-    # Style is always hyperrealism — hardcoded, not user-selectable
-    style_param = HYPERREALISM_STYLE
+    # Style is always hyperrealism — hardcoded, not user-selectable.
+    # Clade-specific so plants get "living plant tissue" and arthropods get
+    # "living chitinous exoskeleton" instead of "living animal skin texture".
+    style_param = CLADE_STYLE.get(habitat, CLADE_STYLE["terrestrial"])
 
     # Context — tracks selections for branching suggestions + invalid combo blocking (all habitats)
     ctx = {
@@ -2473,7 +2610,7 @@ def main() -> None:
     # --- Save ---
     saved_param_ids = (
         [rp["id"] for rp in required_params]
-        + [HYPERREALISM_STYLE["id"], lighting_param["id"], mood_param["id"],
+        + [style_param["id"], lighting_param["id"], mood_param["id"],
            condition_param["id"], behavior_param["id"], weather_param["id"]]
         + ([camera_param["id"]] if camera_param else [])
     )

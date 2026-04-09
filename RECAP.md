@@ -39,25 +39,25 @@ Generate Midjourney images that look like **real wildlife photography** — benc
 ### Prompt Assembly — 5-Section Priority Order
 No category bleed between sections. Earlier = richer, later = shorter/supportive.
 
-1. **Subject** — species name + size, anatomy, feathering, tail posture, coloration, required params, skin texture, mouth/teeth, behavior, condition, mood, style anchor
-2. **Interaction** — habitat-specific (`HABITAT_INTERACTION` dict):
-   - Terrestrial: feet weight-bearing, toe contact, claw wear
-   - Marine: body submerged, waterline crossing torso, water tension against skin
-   - Aerial: wing membrane taut, finger bones as structural ridges, translucent membrane
-   - Arthropod: massive body weight pressing into ground, legs thick as branches, towering over ferns, ground-level camera looking up
-   - Plant: rooted in soil, trunk base widening, root buttresses, leaf litter, moss on bark
-3. **Environment** — period + habitat setting, composition framing
-4. **Lighting** — one lighting condition + one weather phrase
-5. **Camera** — lens spec only
+1. **Subject** — species name + size, anatomy, feathering, tail posture, coloration, required params, skin texture, mouth/teeth (skipped on arthropods, plants, and toothless beak species), behavior (first 2 phrases), condition, style anchor. *Mood is selected but NOT injected — Session 9.*
+2. **Interaction** — habitat-specific (`HABITAT_INTERACTION` dict, 2 phrases each):
+   - Terrestrial: feet fully weight-bearing, natural keratin wear on claw tips
+   - Marine: body partially submerged, waterline crossing torso
+   - Aerial: wing membrane taut against light, body suspended in open sky
+   - Arthropod: massive body weight pressing into ground, body segments clearly defined
+   - Plant: rooted in soil, root buttresses visible at base
+3. **Environment** — period + habitat setting (capped at 3 phrases), composition framing. *Anti-CGI environment anchor removed in Session 9.*
+4. **Lighting** — first phrase of lighting param only. *Weather is NOT injected — Session 9.*
+5. **Camera** — lens spec only (underwater fixed_camera no longer contains `natural light from above`)
 
 Deduplication pass strips exact repeated clauses before final join.
 
-### Habitat-Specific Realism (`HABITAT_REALISM`)
-- **Terrestrial:** National Geographic wildlife photography, telephoto bokeh
-- **Marine:** National Geographic ocean wildlife photography, underwater caustics, water surface refraction
-- **Aerial:** National Geographic bird-in-flight photography, atmospheric haze
-- **Arthropod:** National Geographic wildlife photography (NOT macro — treats them as large animals), telephoto bokeh
-- **Plant:** National Geographic botanical photography, natural forest light
+### Habitat-Specific Realism (`HABITAT_REALISM`) — Session 9 lean
+- **Terrestrial:** National Geographic wildlife photography, telephoto bokeh, film grain
+- **Marine:** National Geographic ocean wildlife photography, underwater caustics, marine biology documentary  *(Surface-only artifacts removed: was contradicting underwater shots.)*
+- **Aerial:** National Geographic bird-in-flight photography, raptor flight documentary
+- **Arthropod:** National Geographic wildlife photography, photographed like a large animal not a small insect
+- **Plant:** National Geographic botanical photography, botanical field photograph
 
 ### Habitat-Specific Negative Prompts (`HABITAT_NEGATIVE`)
 - **Terrestrial:** (base negative only)
@@ -72,12 +72,16 @@ Deduplication pass strips exact repeated clauses before final join.
 - `pick_weather()` filters weather options to only show compatible choices
 - `volcanic_ash_fall` is compatible with any sky state
 
-### Hardcoded Constants
-- **Style:** `"hyperrealistic, anatomically accurate, living animal skin texture, subsurface scattering, 8K texture"`
-- **Mouth (carnivore):** `"yellowed uneven teeth, wet interior mouth, heavy saliva stranding between teeth"`
-- **Mouth (herbivore):** `"wet lips parted, grinding teeth worn flat, saliva catching light along jaw"`
-- **Mouth (arthropod):** `"mandibles or chelicerae visible, no vertebrate mouth"` — skips teeth/saliva entirely
-- **Negative prompt:** anatomy errors, studio blockers, fossil/skeleton blockers, indoor blockers + habitat-specific
+### Hardcoded Constants (Session 9 lean)
+- **Style (per clade via `CLADE_STYLE`):**
+  - Vertebrates: `"hyperrealistic, anatomically accurate, living animal skin texture, natural imperfections, photographed in the wild"`
+  - Arthropod: `"... living chitinous exoskeleton ..."`
+  - Plant: `"hyperrealistic, botanically accurate, living plant tissue, bark and leaf texture, natural imperfections, photographed in the wild"`
+- **Mouth (carnivore):** `"yellowed uneven teeth"` — trimmed from 3 phrases to 1
+- **Mouth (herbivore):** `"grinding teeth worn flat"` — trimmed from 3 phrases to 1
+- **Mouth (arthropod):** `"mandibles or chelicerae visible, no vertebrate mouth"`
+- **Mouth (toothless beak species):** *not injected* — guarded by description/notes scan
+- **Negative prompt:** modular `build_negative_prompt(habitat)` — clade-specific anatomy + studio + fossil + indoor + CGI blocks
 
 ### Modular Vary Region Workflow — 4 Steps
 
@@ -355,38 +359,229 @@ Every menu now shows a `★ SUGGESTED` banner (5 picks, highlighted in the numbe
 - All 16 new species inserted with full scientific data (period, diet, size_class, body_length, description, notes, fossil sites)
 - `sref_urls.json` expanded to 42 species entries
 
+### Session 8 — Clade-Aware Style, Modular Negatives, Output Mode Expansion
+
+#### Clade-Bleed Audit (root cause of plant prompts containing animal-skin language)
+- `HYPERREALISM_STYLE` was a single global injecting `"living animal skin texture"` into every clade — visible in fern test where the prompt described a plant with animal-skin language
+- `NEGATIVE_PROMPT` was a single global containing ~15 vertebrate-only anatomy errors (`fused digits, talons, footpads, osteoderms`) injected into plant + arthropod prompts as wasted tokens that diluted MJ's attention
+- `make_feet_fix_prompt` and `make_mouth_fix_prompt` both inherited the global negative — arthropod legs-fix was getting `"missing claws, indistinct talons"` injected
+- `osteoderms` was filed under "fossil blockers" but it's actually vertebrate skin anatomy — should never reach arthropod or plant prompts at all
+
+#### Clade-Aware Style — `CLADE_STYLE` dict
+- Replaced `HYPERREALISM_STYLE` with per-clade dict:
+  - **Vertebrates** (terrestrial / marine / aerial): `"living animal skin texture"`
+  - **Arthropod**: `"living chitinous exoskeleton"`
+  - **Plant**: `"botanically accurate, living plant tissue, bark and leaf texture"`
+- `main()` now picks `CLADE_STYLE.get(habitat)` instead of the single global
+- `HYPERREALISM_STYLE` kept as a back-compat shim pointing at terrestrial
+
+#### Modular Negative Prompt Builder
+- Split monolithic `NEGATIVE_PROMPT` into 8 named blocks:
+  - `NEG_VERTEBRATE_ANATOMY` (digits, claws, talons, footpads, osteoderms)
+  - `NEG_ARTHROPOD_ANATOMY` (segmented chitin, anti-mammalian-limbs / fingers / toes / talons / footpads)
+  - `NEG_STUDIO` (universal — backdrops, museum, specimen)
+  - `NEG_FOSSIL_VERTEBRATE` (fossil + skeleton + bones — for vertebrate clades)
+  - `NEG_FOSSIL_ARTHROPOD` (fossil + amber inclusion, no skeleton/bones)
+  - `NEG_FOSSIL_PLANT` (fossil + petrified + herbarium specimen, no skeleton)
+  - `NEG_INDOOR` (universal — building, warehouse, concrete)
+  - `NEG_CGI` (universal — render, matte painting, fantasy, smooth gradient sky)
+- New `build_negative_prompt(habitat)` assembles only the clade-relevant blocks plus `HABITAT_NEGATIVE` extras
+- All 3 fix prompts (`make_feet_fix_prompt`, `make_mouth_fix_prompt`, perched-mode override in `assemble_prompt`) wired to the builder
+- Perched mode preserves "folded wings" by inlining base blocks without `HABITAT_NEGATIVE` extras
+
+| Clade        | --no tokens before | after |
+|--------------|--------------------|-------|
+| Terrestrial  | 69                 | 69    |
+| Marine       | 76                 | 76    |
+| Aerial       | 76                 | 76    |
+| Arthropod    | 86                 | 77    |
+| **Plant**    | **76**             | **54** |
+
+#### Output Mode Expansion (15 → 20)
+- Added 5 new modes specifically chosen to give arthropod and plant a meaningful menu (was 4 each):
+  - **`shoreline`** — water-edge transition (terrestrial / marine / plant)
+  - **`camera_trap`** — trail-cam aesthetic, candid framing (terrestrial / arthropod / plant)
+  - **`canopy_upward`** — looking straight up through canopy (terrestrial / plant / arthropod / aerial)
+  - **`misty_dawn`** — dawn fog, atmospheric depth (all 5 clades)
+  - **`group_cluster`** — multiple subjects / grove (all 5 clades)
+- Per-clade availability after expansion:
+  - Terrestrial: 10 → 15
+  - Marine: 10 → 13
+  - Aerial: 9 → 12
+  - **Arthropod: 4 → 8**
+  - **Plant: 4 → 9**
+- `select_mode()` no longer renders the `desc` column — display name only
+
+#### Validated With Generated Images
+- **Calamites** (plant) — botanical photography output, misty dawn, no animal-skin bleed in prompt
+- **Megarachne** (arthropod) — proper scale (forest floor dwarfs leaf litter), chitin texture, no vertebrate anatomy bleed
+- **Ammonite** (marine) — iridescent nacre rendering correctly with marine pipeline
+
+### Session 9 — Hard Audit: Less-Is-More Prompt Trim
+
+#### Trigger
+User showed an Elasmosaurus underwater shot side-by-side with a hand-edited lean version. The original packed ~80 clauses; the lean version was ~28. Diagnosis: the prompt was over-described, contradictory, and wasting MJ attention on filler. User's principle: *"focus on the fundamentals of detail in the animal, and the surrounding environment way more than over complex lighting or behavior instructions."*
+
+#### Contradictions found
+- **Marine HABITAT_REALISM contained `water droplets on lens, wet skin detail`** — surface-only artifacts being injected into fully-submerged shots. Logically impossible underwater.
+- **Underwater fixed_camera contained `natural light from above`** — lighting language bleeding into the camera section, then duplicating with environment "light filtering from surface above".
+- **Underwater composition contained `light filtering from surface above`** — same phrase already in environment dict, creating triple-injection until dedupe ran.
+- **Quetzalcoatlus + other beaked species** were getting `MOUTH_TEETH_CARNIVORE` ("yellowed uneven teeth") injected even though notes said "toothless pointed beak".
+- **Mood + behavior overlapped massively** — typical pair: behavior `"slow deliberate swimming, body undulating gently"` + mood `"moving through dark water at depth, body streamlined, slow deliberate patrolling"` saying the same thing twice.
+
+#### Bloat sources cut
+| Source | Before | After |
+|--------|--------|-------|
+| `HABITAT_REALISM` (per habitat) | 5–7 phrases | 2–3 phrases |
+| `HABITAT_INTERACTION` (per habitat) | 4–6 phrases | 2 phrases |
+| `underwater` interaction override | 5 phrases | 2 phrases |
+| `surface_break` interaction override | 5 phrases | 2 phrases |
+| `perched` interaction override | 6 phrases | 3 phrases |
+| `MOUTH_TEETH_CARNIVORE` | 3 phrases | 1 phrase (`yellowed uneven teeth`) |
+| `MOUTH_TEETH_HERBIVORE` | 3 phrases | 1 phrase (`grinding teeth worn flat`) |
+| Anti-CGI environment anchor | 3 phrases per prompt | removed (covered by --no) |
+| Lighting param injection | full value (often 4 phrases) | first phrase only |
+| Weather param injection | full value (often 4 phrases) | not injected (kept in tags / branching) |
+| Mood param injection | full value (3+ phrases) | not injected (kept in tags / branching) |
+| Behavior param injection | full value (3 phrases) | first 2 phrases |
+| Environment dict injection | full value (3–4 phrases) | first 3 phrases |
+
+#### Mood / weather are still selected
+Both still appear in the menu, drive `ctx` for context-reactive suggestions and invalid-combo blocking, and are saved to the `prompts` table for tags. They are simply no longer injected into the MJ prose. The user can re-enable injection later if MJ behavior changes.
+
+#### Toothless beak guard
+`assemble_prompt` now scans `description + notes` for "toothless" or "beak" (without "tooth") and skips the mouth-teeth injection entirely. Fixes Quetzalcoatlus, Pteranodon, Archelon, Ammonite from getting carnivore-tooth language layered over toothless anatomy.
+
+#### Token-count smoke test (after trim)
+
+| Habitat / mode | Clauses |
+|----------------|---------|
+| Marine / underwater (Elasmosaurus) | 32 (was ~80) |
+| Terrestrial / portrait (T. rex) | 26 |
+| Plant / portrait (Calamites) | 27 |
+| Arthropod / portrait (Megarachne) | 33 |
+| Aerial / soaring (Quetzalcoatlus) | 34 — **no false teeth** |
+
+~60% prose reduction across the board, no contradictions across all 5 clades.
+
+### Session 10 — Hard Audit Round 2 (canvas mode + realism spam + mode conflicts)
+
+#### Trigger
+User scored Session 9 output: **Visual potential 9/10, System purity 5/10, Lean test integrity 3/10.** The Elasmosaurus *canvas* shot (not the underwater shot Session 9 had tested) still showed:
+1. **Mode conflict** — `"fully aquatic"` + `"body partially submerged"` + `"waterline crossing torso"` all in one prompt. Three different states.
+2. **Redundant realism spam** — `hyperrealistic, anatomically accurate, living animal skin texture, natural imperfections, photographed in the wild, National Geographic ocean wildlife photography, marine biology documentary` — six overlapping "trust me this is real" phrases.
+3. **Narrative clutter** — `"jaw working on prey, fragments drifting, healed bite scars on ribcage, claw marks on neck, torn eyelid, powerful survivor"` — reads as event/character backstory, hostile to a calm portrait.
+4. **CANVAS_PRINT bleed** — `"high dynamic range, shadow detail retained, highlight detail retained, print-ready detail, no blown highlights"` doing nothing for MJ.
+5. **Camera over-specification** — `"Canon EOS R5 24-70mm f/4, mid-range, habitat in frame"` with HDR claims attached.
+
+Diagnosis: Session 9 trimmed the underwater path I tested but never touched the canvas path, the realism stack, the multi-phrase condition values, or the contradiction between marine `HABITAT_INTERACTION` (waterline) and species-level `"fully aquatic"` text.
+
+#### Fixes
+
+**Marine interaction default flipped to underwater.** Was `"body partially submerged, waterline crossing torso"` — but most marine species in the DB are fully aquatic plesiosaurs/sharks/ichthyosaurs that should never be at the surface unless the mode explicitly says so. Now defaults to `"fully submerged"`. Surface-state modes (`shoreline`, `surface_break`) override with their own waterline language.
+
+**Realism stack collapsed.**
+- `CLADE_STYLE`: 5 phrases → 2 (`"anatomically accurate, living animal skin texture"`)
+- `HABITAT_REALISM`: 2–3 phrases → 1 (`"ocean wildlife photography, underwater caustics"`)
+- Net per-prompt: ~7 realism phrases → 3.
+
+**Behavior + condition further trimmed.**
+- Behavior: first 2 phrases → first 1 phrase
+- Condition: full → first 2 phrases (was a chain of 4–6 injuries)
+
+**`CANVAS_PRINT` block removed entirely.** Was 5 phrases doing nothing — print readiness happens at upscale time, not in the prompt. The flag stays on `OUTPUT_MODES` for tag/saved-record purposes only.
+
+**Canvas `fixed_camera` trimmed.** `"Canon EOS R5 24-70mm f/4, mid-range, habitat in frame"` → `"Canon EOS R5 24-70mm f/4"`.
+
+**Horizon strip is now mode-aware.** `"horizon visible"` is dropped from marine modes EXCEPT `shoreline` and `surface_break` (where the species is at the surface and a horizon is appropriate).
+
+#### Token-count smoke test (post Session 10)
+
+| Habitat / mode | Session 9 | Session 10 |
+|----------------|-----------|------------|
+| Marine / canvas (Elasmosaurus) | ~38 | **25** |
+| Marine / underwater (Elasmosaurus) | 32 | **24** |
+| Marine / shoreline (Elasmosaurus) | — | 29 (correctly keeps surface language) |
+| Terrestrial / canvas (T. rex) | ~32 | **20** |
+| Plant / canvas (Calamites) | ~30 | **22** |
+| Arthropod / portrait (Megarachne) | 33 | **26** |
+| Aerial / soaring (Quetzalcoatlus) | 34 | **26** |
+| Aerial / perched (Quetzalcoatlus) | — | 27 |
+
+All 8 cases pass the contradiction sweep (no aquatic+submerged on default modes, no horizon underwater, no CANVAS_PRINT bleed, no lighting in camera, no realism spam).
+
+### Session 11 — Realism Stack Eradication + Wide-Scale Placement Variant
+
+#### Trigger
+User scored Session 10 output and flagged that the realism stack was *still* causing staged museum-like compositions. Verbatim instruction: *"The following phrases must be removed entirely from the output: anatomically accurate, living animal skin texture, wildlife photography (all variants). These are not improving realism and are biasing the model toward specimen-style composition. Also remove: all camera brands and lens specs, animal centred / symmetrical framing language. Do not replace them with alternatives. Do not change architecture. Only remove these from the active output path."*
+
+#### Root cause discovered
+Session 10 trimmed `CLADE_STYLE` and `HABITAT_REALISM` constants but the realism prose was *still* leaking into prompts. Diagnosis: `style_param["value"]` is pulled from the **`parameters` table** (category='style'), not from `CLADE_STYLE`. The DB rows contain the full realism stack baked in (`"hyperrealistic, anatomically accurate, living animal skin texture, subsurface scattering, 8K texture, shot on Canon EOS R5, National Geographic wildlife photography, ..."`). Sessions 9 and 10 had been editing constants that were never reaching the prose.
+
+#### Removals (assemble_prompt prose path only)
+- **`style_param["value"]` no longer appended to subject block.** Param is still passed through the function signature for save_prompt / tag wiring; nothing flows into prose.
+- **`HABITAT_REALISM` values cleared to empty strings.** Filter in the join drops them. Dict structure preserved.
+- **`CLADE_STYLE` values cleared to empty strings.** Same — preserved for parameter-id wiring.
+- **Camera section (`camera = ""`).** Camera brands and lens specs no longer flow into prose. `mode_cfg["fixed_camera"]` and `camera_param` are still consulted upstream for tag/save-record purposes.
+- **`"animal centred, symmetrical"` stripped from PLACEMENT dead-center sentinel.** Branch now contributes only `horizon_phrase` (when applicable).
+
+#### Wide-scale placement variant (new)
+Added a new placement option to `select_canvas_placement()`: **`("wide", "all")`** with label *"Wide scale — environment dominant, distant subject"*. Detected via `wide_mode = bool(placement) and placement[0] == "wide"` near the top of `assemble_prompt` so it works **regardless of the mode's composition template** (canvas, underwater, environmental, etc — not just modes with `composition: "PLACEMENT"`).
+
+When `wide_mode` is active:
+- `"full body visible head to tail"` is suppressed in subject block
+- Environment composition is **overridden** with the wide-scale phrase block: *"subject small in frame, environment dominant, large negative space, distant subject, scale emphasized over detail"*
+- No camera language is added
+- All other placement options (rule of thirds, dead center, foreground dominant, etc) are unchanged
+
+#### Token-count smoke test (post Session 11)
+
+| Habitat / mode | S10 | S11 |
+|----------------|-----|-----|
+| Marine / underwater (Elasmosaurus) | 24 | **18** |
+| Marine / underwater + wide (Elasmosaurus) | — | **22** |
+
+Banned-phrase audit on Elasmosaurus / underwater: `anatomically accurate`, `living animal skin texture`, `subsurface scattering`, `8K texture`, `wildlife photography` (all variants), `National Geographic`, `Canon EOS`, `shot on`, `animal centred`, `symmetrical` — all absent. Regression test confirms canvas / rule-of-thirds-left is unaffected (still injects `full body visible head to tail` and `rule of thirds`, does not inject the wide-scale phrases).
+
 ---
 
 ## Current Status
 - **42 species** across 5 habitats — 8 terrestrial, 14 marine, 4 aerial, 8 arthropod, 8 plant
-- **Anti-CGI measures:** Active in style constant, environment section, and negative prompt
-- **--sref suggestion system:** Live — prompts user after species select when URLs are available in `sref_urls.json`
-- **Perched mode:** Active for aerial species — unblocks perched behaviors, blocks flight behaviors
-- **Marine waterline refraction:** Explicit above/below visual difference in interaction and mouth fix prompts
-- **Context-reactive branching:** Fully implemented for terrestrial, marine, aerial — **arthropod and plant use generic fallback** (no suggestions or blocking yet)
-- **Invalid combo blocking:** Active for terrestrial, marine, aerial — not yet implemented for arthropod/plant
-- **Modular 4-step workflow:** All 4 steps output per run; arthropods get species-specific mouthpart fixes; plants skip Steps 2 and 4
-- **Diet-grouped menus:** Terrestrial (Carnivore/Herbivore) and Marine (Predators/Fish-Eaters/Filter Feeders/Omnivores) species menus have section headers
-- **Arthropod scale fix applied** — environmental scale cues, wildlife photography framing, no vertebrate mouth language
-- **Arthropod results:** First test showed Megalograptus and Pulmonoscorpius looking like normal-sized modern bugs. Scale fix committed but **not yet re-tested**
+- **Lean prompt mode (Sessions 9 + 10 + 11):** Marine underwater now ~18 clauses (was ~80). Realism stack **eradicated** from prose path: no `style_param` injection, no `HABITAT_REALISM` injection, no camera brands/lens specs, no `wildlife photography`, no `anatomically accurate`, no `living animal skin texture`, no `animal centred / symmetrical`. Behavior cut to 1 phrase, condition to 2. CANVAS_PRINT block removed. Marine interaction defaults to *underwater*, not waterline. Mood + weather still selected for context-reactive branching but never injected into prose. Style + camera params still passed through `assemble_prompt` for save_prompt / tag wiring.
+- **Wide-scale placement variant:** `("wide", "all")` added to `select_canvas_placement` — works for any mode (not just `canvas`) via top-level `wide_mode` flag. Suppresses `"full body visible head to tail"`, overrides environment composition with the five-phrase wide-scale block. No camera language added. Other placement options unaffected.
+- **Clade-aware everything:** style anchor, negative prompt, mouth/teeth, interaction block, realism block — all picked from per-clade dicts.
+- **Toothless beak guard:** Quetzalcoatlus / Pteranodon / Archelon / Ammonite no longer get tooth language injected over their toothless anatomy.
+- **Mode-aware horizon strip:** marine canvas/portrait/underwater never inject "horizon visible"; marine shoreline/surface_break do.
+- **--sref suggestion system:** Live — prompts user after species select when URLs are available in `sref_urls.json`.
+- **Perched mode:** Active for aerial species — unblocks perched behaviors, blocks flight behaviors.
+- **Context-reactive branching:** Fully implemented for terrestrial, marine, aerial — **arthropod and plant use generic fallback** (no suggestions or blocking yet).
+- **Invalid combo blocking:** Active for terrestrial, marine, aerial — not yet implemented for arthropod/plant.
+- **Modular 4-step workflow:** All 4 steps output per run; arthropods get species-specific mouthpart fixes; plants skip Steps 2 and 4.
+- **Diet-grouped menus:** Terrestrial (Carnivore/Herbivore) and Marine (Predators/Fish-Eaters/Filter Feeders/Omnivores) species menus have section headers.
+- **Validated MJ outputs (Sessions 7–8):** Calamites (plant), Megarachne (arthropod), Ammonite (marine), Elasmosaurus (marine underwater).
 
 ## Known Issues
-- **Arthropod scale not yet validated** — scale fix (environmental comparisons, wildlife photography realism, anti-macro negatives) committed but needs re-testing with MJ
-- **Plant habitat untested** — no MJ outputs generated yet for any plant species
-- **Arthropod/plant have no context-reactive suggestions** — `get_suggestions()` and `get_blocked()` fall through to empty defaults for these habitats
-- **Git LFS not installed** — pushes require `--no-verify` to bypass LFS pre-push hook; `.gitattributes` tracks site assets via LFS
+- **Sessions 10 + 11 lean output not yet validated visually in MJ** — smoke-tested in Python and passes contradiction + banned-phrase sweeps; needs visual confirmation that ~18-clause prompts still produce wildlife-photo quality (and that the realism stack removal didn't go *too* far in the other direction).
+- **`condition` param values can leak surface language underwater** — observed: Elasmosaurus underwater output included `"head raised vertically above surface"` because the first phrase of the condition param contained surface language. Session 11 caps to first 2 phrases at injection but doesn't filter for mode-incompatible content. Possible fix: tag condition params with `mode_compat` and skip if incompatible, or sanitize the DB rows.
+- **`condition` param values often pile multiple states** in the underlying DB — Session 11 truncates at injection but a DB cleanup pass would let context-reactive branching pick from cleaner single-state entries.
+- **`behavior` param values similar pattern** — Session 11 caps to first 1 phrase. DB cleanup opportunity, not blocking.
+- **Arthropod/plant have no context-reactive suggestions** — `get_suggestions()` and `get_blocked()` fall through to empty defaults for these habitats.
+- **Some lighting param values lead with time-of-day language** (`dawn_first_light` → `"first light before sunrise"`) — fine but reads as a time phrase not a lighting effect. DB cleanup opportunity, not blocking.
+- **Plant species notes column sometimes contains directive sentences** ("Use modern horsetail as reference but scaled up massively.") that read awkwardly when injected into prose. Pre-existing.
+- **Git LFS not installed** — pushes require `--no-verify` to bypass LFS pre-push hook; `.gitattributes` tracks site assets via LFS.
+- **`style_param` and `camera_param` are now dead inputs to the prose path** — they still pass through the `assemble_prompt` signature and are saved as tags, but their `value` columns are no longer read for prose. If we want the prose to ever pull from them again, the assembly path needs to be re-wired (not just the constants).
 
 ## Next Priorities
-1. **Re-test arthropods with scale fix** — run Pulmonoscorpius, Megalograptus, Arthropleura again and compare to pre-fix results
-2. **Test plant habitat** — run Lepidodendron, Araucaria, Wattieza and verify botanical photography feel
-3. **Add arthropod/plant-specific suggestions and blocking** — context-reactive branching for new habitats (species-specific lighting, mood-driven behavior, invalid combo rules)
-4. **Add terrestrial species** — Pachycephalosaurus, Carnotaurus, Therizinosaurus, Allosaurus
-5. **Printify automation** — user needs to regenerate API key, then build folder-watcher → upscale → upload → draft pipeline
-6. **Populate `sref_urls.json`** — upload real animal analogue photos to Discord, collect URLs per species
-7. **Build batch mode** — generate N prompts unattended with randomized selections for variety
-8. **Canvas print formatting script** — upscale + bleed margins for Printify canvas sizes (8×10, 12×18, 20×24, 24×32)
-9. **Add scene composition presets** — "predator/prey encounter", "herd at waterhole", "two species sharing habitat" for multi-subject scenes
-10. **Install Git LFS** — `brew install git-lfs && git lfs install` to stop needing `--no-verify` on every push
+1. **Visually validate Session 11 lean prompts in MJ** — re-run Elasmosaurus underwater (with and without `wide`), T. rex canvas, Calamites canvas + wide, Megarachne portrait, Quetzalcoatlus soaring/perched and confirm the trimmed-and-stripped prompts still produce wildlife-photo quality. **Critical: did the realism stack removal go too far?** If outputs now look painterly/illustrated, we may need to re-introduce one or two specific cues — but as deliberate single phrases, not as a stack.
+2. **A/B test the wide variant** — pull the same species + mode, generate one with default placement and one with `wide`, compare scale-of-subject readability.
+3. **Mode-aware condition filtering** — strip condition phrases that contradict mode (e.g. `"head raised above surface"` should not survive `output_mode == "underwater"`). Either tag DB rows with `mode_compat` or run a post-injection regex pass.
+4. **Add arthropod/plant-specific suggestions and blocking** — context-reactive branching for the new habitats.
+5. **Per-species "winning combo" cache** — save lighting + behavior + condition + mode sets that produced confirmed-good outputs to a `winning_combos` table; surface as `★ KNOWN GOOD` in menus.
+6. **Vision-feedback fix loop** — pass MJ output through Claude vision to score scientific accuracy and auto-suggest which Vary-Region step to apply.
+7. **Add terrestrial species** — Pachycephalosaurus, Carnotaurus, Therizinosaurus, Allosaurus.
+8. **Printify automation** — user needs to regenerate API key, then build folder-watcher → upscale → upload → draft pipeline.
+9. **Populate `sref_urls.json`** — upload real animal analogue photos to Discord, collect URLs per species.
+10. **Install Git LFS** — `brew install git-lfs && git lfs install` to stop needing `--no-verify` on every push.
 
 ## Reference Photos to Use as `--sref`
 - Komodo dragon foot (digits separated, claws at different angles, leathery pads)
