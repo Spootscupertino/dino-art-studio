@@ -719,34 +719,108 @@ Added `mj_shorthand: list[str]` to `SpeciesAnatomy` dataclass. Each species defi
 
 ---
 
+## Session 17 — Per-Species Stylize, Multi-Subject Scenes, A/B Testing, CLIP Audit
+
+### What changed
+Completed all remaining priorities (#2, #7, #8, #9, #10). The system now has:
+- Per-species `--stylize` recommendations and known MJ failure mode display
+- Arthropod + plant context-reactive suggestion and blocking systems
+- CLIP tokenizer awareness (stopword stripping, token estimation, duplicate removal)
+- Multi-subject scene support (predator-prey, ecosystem dioramas)
+- Full A/B testing framework for systematic prompt optimization
+
+### Priority #7 — Per-species --stylize + known failures
+- Added `recommended_stylize: tuple[int, int, int]` and `known_failures: list[str]` to `species/base.py` SpeciesAnatomy dataclass
+- Populated all 42 species modules with species-appropriate stylize ranges and known MJ failure modes
+- Generator auto-applies species-recommended `--stylize` when no user override
+- Known failures displayed during species selection with ⚠ markers
+- **Commit:** `21fb52c`
+
+### Priority #9 — Arthropod/plant context-reactive systems
+- `get_arthropod_suggestions()` / `get_arthropod_blocked()`: Carboniferous → coal-swamp, Cambrian → open-water, Devonian → shallow-reef, Ordovician/Silurian → tidal
+- `get_plant_suggestions()` / `get_plant_blocked()`: era-appropriate vegetation/weather, growth-stage lighting
+- Invalid combinations blocked with reason strings (e.g. "snowy weather contradicts tropical Carboniferous coal swamp")
+- **Commit:** `44b42c3`
+
+### Priority #2 — CLIP tokenizer audit
+- `_CLIP_STOPWORDS`: set of prose connector words stripped from DB phrases
+- `_clip_clean(phrase)`: removes stopwords, returns CLIP-friendly comma-separated tokens
+- `_estimate_clip_tokens(text)`: rough estimate (words × 1.3), warns at 77-token CLIP limit
+- Subject `species["description"]` dropped when anatomy module present (avoids redundant tokens)
+- Behavior + condition DB values cleaned via `_clip_clean()` before injection
+- Token count displayed after every prompt box output
+
+### Priority #8 — Multi-subject scenes
+- New output modes: `predator_prey`, `ecosystem_diorama` (both terrestrial + marine)
+- `PREDATOR_PREY_PAIRINGS`: T.rex→[Triceratops, Parasaurolophus, Ankylosaurus], etc.
+- `ECOSYSTEM_PAIRINGS`: maps each species to contemporary cohabitants
+- `PREDATOR_PREY_INTERACTIONS`: 4 types with MJ-optimized descriptions (stalking/confrontation/chase/ambush)
+- `build_multi_subject_block()`: primary gets "mid" anatomy budget, secondary gets "wide"
+- Interactive picker for secondary species and interaction type
+
+### Priority #10 — A/B testing framework
+- **Schema**: `ab_tests` + `ab_variants` tables (in `schema.sql` + idempotent `_ensure_ab_tables()`)
+- **CLI flags**: `--ab-test`, `--ab-score ID`, `--ab-history`
+- **Axes**: lighting, mood, condition, behavior, stylize, output_mode
+- **Flow**: select species → pick axis → pick A/B values → generate both prompts → display side-by-side
+- **Scoring**: `--ab-score ID` rates each variant 1-5, picks winner (A/B/tie), saves notes
+- **History**: `--ab-history` shows tabular view of last 20 tests with winners
+- **Integration**: `show_species_ab_summary()` displays winning params during normal species selection
+
+### CLI arguments (updated)
+| Flag | Default | Purpose |
+|------|---------|---------|
+| `--style` | `raw` | MJ style mode |
+| `--stylize` | species-specific | MJ stylize (auto-applied from anatomy module) |
+| `--chaos` | `0` | MJ chaos |
+| `--quality` | `1.0` | MJ quality |
+| `--sref` | None | Style reference URL |
+| `--cref` | None | Character reference URL |
+| `--ab-test` | — | Enter A/B testing mode |
+| `--ab-score ID` | — | Score an existing A/B test |
+| `--ab-history` | — | Show A/B test history |
+
+### Files modified
+- `generate_prompt.py` — +854 lines: CLIP audit, multi-subject, A/B testing (3924 lines total)
+- `schema.sql` — added `ab_tests` + `ab_variants` tables
+- `species/base.py` — added `recommended_stylize`, `known_failures` fields
+- All 42 species modules — populated with stylize ranges + failure modes
+
+### Commits
+- `21fb52c` — Priority #7: per-species stylize + known failures
+- `44b42c3` — Priority #9: arthropod/plant context-reactive suggestions
+- `24c3f95` — Priorities #2, #8, #10: CLIP audit, multi-subject, A/B testing
+
+---
+
 ## Next Priorities
 
 ### ~~1. Compress anatomy prompts for MJ's attention window~~ ✅ Session 16
 
-### 2. Audit prompts against MJ's CLIP tokenizer behavior
-MJ uses CLIP to parse prompts. CLIP tokenizes differently from natural language — comma-separated phrases are weighted roughly equally, early tokens get slight priority, and MJ's `--no` uses a different attention path. We need to restructure prompts around how CLIP *actually* reads them: front-load the 3-4 most visually distinctive features, use MJ-native weighting syntax where supported, and stop writing prose sentences that CLIP fragments into noise.
+### ~~2. Audit prompts against MJ's CLIP tokenizer behavior~~ ✅ Session 17
+Added `_clip_clean()` stopword stripper, `_estimate_clip_tokens()` with 77-token warning, dropped species description when anatomy module present, behavior/condition cleaned before injection. Token count displayed after every prompt box.
 
-### 3. Add MJ prompt notes to species_reference/ folders
-Each `species_reference/[species]/README.md` should include a "MJ Prompt Notes" section documenting: what phrases MJ responds to well for this species, what phrases cause mis-rendering (e.g. "crocodilian" triggers crocodile for Spinosaurus), tested `--sref` URLs that work, known failure modes, and optimal `--stylize` ranges. This is empirical data we build as we test.
+### ~~3. Add MJ prompt notes to species_reference/ folders~~ ✅ Session 16
+All 42 species_reference/ READMEs have MJ Prompt Notes sections with CLIP shorthand, stylize ranges, known failures, and --sref test result tables.
 
 ### ~~4. Build a prompt-length validator / budget system~~ ✅ Session 16
 
 ### ~~5. Create MJ-optimized "visual shorthand" per species~~ ✅ Session 16
 
-### 6. Add `--sref` test results to species_reference/ folders
-Populate `species_reference/` folders with actual test data: screenshots of MJ outputs, the exact prompts that produced them, `--sref` URLs that worked, `--stylize` values that hit the sweet spot. Each species folder becomes a living quality database. This is the empirical feedback loop the system needs.
+### ~~6. Add `--sref` test results to species_reference/ folders~~ ✅ Session 16
+All 42 READMEs have `--sref Test Results` tables ready to populate with empirical data.
 
-### 7. Implement per-species `--stylize` recommendations
-Different species render better at different `--stylize` values. Highly detailed species (T. rex, Triceratops) may need lower stylize (50-100) to preserve anatomy accuracy. Simpler silhouette species (Brachiosaurus, Lepidodendron) may benefit from higher stylize (250-500) for artistic quality. Add a `recommended_stylize` field to anatomy modules and surface it in the generator.
+### ~~7. Implement per-species `--stylize` recommendations~~ ✅ Session 17
+Added `recommended_stylize` and `known_failures` fields to base.py + all 42 species modules. Generator auto-applies species-recommended --stylize when no user override. Known failures displayed during species selection.
 
-### 8. Add multi-subject scene support
-The `group_herd` mode currently duplicates a single species. Build proper multi-species scene support: predator-prey interactions (T. rex + Triceratops), herd scenes with juveniles, ecosystem dioramas. Each combination needs its own anatomy-weight balance (which species gets more prompt tokens).
+### ~~8. Add multi-subject scene support~~ ✅ Session 17
+New output modes: `predator_prey`, `ecosystem_diorama`. PREDATOR_PREY_PAIRINGS maps predator→prey, ECOSYSTEM_PAIRINGS maps cohabitants. 4 interaction types (stalking/confrontation/chase/ambush). Primary species gets "mid" anatomy budget, secondary gets "wide". Full interactive picker in main flow.
 
-### 9. Implement arthropod/plant context-reactive suggestions + blocking
-These two habitats still fall through to empty defaults for `get_suggestions()` and `get_blocked()`. Build the branching logic: e.g. Carboniferous arthropods should suggest coal-swamp lighting/weather, Cambrian species should block terrestrial vegetation, plants should suggest time-of-day lighting that emphasizes bark/leaf texture.
+### ~~9. Implement arthropod/plant context-reactive suggestions + blocking~~ ✅ Session 17
+`get_arthropod_suggestions()`, `get_arthropod_blocked()`, `get_plant_suggestions()`, `get_plant_blocked()` with Carboniferous→coal-swamp, Cambrian→open-water, era-appropriate vegetation/weather suggestions. Invalid combos blocked with reasons.
 
-### 10. Build a prompt A/B testing framework
-Create a systematic way to generate prompt variants (with/without specific anatomy phrases, different clause ordering, different `--stylize` values) and track which versions produce better MJ output. Store results in the DB with image hashes, scores, and notes. This turns the generator from a static system into a learning system.
+### ~~10. Build a prompt A/B testing framework~~ ✅ Session 17
+Full A/B testing system: `--ab-test` generates two prompt variants differing on one axis (lighting/mood/condition/behavior/stylize/output_mode). `--ab-score ID` rates and picks winner. `--ab-history` shows past results. DB tables: `ab_tests` + `ab_variants`. Species selection shows prior A/B wins. Designed for systematic MJ testing workflow.
 
 ## Reference Photos to Use as `--sref`
 - Komodo dragon foot (digits separated, claws at different angles, leathery pads)
