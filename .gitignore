@@ -34,3 +34,12 @@ env/
 
 # Claude Code internal files
 .claude/
+
+# Environment
+.env
+
+# Backups
+*_backup.py
+
+# Git LFS migration artifacts
+.gitattributes.bak

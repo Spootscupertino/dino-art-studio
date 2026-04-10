@@ -66,4 +66,13 @@ ANATOMY = SpeciesAnatomy(
         "no upper teeth — upper jaw is smooth cartilage that the whorl closes against",
         "closely related to modern ratfish and chimaeras, NOT a true shark",
     ],
+
+    mj_shorthand=[
+        "spiral tooth whorl in lower jaw",
+        "ratfish-like elongated body",
+        "smooth cartilaginous skin",
+        "whorl teeth concealed inside jaw",
+        "heterocercal tail upper lobe extended",
+        "4m deep-ocean chimaera relative",
+    ],
 )

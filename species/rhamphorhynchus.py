@@ -68,4 +68,12 @@ ANATOMY = SpeciesAnatomy(
         "exceptionally preserved Solnhofen specimens show wing membrane details and pycnofiber impressions",
         "forward-interlocking teeth formed perfect fish-catching basket",
     ],
+
+    mj_shorthand=[
+        "long bony tail with diamond vane tip",
+        "forward-projecting interlocking needle teeth",
+        "leathery wing membrane to ankles",
+        "dense pycnofiber body fuzz",
+        "crow-sized 1.8m wingspan pterosaur",
+    ],
 )

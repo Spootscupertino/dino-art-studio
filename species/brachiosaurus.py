@@ -42,7 +42,7 @@ ANATOMY = SpeciesAnatomy(
         build="enormous long-necked sauropod with distinctively LONGER forelimbs than hindlimbs — gives giraffe-like upward slope from hips to shoulders",
         neck="extremely long neck (9m+) held at a steep upward angle due to elevated shoulder position — highest feeding reach of any dinosaur",
         tail="relatively short for a sauropod, tapering, held roughly horizontal",
-        silhouette="giraffe-proportioned giant with forequarters higher than hindquarters, extremely long steep neck, small head held very high",
+        silhouette="giraffe-proportioned giant with forequarters higher than rear, long steep neck, small head held high",
         size_comparison="22m long, 13m tall, 56 tonnes — could peer into fifth-story windows, one of the tallest dinosaurs known",
     ),
 
@@ -68,5 +68,14 @@ ANATOMY = SpeciesAnatomy(
         "highest feeding reach of any dinosaur — could browse at 13m+ height",
         "nasal arch above eyes gives the skull a distinctive crested appearance",
         "NOT depicted in water up to its neck — fully terrestrial, the snorkel hypothesis was abandoned decades ago",
+    ],
+
+    mj_shorthand=[
+        "giraffe-proportioned sauropod forequarters higher than rear",
+        "extremely long steep-angled neck",
+        "arched nasal crest above eyes",
+        "columnar elephant-like legs",
+        "small spatulate-toothed head",
+        "22m long 56-tonne giant",
     ],
 )

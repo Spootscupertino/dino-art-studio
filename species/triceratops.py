@@ -73,4 +73,13 @@ ANATOMY = SpeciesAnatomy(
         "forelimbs semi-erect with elbows slightly bowed outward — NOT fully columnar like an elephant and NOT fully sprawled",
         "parrot-like beak at front of mouth, dental batteries for processing tough vegetation behind it",
     ],
+
+    mj_shorthand=[
+        "three-horned skull with solid bony frill",
+        "parrot-like keratinous beak",
+        "pebbly rosette-patterned scales",
+        "rhino-proportioned stocky quadruped",
+        "semi-erect forelimbs elbows bowed out",
+        "9m long 9-tonne ceratopsian",
+    ],
 )

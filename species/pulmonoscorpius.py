@@ -68,4 +68,13 @@ ANATOMY = SpeciesAnatomy(
         "stinger was venomous — functional venom delivery system just like modern scorpions",
         "glossy dark exoskeleton should catch light realistically",
     ],
+
+    mj_shorthand=[
+        "glossy dark scorpion scaled to dog size",
+        "curved venomous stinger tail",
+        "robust pedipalp pincers fist-sized",
+        "eight thick segmented walking legs",
+        "smooth glossy chitinous exoskeleton",
+        "70cm largest terrestrial scorpion",
+    ],
 )

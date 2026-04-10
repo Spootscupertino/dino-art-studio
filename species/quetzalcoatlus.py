@@ -71,4 +71,13 @@ ANATOMY = SpeciesAnatomy(
         "primarily a terrestrial stalking predator like a giant stork, not exclusively a fish-catcher",
         "quadrupedal launch was the ONLY way it could take off — biomechanically impossible to run-and-flap",
     ],
+
+    mj_shorthand=[
+        "giraffe-height standing on folded wings",
+        "extremely long lancet-shaped toothless beak",
+        "10-11m wingspan largest flying animal ever",
+        "pycnofiber-covered lightweight hollow bones",
+        "long stiff vertical neck when standing",
+        "terrestrial stork-like stalking posture",
+    ],
 )

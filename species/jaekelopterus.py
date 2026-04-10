@@ -68,4 +68,13 @@ ANATOMY = SpeciesAnatomy(
         "largest arthropod predator ever discovered — chelicerae alone are terrifying",
         "dark exoskeleton with natural scratches and battle scars for realism",
     ],
+
+    mj_shorthand=[
+        "massive serrated chelicerae pincers",
+        "crocodile-sized sea scorpion",
+        "broad flat segmented body",
+        "rear paddle-shaped swimming legs",
+        "dark scarred chitinous exoskeleton",
+        "2.5m largest arthropod predator ever",
+    ],
 )

@@ -38,4 +38,12 @@ ANATOMY = SpeciesAnatomy(
         "often confused with true cycads but completely separate lineage (Bennettitales)",
         "went extinct in the Cretaceous — replaced by true flowering plants",
     ],
+
+    mj_shorthand=[
+        "flower-like cones between palm fronds",
+        "short stocky trunk with leaf-base armor",
+        "crown of pinnate feather-like fronds",
+        "cycad-like palm-like overall form",
+        "3m stocky Mesozoic bennettitale",
+    ],
 )

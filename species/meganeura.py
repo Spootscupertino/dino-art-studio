@@ -67,4 +67,13 @@ ANATOMY = SpeciesAnatomy(
         "iridescent wing veins catching light are key visual feature",
         "only possible in high-oxygen Carboniferous atmosphere",
     ],
+
+    mj_shorthand=[
+        "eagle-sized giant dragonfly",
+        "four transparent veined iridescent wings",
+        "enormous compound eyes golf-ball sized",
+        "glossy dark chitinous segmented body",
+        "six bristled legs in prey-catching basket",
+        "70cm wingspan largest flying insect ever",
+    ],
 )

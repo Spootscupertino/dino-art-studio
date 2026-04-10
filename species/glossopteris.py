@@ -39,4 +39,12 @@ ANATOMY = SpeciesAnatomy(
         "went extinct at the end-Permian mass extinction — replaced by seed ferns and early conifers",
         "seed fern — reproduced with seeds not spores, despite being called a fern",
     ],
+
+    mj_shorthand=[
+        "broad tongue-shaped leaves net-like venation",
+        "thick woody deciduous canopy tree",
+        "prominent central midvein on each leaf",
+        "fallen tongue leaves covering ground",
+        "25m Permian Gondwanan forest dominant",
+    ],
 )

@@ -63,4 +63,13 @@ ANATOMY = SpeciesAnatomy(
         "nicknamed Ginsu Shark for blade-like teeth that cut cleanly — preserved prey with clean cut marks",
         "known to prey on mosasaurs, plesiosaurs, and large fish — apex predator of Cretaceous seas",
     ],
+
+    mj_shorthand=[
+        "sleek torpedo mako-shark body",
+        "smooth unserrated blade-like teeth",
+        "large dark hunting eye",
+        "powerful lunate tail fin",
+        "hydrodynamic smooth denticle skin",
+        "great-white-sized 6m Cretaceous shark",
+    ],
 )

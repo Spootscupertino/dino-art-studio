@@ -41,4 +41,12 @@ ANATOMY = SpeciesAnatomy(
         "resembles a giant tree fern more than any modern tree",
         "grew in coastal swamp environments during the Devonian",
     ],
+
+    mj_shorthand=[
+        "crown of fernlike fronds at very top only",
+        "tall slender unbranched columnar trunk",
+        "spiral diamond leaf-scar trunk pattern",
+        "giant tree-fern silhouette",
+        "8m oldest known tree Devonian",
+    ],
 )

@@ -39,4 +39,12 @@ ANATOMY = SpeciesAnatomy(
         "large round seed cones — food source for Mesozoic animals",
         "the tree that sauropods like Brachiosaurus fed upon in Jurassic forests",
     ],
+
+    mj_shorthand=[
+        "stiff triangular overlapping scale-leaves",
+        "tiered horizontal pagoda-like branches",
+        "deeply furrowed thick bark",
+        "large round seed cones on branches",
+        "50m tall Mesozoic monkey puzzle conifer",
+    ],
 )

@@ -66,4 +66,13 @@ ANATOMY = SpeciesAnatomy(
         "herbivore despite terrifying appearance — fed on fern fronds and decaying plant matter",
         "largest known land arthropod in Earth's history",
     ],
+
+    mj_shorthand=[
+        "car-length giant millipede",
+        "dinner-plate-sized armored body segments",
+        "dozens of thick paired legs",
+        "dark chitinous interlocking plates",
+        "2.6m longest land arthropod ever",
+        "low ground-level dwarfing ferns",
+    ],
 )

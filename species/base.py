@@ -5,6 +5,16 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 
+# ── Character budgets for MJ's effective attention window ────────────
+# MJ (via CLIP) processes ~60 words / ~350 chars effectively.
+# Beyond that, later tokens are increasingly ignored.
+# These budgets include the anatomy portion only — subject name,
+# environment, interaction, and flags are added separately.
+BUDGET_CLOSE = 350   # chars — close-up: max detail within budget
+BUDGET_MID   = 250   # chars — mid shots: key features only
+BUDGET_WIDE  = 120   # chars — wide/landscape: silhouette hint only
+
+
 # ── Sub-component dataclasses ────────────────────────────────────────
 
 @dataclass
@@ -103,98 +113,125 @@ class SpeciesAnatomy:
 
     unique_features: list[str] = field(default_factory=list)
 
+    # ── MJ-optimized shorthand (Session 16) ──────────────────────────
+    # 5-8 short CLIP-friendly phrases that MJ actually keys on.
+    # These are the PRIMARY output — the detailed dataclass fields above
+    # are the scientific reference that the shorthand is distilled from.
+    # Each phrase should be 2-5 words, visually concrete, no explanations.
+    # Priority order: [0] is the most visually distinctive feature.
+    mj_shorthand: list[str] = field(default_factory=list)
+
 
 # ── Prompt builders ──────────────────────────────────────────────────
 
-def _collect_strings(obj, skip: Optional[set] = None) -> list:
-    """Pull all non-empty string fields from a dataclass instance."""
-    if obj is None:
-        return []
-    skip = skip or set()
-    parts: list[str] = []
-    for f in obj.__dataclass_fields__:
-        if f in skip:
-            continue
-        val = getattr(obj, f)
-        if isinstance(val, str) and val:
-            parts.append(val)
-    return parts
+def _budget_join(phrases: list, budget: int) -> str:
+    """Join phrases with ', ' until budget is exhausted.
+
+    Phrases are added in priority order (index 0 = highest priority).
+    Once adding the next phrase would exceed the budget, stop.
+    Always includes at least the first phrase regardless of budget.
+    """
+    if not phrases:
+        return ""
+    result = phrases[0]
+    for p in phrases[1:]:
+        candidate = result + ", " + p
+        if len(candidate) > budget:
+            break
+        result = candidate
+    return result
 
 
 def build_anatomy_prompt(anatomy: SpeciesAnatomy, mode_type: str = "mid") -> str:
-    """Build a Midjourney-ready anatomy string.
+    """Build a budget-capped Midjourney-ready anatomy string.
 
-    mode_type controls detail level:
-        "close"  – maximum detail (skull, teeth, integument, limbs, body, coloration)
-        "mid"    – moderate detail (integument, body silhouette, key features)
-        "wide"   – minimal (2 critical features only, for landscape-dominant shots)
+    Uses mj_shorthand as the primary source — these are CLIP-optimized
+    phrases tested to produce correct anatomy in MJ output. Falls back
+    to extracting from detailed dataclass fields if no shorthand defined.
+
+    mode_type controls detail level and budget:
+        "close"  – up to BUDGET_CLOSE chars (~350) — all shorthand phrases
+        "mid"    – up to BUDGET_MID chars (~250) — top shorthand + silhouette
+        "wide"   – up to BUDGET_WIDE chars (~120) — silhouette only
     """
+    budget = {"close": BUDGET_CLOSE, "mid": BUDGET_MID, "wide": BUDGET_WIDE}.get(
+        mode_type, BUDGET_MID
+    )
+
+    # ── Shorthand path (preferred) ───────────────────────────────────
+    if anatomy.mj_shorthand:
+        if mode_type == "wide":
+            # Wide: silhouette + first shorthand phrase
+            parts: list[str] = []
+            if anatomy.body and anatomy.body.silhouette:
+                parts.append(anatomy.body.silhouette)
+            parts.append(anatomy.mj_shorthand[0])
+            return _budget_join(parts, budget)
+
+        if mode_type == "mid":
+            # Mid: silhouette + top shorthand phrases within budget
+            parts = []
+            if anatomy.body and anatomy.body.silhouette:
+                parts.append(anatomy.body.silhouette)
+            parts.extend(anatomy.mj_shorthand)
+            return _budget_join(parts, budget)
+
+        # Close: all shorthand + size comparison + coloration hint
+        parts = list(anatomy.mj_shorthand)
+        if anatomy.body and anatomy.body.size_comparison:
+            parts.append(anatomy.body.size_comparison)
+        if anatomy.coloration and anatomy.coloration.likely_pattern:
+            parts.append(anatomy.coloration.likely_pattern)
+        return _budget_join(parts, budget)
+
+    # ── Fallback: extract from detailed fields ───────────────────────
+    # Used only if mj_shorthand is empty (shouldn't happen once all
+    # 42 species are populated, but kept for safety).
+    return _fallback_prompt(anatomy, mode_type, budget)
+
+
+def _fallback_prompt(anatomy: SpeciesAnatomy, mode_type: str, budget: int) -> str:
+    """Legacy field-extraction path — used when mj_shorthand is empty."""
     if mode_type == "wide":
-        # Wide shots: just silhouette + 2 most important features
         parts: list[str] = []
         if anatomy.body and anatomy.body.silhouette:
             parts.append(anatomy.body.silhouette)
-        for feat in anatomy.unique_features[:2]:
-            parts.append(feat)
-        return ", ".join(parts)
+        if anatomy.unique_features:
+            parts.append(anatomy.unique_features[0])
+        return _budget_join(parts, budget)
 
-    # Close / mid share the same pool, close just uses more of it
-    sections: list[str] = []
+    # Build a priority-ranked list from fields
+    ranked: list[str] = []
 
-    # Skull
-    if anatomy.skull:
-        skull_parts = _collect_strings(anatomy.skull)
-        if mode_type == "close":
-            sections.extend(skull_parts)
-        elif skull_parts:
-            sections.append(skull_parts[0])  # overall_shape only
+    # 1. Silhouette (always first — tells MJ the overall shape)
+    if anatomy.body and anatomy.body.silhouette:
+        ranked.append(anatomy.body.silhouette)
 
-    # Dentition
-    if anatomy.dentition:
-        dent_parts = _collect_strings(anatomy.dentition)
-        if mode_type == "close":
-            sections.extend(dent_parts)
-        elif dent_parts:
-            sections.append(dent_parts[0])  # tooth_shape only
+    # 2. Key texture
+    if anatomy.integument and anatomy.integument.primary_covering:
+        ranked.append(anatomy.integument.primary_covering)
 
-    # Integument (always included)
-    if anatomy.integument:
-        sections.extend(_collect_strings(anatomy.integument))
+    # 3. Skull shape (close only)
+    if mode_type == "close" and anatomy.skull and anatomy.skull.overall_shape:
+        ranked.append(anatomy.skull.overall_shape)
 
-    # Body proportions
-    if anatomy.body:
-        skip_body = {"body_length_m", "body_mass_kg"}
-        bp = _collect_strings(anatomy.body, skip=skip_body)
-        if mode_type == "close":
-            sections.extend(bp)
-        else:
-            # mid: silhouette + build + size_comparison
-            for key in ("silhouette", "build", "size_comparison"):
-                val = getattr(anatomy.body, key, "")
-                if val:
-                    sections.append(val)
+    # 4. Teeth / beak
+    if anatomy.dentition and anatomy.dentition.tooth_shape:
+        ranked.append(anatomy.dentition.tooth_shape)
 
-    # Limbs
-    if anatomy.limbs:
-        limb_parts = _collect_strings(anatomy.limbs)
-        if mode_type == "close":
-            sections.extend(limb_parts)
-        elif limb_parts:
-            sections.append(limb_parts[0])
+    # 5. Size anchor
+    if anatomy.body and anatomy.body.size_comparison:
+        ranked.append(anatomy.body.size_comparison)
 
-    # Coloration
-    if anatomy.coloration:
-        sections.extend(_collect_strings(anatomy.coloration))
+    # 6. Top unique feature
+    if anatomy.unique_features:
+        ranked.append(anatomy.unique_features[0])
 
-    # Locomotion (close only)
-    if mode_type == "close" and anatomy.locomotion:
-        sections.extend(_collect_strings(anatomy.locomotion))
+    # 7. Coloration
+    if anatomy.coloration and anatomy.coloration.likely_pattern:
+        ranked.append(anatomy.coloration.likely_pattern)
 
-    # Unique features (always top 3)
-    for feat in anatomy.unique_features[:3]:
-        sections.append(feat)
-
-    return ", ".join(sections)
+    return _budget_join(ranked, budget)
 
 
 def build_anatomy_negative(anatomy: SpeciesAnatomy) -> str:

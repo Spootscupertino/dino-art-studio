@@ -38,4 +38,12 @@ ANATOMY = SpeciesAnatomy(
         "jointed segmented trunk with regular nodes is the key visual identifier — looks like bamboo",
         "whorls of thin needle-like branches radiate from each node like wagon wheel spokes",
     ],
+
+    mj_shorthand=[
+        "jointed bamboo-like segmented trunk",
+        "needle-branch whorls at each node",
+        "ribbed longitudinal trunk surface",
+        "feathery tiered canopy silhouette",
+        "20m giant Carboniferous horsetail",
+    ],
 )

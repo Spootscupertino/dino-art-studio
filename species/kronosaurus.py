@@ -65,4 +65,13 @@ ANATOMY = SpeciesAnatomy(
         "original Harvard mount over-reconstructed with too many vertebrae — actual size smaller than early estimates",
         "apex predator of Early Cretaceous Australian inland sea",
     ],
+
+    mj_shorthand=[
+        "enormous skull on short thick neck",
+        "four broad powerful paddle flippers",
+        "massive barrel-shaped body",
+        "robust conical 30cm teeth",
+        "smooth scarred marine predator skin",
+        "10m truck-sized pliosaur",
+    ],
 )

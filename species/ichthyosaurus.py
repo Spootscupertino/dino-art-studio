@@ -67,4 +67,13 @@ ANATOMY = SpeciesAnatomy(
         "gave birth to live young tail-first — confirmed by extraordinary fossils preserving the birth moment",
         "dorsal fin and tail fluke are soft tissue only — no bony support, only known from exceptional preservation",
     ],
+
+    mj_shorthand=[
+        "dolphin-shaped with enormous round eyes",
+        "bony sclerotic eye ring",
+        "smooth scaleless skin like dolphin",
+        "soft-tissue dorsal fin no bone",
+        "crescent tail fluke vertebrae bend down",
+        "2m dolphin-sized marine reptile",
+    ],
 )

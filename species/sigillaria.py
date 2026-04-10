@@ -41,4 +41,12 @@ ANATOMY = SpeciesAnatomy(
         "Stigmaria root system — distinctive branching root structure spreading laterally",
         "major component of Carboniferous coal deposits — these trees literally became coal",
     ],
+
+    mj_shorthand=[
+        "hexagonal seal-like leaf scars in vertical rows",
+        "tall straight rarely-branched column trunk",
+        "grass-like leaf tuft at summit only",
+        "smooth bark with raised round scars",
+        "30m Carboniferous coal-swamp pillar tree",
+    ],
 )

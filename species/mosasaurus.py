@@ -67,4 +67,13 @@ ANATOMY = SpeciesAnatomy(
         "double row of palatal pterygoid teeth — once prey was gripped, palatal teeth walked it into the throat",
         "keeled overlapping scales confirmed by exceptional skin impressions",
     ],
+
+    mj_shorthand=[
+        "keeled overlapping snake-like scales",
+        "rounded conical snout with loose jaw hinge",
+        "deep crescent tail fluke",
+        "four short paddle flippers",
+        "conical recurved gripping teeth",
+        "13m elongated barrel-bodied marine lizard",
+    ],
 )

@@ -66,4 +66,12 @@ ANATOMY = SpeciesAnatomy(
         "photograph like a horseshoe crab on a beach — resting on rocks at water's edge",
         "most common eurypterid in the fossil record, thousands of specimens known",
     ],
+
+    mj_shorthand=[
+        "compact olive-brown sea scorpion",
+        "paddle-shaped rear swimming legs",
+        "streamlined oval segmented body",
+        "tail spike telson for defense",
+        "horseshoe-crab-sized 30cm eurypterid",
+    ],
 )

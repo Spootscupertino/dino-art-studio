@@ -66,4 +66,12 @@ ANATOMY = SpeciesAnatomy(
         "photograph at ground level showing scale against vegetation",
         "dark segmented exoskeleton, NOT a spider — no spinnerets, no web",
     ],
+
+    mj_shorthand=[
+        "broad oval armored eurypterid body",
+        "dark segmented chitinous exoskeleton",
+        "multiple paired walking legs",
+        "dog-sized dwarfing leaf litter",
+        "NOT a spider no web no spinnerets",
+    ],
 )

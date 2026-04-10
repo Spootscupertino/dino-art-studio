@@ -40,4 +40,12 @@ ANATOMY = SpeciesAnatomy(
         "grew rapidly and died young — trunk was mostly bark with little actual wood",
         "dominant canopy tree of Carboniferous coal swamps — the coal we burn today is largely from these trees",
     ],
+
+    mj_shorthand=[
+        "diamond-shaped spiral leaf scars on trunk",
+        "tall straight unbranched columnar trunk",
+        "grass-like drooping leaf crown at top only",
+        "reptile-scale-patterned bark texture",
+        "40m towering Carboniferous club moss",
+    ],
 )

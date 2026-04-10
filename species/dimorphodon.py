@@ -69,4 +69,13 @@ ANATOMY = SpeciesAnatomy(
         "dimorphic dentition (two tooth types) is unusual among pterosaurs and gives the genus its name",
         "associated with Mary Anning and early pterosaur paleontology — discovered at Lyme Regis, England",
     ],
+
+    mj_shorthand=[
+        "oversized deep puffin-like skull",
+        "two tooth types large front fangs small rear",
+        "short broad maneuverable wings",
+        "pycnofiber-covered compact body",
+        "long stiffened bony tail",
+        "pigeon-sized 1.4m wingspan early pterosaur",
+    ],
 )

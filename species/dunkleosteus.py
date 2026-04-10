@@ -68,4 +68,13 @@ ANATOMY = SpeciesAnatomy(
         "jaw opening speed created suction feeding effect — prey was pulled into mouth by water pressure",
         "one of the first vertebrate apex predators in Earth's history",
     ],
+
+    mj_shorthand=[
+        "heavy interlocking bony head armor plates",
+        "self-sharpening guillotine jaw blades no teeth",
+        "armored front half unarmored muscular rear",
+        "flat broad head small forward eyes",
+        "bony thoracic shoulder shield",
+        "car-sized 6m armored predatory fish",
+    ],
 )

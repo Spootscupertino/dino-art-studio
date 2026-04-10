@@ -72,4 +72,13 @@ ANATOMY = SpeciesAnatomy(
         "quadrupedal launch from all fours, not bipedal running takeoff",
         "strong sexual dimorphism — males with large crests and narrow hips, females smaller crests wider hips",
     ],
+
+    mj_shorthand=[
+        "long backward-sweeping bony cranial crest",
+        "toothless pointed beak pelican-like",
+        "taut wing membrane to ankles",
+        "fuzzy pycnofiber body covering",
+        "tiny body 7m wingspan 25kg",
+        "quadrupedal on ground folded wings",
+    ],
 )

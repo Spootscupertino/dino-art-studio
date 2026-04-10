@@ -71,4 +71,13 @@ ANATOMY = SpeciesAnatomy(
         "four tail spikes (thagomizer) were lethal defensive weapons — fossil evidence of stegosaur tail spike puncturing Allosaurus bone",
         "tiny head with brain the size of a walnut — one of the lowest brain-to-body ratios of any dinosaur",
     ],
+
+    mj_shorthand=[
+        "staggered diamond dorsal plates alternating left-right",
+        "four tail spikes thagomizer",
+        "absurdly tiny head held low",
+        "arched back peaking over hips",
+        "pebbly scales with embedded osteoderms",
+        "bus-sized quadruped sloping forward",
+    ],
 )

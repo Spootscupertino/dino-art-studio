@@ -40,4 +40,12 @@ ANATOMY = SpeciesAnatomy(
         "finely dissected fernlike compound leaves give a feathery appearance",
         "preserved in the Yixian Formation of China alongside feathered dinosaurs",
     ],
+
+    mj_shorthand=[
+        "tiny primitive flower-like structures at tips",
+        "slender herbaceous aquatic stems",
+        "finely dissected feathery compound leaves",
+        "rooted in shallow lake sediment",
+        "50cm earliest known flowering plant",
+    ],
 )

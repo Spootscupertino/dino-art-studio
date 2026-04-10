@@ -65,4 +65,13 @@ ANATOMY = SpeciesAnatomy(
         "72 cervical vertebrae — more neck bones than any other animal ever discovered",
         "four-flipper underwater flight — swam like a sea turtle or penguin, not like a fish",
     ],
+
+    mj_shorthand=[
+        "impossibly long sinuous neck tiny head",
+        "four large paddle-shaped flippers",
+        "needle-like interlocking fish-trap teeth",
+        "compact rounded torso short tail",
+        "smooth countershaded marine hide",
+        "14m plesiosaur neck over half body length",
+    ],
 )

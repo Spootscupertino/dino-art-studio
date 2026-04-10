@@ -73,4 +73,13 @@ ANATOMY = SpeciesAnatomy(
         "duck-billed beak at front of mouth with dental batteries behind — one of the most efficient plant-processing systems in the Mesozoic",
         "possible skin flap or fleshy web connecting crest base to neck — would enhance visual display",
     ],
+
+    mj_shorthand=[
+        "long backward-sweeping hollow tubular crest",
+        "broad flat duck-billed beak",
+        "pebbly uniform polygonal scales",
+        "robust hadrosaur body deep tail",
+        "facultative biped browsing on all fours",
+        "9.5m long herd animal",
+    ],
 )

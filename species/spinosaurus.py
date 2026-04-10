@@ -75,4 +75,13 @@ ANATOMY = SpeciesAnatomy(
         "debate ongoing: fully aquatic diver vs wading shore predator (Ibrahim vs Hone & Holtz)",
         "closed mouth option — snout tip teeth interlock even when jaws shut",
     ],
+
+    mj_shorthand=[
+        "massive dorsal sail 1.7m tall neural spines",
+        "elongated crocodile-like narrow snout",
+        "deep paddle-shaped eel-like tail fin",
+        "conical unserrated fish-catching teeth",
+        "low quadrupedal stance small hindlimbs",
+        "14m semi-aquatic sail-backed predator",
+    ],
 )

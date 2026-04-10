@@ -66,4 +66,13 @@ ANATOMY = SpeciesAnatomy(
         "could smell directionally through water flow — internal nares created water-flow nasal system for tracking prey",
         "one of the apex predators of Jurassic seas despite being smaller than pop culture suggests",
     ],
+
+    mj_shorthand=[
+        "massive head quarter of body length",
+        "short thick neck barrel body",
+        "four powerful hydrofoil flippers",
+        "robust conical gripping teeth",
+        "smooth hydrodynamic marine hide",
+        "6-7m short-necked pliosaur",
+    ],
 )

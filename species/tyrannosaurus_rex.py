@@ -74,4 +74,14 @@ ANATOMY = SpeciesAnatomy(
         "lips probable — teeth not permanently exposed; keratinous lip tissue covered teeth when mouth closed",
         "no pronated wrists — palms face inward (clapping position), NOT downward",
     ],
+
+    mj_shorthand=[
+        "massive deep skull with binocular eyes",
+        "tiny two-fingered arms",
+        "pebbly non-overlapping scales",
+        "thick horizontal tail as counterbalance",
+        "powerful pillar-like biped legs",
+        "serrated banana-shaped teeth",
+        "12m long bus-sized predator",
+    ],
 )

@@ -71,4 +71,13 @@ ANATOMY = SpeciesAnatomy(
         "ventral surface unarmored — belly was the only vulnerability, hence the wide low stance making it nearly impossible to flip",
         "despite heavy armor, related species Borealopelta shows countershaded camouflage — even armored tanks needed to hide from predators",
     ],
+
+    mj_shorthand=[
+        "massive bony tail club",
+        "interlocking dorsal armor osteoderms",
+        "low flat wide tank body",
+        "four pyramidal skull horns",
+        "lateral triangular body spikes",
+        "armored eyelids",
+    ],
 )

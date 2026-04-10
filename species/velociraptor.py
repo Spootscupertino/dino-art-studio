@@ -73,4 +73,13 @@ ANATOMY = SpeciesAnatomy(
         "sickle claw on second toe held retracted off ground — NOT dragging, flicks downward only during prey capture",
         "palms face INWARD (clapping position) — wrists cannot pronate, arms fold like bird wings at rest",
     ],
+
+    mj_shorthand=[
+        "fully feathered turkey-sized raptor",
+        "sickle claw on raised second toe",
+        "long narrow feathered snout",
+        "feathered wing-like arms folded at rest",
+        "long rigid bony-rod tail",
+        "desert-camouflage plumage",
+    ],
 )

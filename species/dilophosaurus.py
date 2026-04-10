@@ -71,4 +71,13 @@ ANATOMY = SpeciesAnatomy(
         "NOT small — Jurassic Park showed it as dog-sized but real Dilophosaurus was 7m long and 400kg",
         "twin parallel bony crests were thin delicate display structures, NOT heavy horns or weapons",
     ],
+
+    mj_shorthand=[
+        "twin parallel bony head crests",
+        "gracile lean 7m biped predator",
+        "kinked jaw with subnarial notch",
+        "no frill no venom",
+        "recurved serrated blade teeth",
+        "long thin horizontal tail",
+    ],
 )

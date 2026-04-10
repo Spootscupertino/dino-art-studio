@@ -61,4 +61,13 @@ ANATOMY = SpeciesAnatomy(
         "convergent with modern whale sharks and baleen whales despite being a bony fish",
         "extremely fragmentary fossil record — size estimates based on scaling from partial remains",
     ],
+
+    mj_shorthand=[
+        "enormous gaping filter-feeding mouth",
+        "whale-shark-like mottled dark skin",
+        "massive barrel body paddle fins",
+        "gill rakers for straining plankton",
+        "gentle slow-cruising giant",
+        "16m whale-sized bony fish",
+    ],
 )

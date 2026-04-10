@@ -64,4 +64,12 @@ ANATOMY = SpeciesAnatomy(
         "one of the earliest large predators — Ordovician period, before fish dominated the seas",
         "spiny chelicerae are unique among eurypterids and the primary visual identifier",
     ],
+
+    mj_shorthand=[
+        "massively elongated spiny chelicerae claws",
+        "dark segmented eurypterid body",
+        "swimming paddles on rear legs",
+        "pointed telson tail spine",
+        "1m Ordovician sea scorpion predator",
+    ],
 )

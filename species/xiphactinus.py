@@ -63,4 +63,13 @@ ANATOMY = SpeciesAnatomy(
         "famous fossil preserves 2m Gillicus fish swallowed whole inside Xiphactinus body cavity — prey killed the predator",
         "nicknamed Bulldog Fish for upturned jaw profile",
     ],
+
+    mj_shorthand=[
+        "bulldog underbite upturned jaw",
+        "large protruding front fangs",
+        "silvery cycloid scales",
+        "torpedo-shaped predatory bony fish",
+        "large forked caudal fin",
+        "6m largest Cretaceous bony fish",
+    ],
 )

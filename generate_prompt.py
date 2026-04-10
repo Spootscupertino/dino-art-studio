@@ -2161,12 +2161,12 @@ def assemble_prompt(
     size = species["size_class"].lower() if species["size_class"] else ""
     subject_parts = [f"{size} {species['name']}", species["description"] or ""]
 
-    # ── Species anatomy module system (Session 15) ────────────────────────
-    # Replaces the old science-table fields (feathering_coverage, tail_posture,
-    # skin_texture_type, known_coloration_evidence) with rich per-species
-    # anatomy data from species/ modules. Each module knows skull shape,
-    # dentition, integument, body proportions, coloration evidence, limb
-    # structure, locomotion, unique features, and common inaccuracies.
+    # ── Species anatomy module system (Sessions 15-16) ─────────────────
+    # Per-species anatomy modules provide CLIP-optimized shorthand phrases
+    # (mj_shorthand) that MJ actually responds to, budget-capped per mode:
+    #   "close" — up to 350 chars (all shorthand + size + coloration)
+    #   "mid"   — up to 250 chars (silhouette + top shorthand phrases)
+    #   "wide"  — up to 120 chars (silhouette + one key feature)
     # build_anatomy_prompt() returns detail scaled to mode_type:
     #   "close" — full detail (skull, teeth, integument, limbs, coloration)
     #   "mid"   — moderate (integument, silhouette, key features)

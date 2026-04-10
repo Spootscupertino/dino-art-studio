@@ -63,4 +63,13 @@ ANATOMY = SpeciesAnatomy(
         "resembles oversized leatherback turtle — leathery shell not hard scutes",
         "barnacles, algae, and marine growth covering shell was natural living condition",
     ],
+
+    mj_shorthand=[
+        "leathery ridged shell not hard scutes",
+        "massive front flippers 5m span",
+        "hooked keratinous beak no teeth",
+        "barnacles and algae on shell biofouled",
+        "oversized leatherback turtle body plan",
+        "4.6m largest sea turtle ever",
+    ],
 )

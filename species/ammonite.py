@@ -63,4 +63,12 @@ ANATOMY = SpeciesAnatomy(
         "iridescent nacre on shell is preserved in fossils and would have been visible in life",
         "closer related to squid and octopus than to nautilus, despite superficial similarity",
     ],
+
+    mj_shorthand=[
+        "coiled ribbed iridescent nacre shell",
+        "tentacles and large eye at shell opening",
+        "mother-of-pearl pearlescent sheen",
+        "chambered spiral nautilus-like form",
+        "squid-like soft body in shell",
+    ],
 )

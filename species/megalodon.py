@@ -69,4 +69,13 @@ ANATOMY = SpeciesAnatomy(
         "went extinct approximately 3.6 Ma, possibly due to cooling oceans and whale migration to polar waters",
         "NOT alive today despite sensationalist media — definitively extinct",
     ],
+
+    mj_shorthand=[
+        "hand-sized triangular serrated teeth",
+        "broad heavy great-white body plan scaled up",
+        "rough dermal-denticle sandpaper skin",
+        "scarred blunt snout battle-worn",
+        "powerful crescent caudal fin",
+        "school-bus-sized 15m apex shark",
+    ],
 )

@@ -67,4 +67,13 @@ ANATOMY = SpeciesAnatomy(
         "translucent body showing internal structures is a key visual feature",
         "circular mouth could NOT close fully — always has a small gap in the center",
     ],
+
+    mj_shorthand=[
+        "two large spiny grasping frontal appendages",
+        "circular pineapple-ring mouth",
+        "stalked compound eyes 16000 lenses",
+        "rippling lateral swimming lobes",
+        "semi-translucent flattened oval body",
+        "1m Cambrian apex predator",
+    ],
 )
