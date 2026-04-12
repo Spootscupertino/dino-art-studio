@@ -43,3 +43,6 @@ env/
 
 # Git LFS migration artifacts
 .gitattributes.bak
+reference_images/**/*.jpg
+reference_images/**/*.jpeg
+reference_images/**/*.png

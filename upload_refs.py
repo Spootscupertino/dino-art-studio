@@ -1,33 +1,34 @@
 #!/usr/bin/env python3
-"""Upload reference images to Discord and store CDN URLs in sref_urls.json.
+"""Download reference images from source catalog and upload to Discord for MJ --sref.
+
+Workflow:
+    1. sref_sources.json  -- Wikimedia Commons URLs (source catalog)
+    2. reference_images/   -- downloaded images (local cache)
+    3. Discord webhook     -- upload images -> get CDN URLs
+    4. sref_urls.json      -- Discord CDN URLs (used by generate_prompt.py --sref)
 
 Usage:
-    # Upload a single image with a category tag:
-    python3 upload_refs.py --file photo.jpg --category waterhole
+    # Download all source images into reference_images/:
+    python3 upload_refs.py download
 
-    # Upload all new images in reference_images/ subfolders:
-    python3 upload_refs.py --all
+    # Upload all downloaded images to Discord and wire CDN URLs:
+    python3 upload_refs.py all
+
+    # Download + upload in one step:
+    python3 upload_refs.py sync
+
+    # Upload a single image with a category tag:
+    python3 upload_refs.py upload --file photo.jpg --category waterhole
 
     # List what's already uploaded:
-    python3 upload_refs.py --list
-
-Categories map to output modes and species groups:
-    waterhole       → waterhole_gather (armored quadrupeds, herbivores)
-    migration       → migration_march (herds in motion, telephoto depth)
-    family          → family_group (adult + juveniles, size contrast)
-    crocodile       → surface_break, terrestrial carnivores (scaly skin, water edge)
-    feathered_biped → feathered theropods (cassowary, emu texture proxy)
-    tall_predator   → bipedal theropods (secretary bird, shoebill posture)
-    komodo          → scaly terrestrial carnivores (ground-level, pebbly skin)
-    arthropod_group → arthropod group_herd (massing behavior, armored bodies)
-    tortoise_group  → armored species groups (Ankylosaurus, Archelon)
-    raptor_flight   → aerial modes (wing detail, flight posture)
+    python3 upload_refs.py list
 """
 
 import argparse
 import json
 import os
 import sys
+import time
 import urllib.request
 import urllib.error
 from pathlib import Path
@@ -35,9 +36,10 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 ENV_PATH = SCRIPT_DIR / ".env"
 SREF_PATH = SCRIPT_DIR / "sref_urls.json"
+SOURCES_PATH = SCRIPT_DIR / "sref_sources.json"
 REF_DIR = SCRIPT_DIR / "reference_images"
 
-# Category → which species benefit from this reference
+# Category -> which species benefit from this reference
 CATEGORY_SPECIES_MAP = {
     "waterhole": [
         "Stegosaurus", "Triceratops", "Ankylosaurus", "Brachiosaurus",
@@ -75,10 +77,25 @@ CATEGORY_SPECIES_MAP = {
     "raptor_flight": [
         "Pteranodon", "Quetzalcoatlus", "Rhamphorhynchus", "Dimorphodon",
     ],
+    "marine": [
+        "Mosasaurus", "Kronosaurus", "Liopleurodon", "Elasmosaurus",
+        "Ichthyosaurus", "Megalodon", "Cretoxyrhina", "Helicoprion",
+        "Dunkleosteus", "Xiphactinus", "Leedsichthys", "Archelon",
+    ],
+    "sea_scorpion": [
+        "Eurypterus", "Jaekelopterus", "Megalograptus", "Anomalocaris",
+    ],
+    "paleo_plant": [
+        "Araucaria", "Calamites", "Lepidodendron", "Sigillaria",
+        "Archaefructus", "Glossopteris", "Wattieza", "Williamsonia",
+    ],
+    "ammonite": [
+        "Ammonite",
+    ],
 }
 
 
-def load_webhook_url() -> str:
+def load_webhook_url():
     """Read DISCORD_WEBHOOK_URL from .env file."""
     if not ENV_PATH.exists():
         sys.exit("No .env file found. Add DISCORD_WEBHOOK_URL to .env")
@@ -88,40 +105,90 @@ def load_webhook_url() -> str:
     sys.exit("DISCORD_WEBHOOK_URL not found in .env")
 
 
-def upload_to_discord(webhook_url: str, filepath: Path, category: str) -> str:
+def load_sources():
+    """Load sref_sources.json (Wikimedia source URLs keyed by species)."""
+    if not SOURCES_PATH.exists():
+        return {}
+    with open(SOURCES_PATH) as f:
+        return json.load(f)
+
+
+def build_source_download_list():
+    """Build flat list of {label, url, category, filename} from sref_sources.json.
+
+    Deduplicates by URL.  Assigns each image to the first matching category
+    from the species that references it.
+    """
+    sources = load_sources()
+    if not sources:
+        print("No sref_sources.json found. Nothing to download.")
+        return []
+
+    # Reverse map: species -> categories
+    species_to_cats = {}
+    for cat, sp_list in CATEGORY_SPECIES_MAP.items():
+        for sp in sp_list:
+            species_to_cats.setdefault(sp, []).append(cat)
+
+    # Collect unique URLs with their best category assignment
+    seen_urls = {}
+    for species, entries in sources.items():
+        cats = species_to_cats.get(species, [])
+        for entry in entries:
+            url = entry["url"] if isinstance(entry, dict) else entry
+            label = entry.get("label", "ref") if isinstance(entry, dict) else "ref"
+            if url not in seen_urls:
+                best_cat = cats[0] if cats else "uncategorized"
+                # Derive filename from URL
+                fname = url.rsplit("/", 1)[-1]
+                try:
+                    fname = urllib.request.url2pathname(fname)
+                except Exception:
+                    pass
+                fname = fname.replace("/", "_").replace("\\", "_")
+                if not fname.lower().endswith((".jpg", ".jpeg", ".png")):
+                    fname += ".jpg"
+                seen_urls[url] = {
+                    "label": label,
+                    "url": url,
+                    "category": best_cat,
+                    "filename": fname,
+                }
+
+    return list(seen_urls.values())
+
+
+def upload_to_discord(webhook_url, filepath, category):
     """Upload an image to Discord via webhook, return the CDN URL."""
     boundary = "----DinoArtRefBoundary"
     filename = filepath.name
-    content_type = "image/jpeg" if filepath.suffix.lower() in (".jpg", ".jpeg") else "image/png"
+    ct = "image/jpeg" if filepath.suffix.lower() in (".jpg", ".jpeg") else "image/png"
 
-    # Build multipart payload
     payload_json = json.dumps({
-        "content": f"[dino_art ref] category: {category} | file: {filename}"
+        "content": "[dino_art ref] category: %s | file: %s" % (category, filename)
     })
 
     body = []
-    # JSON payload part
-    body.append(f"--{boundary}".encode())
+    body.append(("--%s" % boundary).encode())
     body.append(b'Content-Disposition: form-data; name="payload_json"')
     body.append(b"Content-Type: application/json")
     body.append(b"")
     body.append(payload_json.encode())
-    # File part
-    body.append(f"--{boundary}".encode())
-    body.append(f'Content-Disposition: form-data; name="file"; filename="{filename}"'.encode())
-    body.append(f"Content-Type: {content_type}".encode())
+    body.append(("--%s" % boundary).encode())
+    body.append(('Content-Disposition: form-data; name="file"; filename="%s"' % filename).encode())
+    body.append(("Content-Type: %s" % ct).encode())
     body.append(b"")
     body.append(filepath.read_bytes())
-    body.append(f"--{boundary}--".encode())
+    body.append(("--%s--" % boundary).encode())
 
     body_bytes = b"\r\n".join(body)
 
     req = urllib.request.Request(
-        webhook_url + "?wait=true",  # wait=true returns the message with attachments
+        webhook_url + "?wait=true",
         data=body_bytes,
         method="POST",
         headers={
-            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "Content-Type": "multipart/form-data; boundary=%s" % boundary,
             "User-Agent": "DinoArtRefUploader/1.0",
         },
     )
@@ -132,40 +199,43 @@ def upload_to_discord(webhook_url: str, filepath: Path, category: str) -> str:
             if data.get("attachments"):
                 return data["attachments"][0]["url"]
             else:
-                print(f"  WARNING: No attachment in response for {filename}")
+                print("  WARNING: No attachment in response for %s" % filename)
                 return ""
     except urllib.error.HTTPError as e:
         error_body = e.read().decode()
-        print(f"  ERROR uploading {filename}: {e.code} — {error_body}")
+        print("  ERROR uploading %s: %s -- %s" % (filename, e.code, error_body))
         return ""
 
 
-def load_sref() -> dict:
+def load_sref():
     if SREF_PATH.exists():
         return json.loads(SREF_PATH.read_text())
     return {}
 
 
-def save_sref(data: dict):
-    SREF_PATH.write_text(json.dumps(data, indent=4) + "\n")
+def save_sref(data):
+    SREF_PATH.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
 
 
-def add_url_to_sref(sref: dict, category: str, url: str, filename: str):
+def add_url_to_sref(sref, category, url, label):
     """Add a URL to all species that benefit from this category."""
     species_list = CATEGORY_SPECIES_MAP.get(category, [])
-    entry = {"label": f"{category}/{filename}", "url": url}
+    entry = {"label": label, "url": url}
 
     for sp in species_list:
         if sp not in sref:
             sref[sp] = []
-        # Skip duplicates
-        existing_urls = {e["url"] if isinstance(e, dict) else e for e in sref[sp]}
+        existing_urls = set()
+        for e in sref[sp]:
+            if isinstance(e, dict):
+                existing_urls.add(e.get("url", ""))
+            elif isinstance(e, str):
+                existing_urls.add(e)
         if url not in existing_urls:
             sref[sp].append(entry)
-            print(f"    + {sp}")
 
 
-def get_uploaded_urls(sref: dict) -> set:
+def get_uploaded_urls(sref):
     """Get all URLs already in sref_urls.json."""
     urls = set()
     for entries in sref.values():
@@ -178,32 +248,74 @@ def get_uploaded_urls(sref: dict) -> set:
     return urls
 
 
+# ---------------------------------------------------------------------------
+# Commands
+# ---------------------------------------------------------------------------
+
+def cmd_download(args):
+    """Download source images from sref_sources.json into reference_images/."""
+    items = build_source_download_list()
+    if not items:
+        return
+
+    total = 0
+    skipped = 0
+    failed = 0
+
+    for item in items:
+        cat_dir = REF_DIR / item["category"]
+        cat_dir.mkdir(parents=True, exist_ok=True)
+        dest = cat_dir / item["filename"]
+
+        if dest.exists():
+            skipped += 1
+            continue
+
+        print("  Downloading: %s" % item["label"])
+        print("    -> %s" % dest.relative_to(SCRIPT_DIR))
+
+        try:
+            req = urllib.request.Request(
+                item["url"],
+                headers={"User-Agent": "DinoArtStudio/1.0 (reference download)"},
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                dest.write_bytes(resp.read())
+            total += 1
+            time.sleep(1.0)  # Rate limit courtesy
+        except Exception as ex:
+            print("    FAILED: %s" % str(ex)[:80])
+            failed += 1
+            time.sleep(2.0)
+
+    print("\nDownload complete: %d new, %d skipped, %d failed" % (total, skipped, failed))
+
+
 def cmd_upload_single(args):
     filepath = Path(args.file).resolve()
     if not filepath.exists():
-        sys.exit(f"File not found: {filepath}")
+        sys.exit("File not found: %s" % filepath)
 
     webhook_url = load_webhook_url()
     sref = load_sref()
 
-    print(f"Uploading {filepath.name} [{args.category}]...")
+    print("Uploading %s [%s]..." % (filepath.name, args.category))
     url = upload_to_discord(webhook_url, filepath, args.category)
     if url:
-        print(f"  CDN URL: {url}")
-        add_url_to_sref(sref, args.category, url, filepath.name)
+        print("  CDN URL: %s" % url)
+        add_url_to_sref(sref, args.category, url, "%s/%s" % (args.category, filepath.name))
         save_sref(sref)
-        print(f"  Saved to sref_urls.json")
+        print("  Saved to sref_urls.json")
     else:
         print("  Upload failed.")
 
 
 def cmd_upload_all(args):
     if not REF_DIR.exists():
-        sys.exit(f"No reference_images/ directory found at {REF_DIR}")
+        sys.exit("No reference_images/ directory found at %s" % REF_DIR)
 
     webhook_url = load_webhook_url()
     sref = load_sref()
-    already_uploaded = get_uploaded_urls(sref)
 
     total = 0
     skipped = 0
@@ -213,7 +325,7 @@ def cmd_upload_all(args):
             continue
         category = category_dir.name
         if category not in CATEGORY_SPECIES_MAP:
-            print(f"Skipping unknown category: {category}")
+            print("Skipping unknown category: %s" % category)
             continue
 
         images = sorted([
@@ -224,66 +336,98 @@ def cmd_upload_all(args):
         if not images:
             continue
 
-        print(f"\n[{category}] — {len(images)} image(s)")
+        print("\n[%s] -- %d image(s)" % (category, len(images)))
         for img in images:
-            # Simple duplicate check by filename in existing labels
             existing_labels = set()
             for sp in CATEGORY_SPECIES_MAP.get(category, []):
                 for e in sref.get(sp, []):
                     if isinstance(e, dict):
                         existing_labels.add(e.get("label", ""))
 
-            label = f"{category}/{img.name}"
+            label = "%s/%s" % (category, img.name)
             if label in existing_labels:
-                print(f"  SKIP (already uploaded): {img.name}")
+                print("  SKIP (already uploaded): %s" % img.name)
                 skipped += 1
                 continue
 
-            print(f"  Uploading {img.name}...")
+            print("  Uploading %s..." % img.name)
             url = upload_to_discord(webhook_url, img, category)
             if url:
-                add_url_to_sref(sref, category, url, img.name)
+                add_url_to_sref(sref, category, url, label)
                 total += 1
             else:
-                print(f"  FAILED: {img.name}")
+                print("  FAILED: %s" % img.name)
+
+            time.sleep(1.0)  # Discord rate limit courtesy
 
     save_sref(sref)
-    print(f"\nDone. Uploaded {total} images, skipped {skipped}.")
+    print("\nDone. Uploaded %d images, skipped %d." % (total, skipped))
+
+
+def cmd_sync(args):
+    """Download from sources, then upload to Discord -- full pipeline."""
+    print("=== STEP 1: Download from sref_sources.json ===\n")
+    cmd_download(args)
+    print("\n=== STEP 2: Upload to Discord ===\n")
+    cmd_upload_all(args)
+    print("\n=== SYNC COMPLETE ===")
+    sref = load_sref()
+    covered = sum(1 for v in sref.values() if v)
+    total_urls = sum(len(v) for v in sref.values())
+    print("Species with refs: %d/42" % covered)
+    print("Total CDN URLs: %d" % total_urls)
 
 
 def cmd_list(args):
     sref = load_sref()
+    total = 0
     for sp, entries in sorted(sref.items()):
         if sp.startswith("_"):
             continue
         if not entries:
             continue
-        print(f"\n{sp}:")
+        print("\n%s:" % sp)
         for e in entries:
             if isinstance(e, dict):
-                print(f"  [{e.get('label', '?')}] {e.get('url', '?')}")
+                print("  [%s] %s" % (e.get("label", "?"), e.get("url", "?")))
             else:
-                print(f"  {e}")
+                print("  %s" % e)
+            total += 1
+    if total == 0:
+        print("No URLs in sref_urls.json yet.")
+        print("Run: python3 upload_refs.py sync")
+    else:
+        print("\nTotal: %d entries" % total)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Upload reference images to Discord for MJ --sref")
+    parser = argparse.ArgumentParser(
+        description="Download reference images and upload to Discord for MJ --sref"
+    )
     sub = parser.add_subparsers(dest="command")
+
+    sub.add_parser("download", help="Download source images from sref_sources.json")
 
     p_file = sub.add_parser("upload", help="Upload a single image")
     p_file.add_argument("--file", required=True, help="Path to image file")
-    p_file.add_argument("--category", required=True, choices=list(CATEGORY_SPECIES_MAP.keys()),
+    p_file.add_argument("--category", required=True,
+                        choices=list(CATEGORY_SPECIES_MAP.keys()),
                         help="Reference category")
 
-    sub.add_parser("all", help="Upload all new images from reference_images/ subfolders")
+    sub.add_parser("all", help="Upload all new images from reference_images/")
+    sub.add_parser("sync", help="Download sources + upload to Discord (full pipeline)")
     sub.add_parser("list", help="List all uploaded reference URLs")
 
     args = parser.parse_args()
 
-    if args.command == "upload":
+    if args.command == "download":
+        cmd_download(args)
+    elif args.command == "upload":
         cmd_upload_single(args)
     elif args.command == "all":
         cmd_upload_all(args)
+    elif args.command == "sync":
+        cmd_sync(args)
     elif args.command == "list":
         cmd_list(args)
     else:
