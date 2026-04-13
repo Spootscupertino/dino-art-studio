@@ -867,7 +867,100 @@ Expanded group/multi-animal output modes, added feathered integument to T. rex a
 
 ---
 
-## Next Priorities (Session 18)
+## Session 19 — Predator–Prey Rewrite, --sref Pipeline Fix, Naturalism Injection
+
+### What changed
+Fixed the `--sref` system (Wikimedia URLs rejected by MJ), rewrote the predator_prey prompt system across 5 iterations based on live MJ testing, and injected living-animal naturalism language extracted from user-provided reptile reference photos.
+
+### --sref Reference Library Restructure
+- **Problem:** Wikimedia Commons URLs have percent-encoded paths and redirects — MJ shows "Invalid link" error
+- **Solution:** Two-file system separating source catalog from MJ-ready URLs:
+  - `sref_sources.json` — 43 verified Wikimedia URLs (download catalog)
+  - `sref_urls.json` — Discord CDN URLs that MJ actually accepts
+- `upload_refs.py` rewritten with 5 commands: `download`, `upload`, `sync`, `all`, `list`
+- 4 new reference_images categories: `marine/`, `sea_scorpion/`, `paleo_plant/`, `ammonite/`
+- 40 Discord CDN URLs wired across 27/42 species
+- Wikimedia rate-limiting (429 after ~10 requests) prevented full download — increased delays to 3s/5s
+
+### Predator–Prey Prompt Rewrite (5 iterations)
+
+**Problem 1 — Prey species not rendering:**
+- Root cause: Primary anatomy at "mid" detail consumed ~33 words, pushing prey name past CLIP's 77-token window
+- Fix: Front-loaded "one X with one Y" as first tokens, both species use "wide" anatomy only (~15 words each)
+- Result: Both species now render in all 4 MJ panels
+
+**Problem 2 — Species physically merging into chimeras:**
+- Added `PREDATOR_PREY_INTERACTIONS` with spatial separation language
+- Added predator_prey-specific negative prompt: `merged bodies, conjoined animals, fused creatures, chimera, hybrid animal, two-headed, morphing, blended anatomy`
+- Result: Bodies separated but still floating near each other passively
+
+**Problem 3 — No scale difference (prey drawn same size as predator):**
+- `build_multi_subject_block()` now reads `body_length_m` from both anatomy modules
+- When ratio > 3:1, injects "tiny [prey] dwarfed by massive [predator]"
+- Mosasaurus (13m) vs Ammonite (0.5m) = 26:1 ratio → scale language fires
+- Added "same size animals, equal sized" to negative prompt
+- Stripped terrestrial "dappled light through canopy gaps" from marine scenes
+- Result: Scale noticeably improved, Ammonite rendered smaller
+
+**Problem 4 — No interaction (animals just float near each other):**
+- **NEW: `HUNT_MOMENTS` dict** — 17 predator/prey pairs × 4 interaction types = 68 bespoke frozen-moment descriptions based on real paleontology
+- Each entry describes a specific physical action, not a spatial relationship:
+  - Mosasaurus + Ammonite: "mosasaurus jaw closing around ammonite shell, crushing bite, shell cracking"
+  - T. rex + Triceratops: "tyrannosaur and triceratops locked face to face, horns versus jaws"
+  - Velociraptor + Para: "velociraptor leaping at parasaurolophus flank, sickle claw extended"
+- Falls back to generic `PREDATOR_PREY_INTERACTIONS` if no species-pair entry exists
+- Subject block now front-loads the hunt ACTION instead of generic scale/position language
+- Composition changed to "candid wildlife encounter, two different animals in frame, decisive moment"
+
+**Problem 5 — Doesn't look like real nature (CG render feel):**
+- Section 2 (interaction) now habitat-specific for predator_prey:
+  - Marine: "murky water, sediment particles, bubbles trailing, bodies moving through water"
+  - Terrestrial: "dirt kicked up, dust and debris, muscles tensed, raw animal energy"
+- Replaced "National Geographic wildlife photograph" (risked Session 11 staged-specimen bias)
+
+### Naturalism Injection (from user's reptile reference photos)
+User provided ~15 reference photos: Komodo dragons (jaw gape, tongue, walking, full body), crocodiles (feeding, basking, head portrait, swimming, group), agama lizards, vine snakes, chameleons, iguanas, sea turtles, tortoises, flying lizards (Draco).
+
+Extracted visual qualities and injected as living-animal texture phrase for close/mid modes:
+- **Terrestrial:** "individual scales catching sunlight, warm natural light, living animal"
+- **Marine:** "wet skin catching light, water particles, living animal"
+- **Arthropod:** "individual chitin plates catching light, organic imperfection, living animal"
+- Skipped for wide modes (surface detail not resolvable) and plants
+- Describes visual QUALITIES directly, not camera/magazine names (avoids Session 11 staged-specimen bias)
+
+### Token budget for predator_prey (Mosasaurus + Ammonite example)
+```
+Position  Tokens  Content
+1-8       ~8      "one massive Mosasaurus with one medium Ammonite"
+9-22      ~14     "mosasaurus jaw closing around ammonite shell, crushing bite, shell cracking"
+23-30     ~8      "tiny Ammonite dwarfed by massive Mosasaurus"
+31-45     ~15     Mosasaurus wide anatomy (silhouette + top shorthand)
+46-58     ~13     Ammonite wide anatomy (silhouette + top shorthand)
+59-68     ~10     "murky water, sediment particles, bubbles trailing..."
+69-80     ~12     Environment + composition + lighting (fading CLIP attention)
+```
+Critical content (species names, hunt action, scale) all in first ~30 tokens.
+
+### Files modified
+- `generate_prompt.py` — HUNT_MOMENTS (68 entries), build_multi_subject_block() scale anchoring, predator_prey negative prompt, habitat-specific interaction override, living-animal naturalism phrase, predator_prey composition rewrite
+- `upload_refs.py` — rewritten with download/sync/upload/list commands, 14 categories
+- `sref_urls.json` — reset to Discord CDN URLs (40 URLs, 27 species)
+- `sref_sources.json` — NEW, 43 Wikimedia source URLs
+
+### Commits
+| Hash | Description |
+|------|-------------|
+| `6bc450a` | sref_urls.json: 92 Wikimedia URLs across 42 species |
+| `a047755` | sref restructure: two-file system, upload_refs.py rewrite |
+| `838b27d` | predator_prey CLIP fix: front-load species names, wide anatomy |
+| `2b1be5f` | predator_prey: spatial separation + negative prompt |
+| `fee8065` | predator_prey: body_length_m scale anchoring |
+| `12a9788` | predator_prey: 68 species-pair hunt moments |
+| `50ad2d6` | naturalism injection from reptile reference photos |
+
+---
+
+## Next Priorities (Session 19)
 
 ### ~~1. Compress anatomy prompts for MJ's attention window~~ ✅ Session 16
 
@@ -887,8 +980,8 @@ All 42 READMEs have `--sref Test Results` tables ready to populate with empirica
 ### ~~7. Implement per-species `--stylize` recommendations~~ ✅ Session 17
 Added `recommended_stylize` and `known_failures` fields to base.py + all 42 species modules. Generator auto-applies species-recommended --stylize when no user override. Known failures displayed during species selection.
 
-### ~~8. Add multi-subject scene support~~ ✅ Session 17
-New output modes: `predator_prey`, `ecosystem_diorama`. PREDATOR_PREY_PAIRINGS maps predator→prey, ECOSYSTEM_PAIRINGS maps cohabitants. 4 interaction types (stalking/confrontation/chase/ambush). Primary species gets "mid" anatomy budget, secondary gets "wide". Full interactive picker in main flow.
+### ~~8. Add multi-subject scene support~~ ✅ Session 17, upgraded Session 19
+New output modes: `predator_prey`, `ecosystem_diorama`. PREDATOR_PREY_PAIRINGS maps predator→prey, ECOSYSTEM_PAIRINGS maps cohabitants. 4 interaction types (stalking/confrontation/chase/ambush). Both species get "wide" anatomy budget. Full interactive picker in main flow. Session 19: added `HUNT_MOMENTS` (68 species-pair-specific frozen-moment descriptions), `body_length_m` ratio-based scale anchoring, habitat-aware interaction/composition, living-animal naturalism injection.
 
 ### ~~9. Implement arthropod/plant context-reactive suggestions + blocking~~ ✅ Session 17
 `get_arthropod_suggestions()`, `get_arthropod_blocked()`, `get_plant_suggestions()`, `get_plant_blocked()` with Carboniferous→coal-swamp, Cambrian→open-water, era-appropriate vegetation/weather suggestions. Invalid combos blocked with reasons.
@@ -915,8 +1008,17 @@ Full A/B testing system: `--ab-test` generates two prompt variants differing on 
 
 ## 10 Ideas — Next Phase
 
-### 1. --sref Reference Library Build-Out
+### 1. --sref Reference Library Build-Out  🔄 IN PROGRESS
 Source and upload all 10 reference photo categories (waterhole, migration, family, crocodile, feathered_biped, tall_predator, komodo, arthropod_group, tortoise_group, raptor_flight). Run `python3 upload_refs.py all` to batch-wire CDN URLs into `sref_urls.json`. Test each category against 2-3 species to validate MJ pulls the right photographic qualities. This is the single highest-impact improvement available right now.
+
+**Session 19 progress:**
+- ✅ Populated `sref_urls.json` with 92 Wikimedia URLs → discovered MJ rejects Wikimedia URLs (percent-encoded, redirects)
+- ✅ Restructured: `sref_sources.json` (Wikimedia catalog, 43 URLs) → download locally → upload to Discord → `sref_urls.json` (CDN URLs MJ accepts)
+- ✅ Rewrote `upload_refs.py` with `download`, `upload`, `sync`, `all`, `list` commands
+- ✅ 40 Discord CDN URLs across 27/42 species wired into `sref_urls.json`
+- ✅ 4 new reference_images categories added: `marine/`, `sea_scorpion/`, `paleo_plant/`, `ammonite/`
+- 🔄 15 species still need images (Wikimedia rate-limited at 429 after ~10 requests)
+- 🔄 User sourced komodo + crocodile reference photos — need to save to folders and run `upload_refs.py all`
 
 ### 2. Printify Integration — Auto-Upload Best Outputs to Store
 Connect `generate_prompt.py` to the Printify API (key already in `.env`). After scoring an A/B test winner or manually marking an output as "print-worthy", auto-upload to Printify as a canvas/poster product with species name, mode, and prompt metadata. Eliminates the manual download→upload→configure loop.
