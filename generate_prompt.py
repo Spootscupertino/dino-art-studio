@@ -1767,7 +1767,7 @@ OUTPUT_MODES: dict[str, dict] = {
         "display":       "Predator–prey encounter",
         "desc":          "two species in frame, predator and prey, tension-filled moment",
         "fixed_camera":  "Canon EOS R5 70-200mm f/2.8, telephoto, natural encounter distance",
-        "composition":   "two different species in frame, predator dwarfs prey, dramatic scale contrast",
+        "composition":   "National Geographic wildlife photograph, two different animals in frame, decisive moment",
         "canvas_print":  False,
         "full_body":     True,
         "needs_placement": False,
@@ -1835,13 +1835,133 @@ ECOSYSTEM_PAIRINGS = {
     "Arthropleura":      ["Meganeura", "Pulmonoscorpius", "Lepidodendron", "Calamites"],
 }
 
-# Interaction phrases for predator-prey encounters.
-# Used to build the subject block when two species are in frame.
+# ── Species-pair hunt moments ─────────────────────────────────────────────
+# Keyed by (predator, prey) → dict of interaction_type → vivid frozen-moment
+# description based on real paleontological behavior.  These replace generic
+# interaction phrases so MJ gets a SPECIFIC action to render.
+HUNT_MOMENTS = {
+    ("Mosasaurus", "Ammonite"): {
+        "stalking":      "mosasaurus gliding behind drifting ammonite, jaw slightly open, ambush approach",
+        "confrontation": "mosasaurus jaw closing around ammonite shell, crushing bite, shell cracking",
+        "chase":         "mosasaurus pursuing jet-propelling ammonite, tentacles trailing behind fleeing prey",
+        "ambush":        "mosasaurus lunging from dark water below, jaws snapping shut on ammonite",
+    },
+    ("Mosasaurus", "Archelon"): {
+        "stalking":      "mosasaurus shadowing archelon from below, massive silhouette beneath turtle",
+        "confrontation": "mosasaurus biting archelon flipper, turtle thrashing to break free",
+        "chase":         "mosasaurus chasing fleeing archelon, flippers beating water",
+        "ambush":        "mosasaurus erupting from depth to seize archelon shell edge",
+    },
+    ("Mosasaurus", "Xiphactinus"): {
+        "stalking":      "mosasaurus trailing wounded xiphactinus, blood trail in water",
+        "confrontation": "mosasaurus and xiphactinus face to face, both jaws open",
+        "chase":         "mosasaurus chasing xiphactinus at full speed through open water",
+        "ambush":        "mosasaurus striking xiphactinus from below, impact moment",
+    },
+    ("Tyrannosaurus rex", "Triceratops"): {
+        "stalking":      "tyrannosaur stalking through ferns behind unaware triceratops, crouched low",
+        "confrontation": "tyrannosaur and triceratops locked face to face, horns versus jaws",
+        "chase":         "tyrannosaur in full sprint after galloping triceratops, dust cloud",
+        "ambush":        "tyrannosaur clamping jaws on triceratops frill, triceratops driving horns upward",
+    },
+    ("Tyrannosaurus rex", "Parasaurolophus"): {
+        "stalking":      "tyrannosaur emerging from treeline toward grazing parasaurolophus",
+        "confrontation": "tyrannosaur towering over crouching parasaurolophus, jaws open",
+        "chase":         "tyrannosaur sprinting after fleeing parasaurolophus, ground shaking",
+        "ambush":        "tyrannosaur seizing parasaurolophus by the neck, prey buckling",
+    },
+    ("Tyrannosaurus rex", "Ankylosaurus"): {
+        "stalking":      "tyrannosaur circling wary ankylosaurus, tail club raised",
+        "confrontation": "tyrannosaur snapping at ankylosaurus flank, tail club swinging defensively",
+        "chase":         "tyrannosaur pursuing retreating ankylosaurus, armored back facing predator",
+        "ambush":        "tyrannosaur biting ankylosaurus side, tail club striking tyrannosaur leg",
+    },
+    ("Velociraptor", "Parasaurolophus"): {
+        "stalking":      "velociraptor crouched low in undergrowth watching parasaurolophus",
+        "confrontation": "velociraptor leaping at parasaurolophus flank, sickle claw extended",
+        "chase":         "velociraptor sprinting after young parasaurolophus, feathers flattened",
+        "ambush":        "velociraptor airborne mid-leap onto parasaurolophus back, claws digging in",
+    },
+    ("Dilophosaurus", "Stegosaurus"): {
+        "stalking":      "dilophosaurus stalking cautiously behind stegosaurus, eyeing vulnerable flank",
+        "confrontation": "dilophosaurus and stegosaurus facing off, thagomizer tail spikes swinging",
+        "chase":         "dilophosaurus circling stegosaurus, testing for opening, tail plates flushed",
+        "ambush":        "dilophosaurus lunging at stegosaurus hindquarters, avoiding tail spikes",
+    },
+    ("Spinosaurus", "Cretoxyrhina"): {
+        "stalking":      "spinosaurus wading chest deep watching circling cretoxyrhina fin",
+        "confrontation": "spinosaurus swiping clawed hand at cretoxyrhina, jaws open, water splashing",
+        "chase":         "spinosaurus pursuing cretoxyrhina through shallows, sail cutting water",
+        "ambush":        "spinosaurus plunging snout underwater to snatch cretoxyrhina",
+    },
+    ("Spinosaurus", "Xiphactinus"): {
+        "stalking":      "spinosaurus standing in river watching xiphactinus shadow below surface",
+        "confrontation": "spinosaurus snout breaking water with xiphactinus in jaws",
+        "chase":         "spinosaurus wading after thrashing xiphactinus in shallows",
+        "ambush":        "spinosaurus striking into water, claws hooking xiphactinus",
+    },
+    ("Kronosaurus", "Ammonite"): {
+        "stalking":      "kronosaurus gliding silently toward cluster of drifting ammonites",
+        "confrontation": "kronosaurus massive jaw engulfing ammonite, shell splintering",
+        "chase":         "kronosaurus pursuing jet-propelling ammonite through murky water",
+        "ambush":        "kronosaurus surging upward from depth to crush ammonite",
+    },
+    ("Kronosaurus", "Ichthyosaurus"): {
+        "stalking":      "kronosaurus shadowing ichthyosaurus from deep water below",
+        "confrontation": "kronosaurus and ichthyosaurus face to face, massive size mismatch",
+        "chase":         "kronosaurus chasing ichthyosaurus through open ocean",
+        "ambush":        "kronosaurus lunging at ichthyosaurus from below, jaws wide",
+    },
+    ("Liopleurodon", "Ichthyosaurus"): {
+        "stalking":      "liopleurodon trailing ichthyosaurus through dim deep water",
+        "confrontation": "liopleurodon massive jaws opening around ichthyosaurus",
+        "chase":         "liopleurodon pursuing ichthyosaurus at speed, flippers driving forward",
+        "ambush":        "liopleurodon erupting from darkness to seize ichthyosaurus",
+    },
+    ("Liopleurodon", "Ammonite"): {
+        "stalking":      "liopleurodon drifting toward cluster of ammonites, mouth opening",
+        "confrontation": "liopleurodon jaw crushing ammonite shell with ease",
+        "chase":         "liopleurodon sweeping through ammonite group, tentacles scattering",
+        "ambush":        "liopleurodon gulping ammonite whole from below",
+    },
+    ("Cretoxyrhina", "Xiphactinus"): {
+        "stalking":      "cretoxyrhina circling below wounded xiphactinus",
+        "confrontation": "cretoxyrhina ramming xiphactinus broadside, teeth tearing",
+        "chase":         "cretoxyrhina in pursuit of fleeing xiphactinus, shark speed",
+        "ambush":        "cretoxyrhina striking xiphactinus from below, explosive bite",
+    },
+    ("Cretoxyrhina", "Archelon"): {
+        "stalking":      "cretoxyrhina circling below archelon shadow on surface",
+        "confrontation": "cretoxyrhina biting archelon flipper from below",
+        "chase":         "cretoxyrhina pursuing archelon, turtle paddling desperately",
+        "ambush":        "cretoxyrhina lunging upward at archelon belly, turtle recoiling",
+    },
+    ("Dunkleosteus", "Eurypterus"): {
+        "stalking":      "dunkleosteus armored head emerging from gloom toward eurypterus",
+        "confrontation": "dunkleosteus bony jaw plates snapping shut on eurypterus",
+        "chase":         "dunkleosteus chasing eurypterus through murky water",
+        "ambush":        "dunkleosteus engulfing eurypterus in single crushing bite",
+    },
+    ("Megalograptus", "Eurypterus"): {
+        "stalking":      "megalograptus spiked arms reaching toward smaller eurypterus",
+        "confrontation": "megalograptus grappling eurypterus with spined appendages",
+        "chase":         "megalograptus pursuing eurypterus across seafloor",
+        "ambush":        "megalograptus seizing eurypterus from behind with barbed claws",
+    },
+    ("Megalodon", "Leedsichthys"): {
+        "stalking":      "megalodon massive shadow approaching leedsichthys from behind",
+        "confrontation": "megalodon jaws gaping around leedsichthys tail section",
+        "chase":         "megalodon in pursuit of leedsichthys, enormous shark dwarfing frame",
+        "ambush":        "megalodon ramming leedsichthys from below, explosive impact",
+    },
+}
+
+# Fallback generic interactions — used when no species-pair entry exists.
 PREDATOR_PREY_INTERACTIONS = {
-    "stalking":      "predator approaching tiny prey from behind, massive jaw looming above small prey, dramatic size contrast",
-    "confrontation": "predator looming over tiny prey, dramatic scale difference, prey dwarfed by predator shadow",
-    "chase":         "predator lunging toward small fleeing prey, massive jaws open, tiny prey escaping",
-    "ambush":        "predator striking at small prey, explosive attack moment, predator body dwarfs prey",
+    "stalking":      "predator creeping toward unaware prey, tension before strike",
+    "confrontation": "predator and prey locked in standoff, frozen moment of tension",
+    "chase":         "predator in full pursuit, prey fleeing at speed, chase in motion",
+    "ambush":        "predator mid-strike, explosive attack, prey reacting",
 }
 
 
@@ -2858,7 +2978,11 @@ def assemble_prompt(
     # Habitat-specific contact/physics block.
     # Terrestrial: feet/ground. Marine: water surface. Aerial: wing/air.
     # Mode overrides prevent repetitive compositions.
-    if output_mode == "perched":
+    if output_mode == "predator_prey":
+        # Naturalism anchor — the subject block already contains the specific
+        # hunt action.  This slot reinforces wildlife-photo realism.
+        interaction = "peak action moment frozen in time, decisive instant, raw nature"
+    elif output_mode == "perched":
         interaction = "talons gripping rocky edge, wings folded"
     elif output_mode == "underwater":
         interaction = "fully submerged"
