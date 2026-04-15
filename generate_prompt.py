@@ -3416,8 +3416,23 @@ def select_sref_urls(species_name, output_mode, habitat, lighting_name):
     # Take ONE entry from each category first, then cycle back for seconds.
     # This ensures MJ sees varied texture/detail types (mouth, claw, skin,
     # habitat) rather than 5 images from the same category.
+    #
+    # CRITICAL: Deduplicate by source filename, not CDN URL.
+    # The same image (e.g. Gharial_san_diego.jpg) may be uploaded to Discord
+    # once per category, producing different CDN URLs for identical content.
+    # Sending the same photo twice wastes an --sref slot.
     selected_urls = []
     used_urls = set()
+    used_filenames = set()  # track source image identity
+
+    def _extract_filename(entry):
+        """Extract source filename from label for content deduplication."""
+        if isinstance(entry, dict):
+            label = entry.get("label", "")
+            if "/" in label:
+                return label.split("/", 1)[1].lower()
+            return label.lower()
+        return ""
 
     # Filter to categories that actually have entries for this species
     available_cats = [c for c in priority_cats if c in cat_index]
@@ -3434,10 +3449,14 @@ def select_sref_urls(species_name, output_mode, habitat, lighting_name):
             while cursor < len(entries):
                 entry = entries[cursor]
                 url = entry["url"] if isinstance(entry, dict) else entry
+                fname = _extract_filename(entry)
                 cursor += 1
-                if url not in used_urls:
+                # Skip if same source image already selected (even under different CDN URL)
+                if url not in used_urls and fname not in used_filenames:
                     selected_urls.append(url)
                     used_urls.add(url)
+                    if fname:
+                        used_filenames.add(fname)
                     cat_cursors[cat] = cursor
                     added_this_round = True
                     break
