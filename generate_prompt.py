@@ -3262,51 +3262,212 @@ def print_prompt_box(prompt_text: str) -> None:
 
 SREF_FILE = Path(__file__).parent / "sref_urls.json"
 
+# Max --sref URLs per prompt (MJ has no hard limit, but Discord's 2000-char
+# message cap and diminishing returns make 5 the practical sweet spot).
+MAX_SREF_URLS = 5
 
-def load_sref_urls() -> dict:
-    """Load species → [url, ...] mapping from sref_urls.json."""
+# ---------------------------------------------------------------------------
+# Context → sref-category priority mapping  (Session 20)
+# ---------------------------------------------------------------------------
+# Each key is a "context signal" derived from output_mode, habitat, or lighting.
+# Values are ordered lists of sref label-prefix categories, highest priority first.
+# The system walks these lists, pulls matching URLs from the species' library,
+# and fills slots up to MAX_SREF_URLS.  Strongest emphasis on mouth/claw/toe
+# detail refs (komodo, crocodile) because those are the hardest for MJ.
+
+# ── Mode-based priorities ──────────────────────────────────────────────────
+SREF_MODE_PRIORITY = {
+    # Close-up / detail modes → mouth, claw, skin texture refs dominate
+    "portrait":         ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    "extreme_closeup":  ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    "eye_contact":      ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    "jaws_detail":      ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    "action_freeze":    ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    # Mid-range full body
+    "canvas":           ["waterhole", "tall_predator", "komodo", "crocodile", "feathered_biped"],
+    "tracking_side":    ["tall_predator", "komodo", "crocodile", "feathered_biped"],
+    "ground_level":     ["tall_predator", "komodo", "crocodile", "feathered_biped"],
+    "camera_trap":      ["waterhole", "komodo", "crocodile", "tall_predator"],
+    "confrontation":    ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    # Epic wide / landscape
+    "environmental":    ["waterhole", "migration", "family", "tall_predator", "komodo"],
+    "valley_panorama":  ["waterhole", "migration", "family", "tall_predator"],
+    "ridgeline_silhouette": ["waterhole", "migration", "tall_predator"],
+    "river_crossing":   ["waterhole", "migration", "crocodile", "tall_predator"],
+    "misty_dawn":       ["waterhole", "migration", "family", "tall_predator"],
+    "storm_front":      ["waterhole", "migration", "tall_predator"],
+    # Specialty
+    "aerial_overhead":  ["waterhole", "migration", "tall_predator"],
+    "dusk_long_exp":    ["waterhole", "migration", "tall_predator"],
+    "shoreline":        ["waterhole", "crocodile", "marine", "tall_predator"],
+    # Group / multi-animal
+    "group_herd":       ["family", "migration", "waterhole", "tall_predator", "komodo"],
+    "family_group":     ["family", "migration", "waterhole", "tall_predator"],
+    "waterhole_gather": ["waterhole", "family", "migration", "crocodile", "tall_predator"],
+    "migration_march":  ["migration", "family", "waterhole", "tall_predator"],
+    # Marine
+    "surface_break":    ["marine", "crocodile", "komodo"],
+    "underwater":       ["marine", "crocodile", "komodo"],
+    # Aerial
+    "soaring_thermal":  ["raptor_flight", "feathered_biped"],
+    "dive_strike":      ["raptor_flight", "feathered_biped"],
+    "perched":          ["raptor_flight", "feathered_biped", "komodo", "crocodile"],
+    # Multi-subject
+    "predator_prey":    ["komodo", "crocodile", "tall_predator", "waterhole"],
+    "ecosystem_diorama":["waterhole", "family", "migration", "tall_predator"],
+}
+
+# ── Habitat-based overrides (applied before mode priorities) ───────────────
+SREF_HABITAT_INJECT = {
+    "marine":    ["marine"],
+    "aerial":    ["raptor_flight", "feathered_biped"],
+    "arthropod": ["arthropod_group", "sea_scorpion"],
+    "plant":     ["paleo_plant"],
+}
+
+# ── Lighting-based bonus categories (appended if slots remain) ─────────────
+SREF_LIGHTING_BONUS = {
+    "golden_hour":      ["waterhole", "migration"],
+    "sunset_warm":      ["waterhole", "migration"],
+    "dawn_first_light": ["waterhole", "migration"],
+    "harsh_midday":     ["waterhole"],
+    "moonlit":          ["waterhole"],
+    "underwater_caustics": ["marine"],
+    "deep_water_fade":  ["marine"],
+    "surface_dapple":   ["marine"],
+    "bioluminescent":   ["marine"],
+    "noon_column":      ["marine"],
+    "reef_scatter":     ["marine"],
+    "murk_glow":        ["marine"],
+    "dawn_surface":     ["marine"],
+    "moonlit_surface":  ["marine"],
+}
+
+
+def load_sref_urls():
+    """Load species → [{label, url}, ...] mapping from sref_urls.json."""
     if not SREF_FILE.exists():
         return {}
     with open(SREF_FILE) as f:
         return json.load(f)
 
 
-def prompt_sref_suggestion(species_name: str):
-    """After species select, offer known --sref URLs if any exist. Returns URL or None."""
-    urls = load_sref_urls()
-    species_urls = urls.get(species_name, [])
-    if not species_urls:
-        return None
+def _extract_category(label):
+    """Extract category prefix from a label like 'komodo/komodo_tongue.jpg'."""
+    if "/" in label:
+        return label.split("/", 1)[0]
+    return ""
 
-    print(f"\n  {hdr(f'STYLE REFERENCES — {species_name}')}")
-    print(f"  {C.DIM}" + "─" * 60 + C.RESET)
-    for i, entry in enumerate(species_urls, 1):
+
+def select_sref_urls(species_name, output_mode, habitat, lighting_name):
+    """Context-aware auto-selection of --sref URLs.
+
+    Picks up to MAX_SREF_URLS from the species' reference library, ranked by
+    relevance to the current scene context (mode + habitat + lighting).
+
+    Priority order:
+      1. Habitat-injected categories (marine species always get marine refs)
+      2. Mode-based category priorities (close-ups get mouth/claw refs)
+      3. Lighting bonus categories (golden hour adds waterhole/migration)
+      4. Any remaining categories to fill slots
+
+    Returns list of URL strings (may be empty if species has no refs).
+    """
+    all_urls = load_sref_urls()
+    species_entries = all_urls.get(species_name, [])
+    if not species_entries:
+        return []
+
+    # Build category → [url_entries] index for this species
+    cat_index = {}
+    for entry in species_entries:
         if isinstance(entry, dict):
-            label = entry.get("label", f"Reference {i}")
+            cat = _extract_category(entry.get("label", ""))
             url = entry["url"]
         else:
-            label = f"Reference {i}"
+            cat = ""
             url = entry
-        short_url = url[:50] + "…" if len(url) > 50 else url
-        print(f"  {C.DIM}{i:>2}.{C.RESET}  {C.BRIGHT_WHITE}{label}{C.RESET}")
-        print(f"      {dim(short_url)}")
-    print(f"  {C.DIM} 0.{C.RESET}  {C.WHITE}Skip — no style reference{C.RESET}")
+        cat_index.setdefault(cat, []).append(entry)
 
-    while True:
-        try:
-            raw = input(f"\n  {hdr('Choose 0–' + str(len(species_urls)) + ':')}  ").strip()
-            choice = int(raw)
-            if choice == 0:
-                return None
-            if 1 <= choice <= len(species_urls):
-                entry = species_urls[choice - 1]
+    # Build ordered priority list of categories
+    priority_cats = []
+
+    # 1. Habitat injection (always first — marine species must get marine refs)
+    for cat in SREF_HABITAT_INJECT.get(habitat, []):
+        if cat not in priority_cats:
+            priority_cats.append(cat)
+
+    # 2. Mode-based priorities
+    for cat in SREF_MODE_PRIORITY.get(output_mode, []):
+        if cat not in priority_cats:
+            priority_cats.append(cat)
+
+    # 3. Lighting bonus
+    for cat in SREF_LIGHTING_BONUS.get(lighting_name, []):
+        if cat not in priority_cats:
+            priority_cats.append(cat)
+
+    # 4. Any remaining categories the species has (catch-all)
+    for cat in cat_index:
+        if cat and cat not in priority_cats:
+            priority_cats.append(cat)
+
+    # Select URLs: round-robin across priority categories for diversity.
+    # Take ONE entry from each category first, then cycle back for seconds.
+    # This ensures MJ sees varied texture/detail types (mouth, claw, skin,
+    # habitat) rather than 5 images from the same category.
+    selected_urls = []
+    used_urls = set()
+
+    # Filter to categories that actually have entries for this species
+    available_cats = [c for c in priority_cats if c in cat_index]
+    cat_cursors = {c: 0 for c in available_cats}  # track position in each category
+
+    rounds = 0
+    while len(selected_urls) < MAX_SREF_URLS and rounds < MAX_SREF_URLS:
+        added_this_round = False
+        for cat in available_cats:
+            if len(selected_urls) >= MAX_SREF_URLS:
+                break
+            entries = cat_index[cat]
+            cursor = cat_cursors[cat]
+            while cursor < len(entries):
+                entry = entries[cursor]
                 url = entry["url"] if isinstance(entry, dict) else entry
-                label = entry.get("label", f"Reference {choice}") if isinstance(entry, dict) else f"Reference {choice}"
-                print(f"  {ok('✓')} {ok(label)}")
-                return url
-        except (ValueError, EOFError):
-            pass
-        print(f"  {warn('Invalid choice — try again')}")
+                cursor += 1
+                if url not in used_urls:
+                    selected_urls.append(url)
+                    used_urls.add(url)
+                    cat_cursors[cat] = cursor
+                    added_this_round = True
+                    break
+            cat_cursors[cat] = cursor
+        if not added_this_round:
+            break
+        rounds += 1
+
+    return selected_urls
+
+
+def display_sref_selection(species_name, selected_urls, species_entries):
+    """Print the auto-selected sref URLs with labels for user visibility."""
+    if not selected_urls:
+        return
+
+    # Build url → label lookup
+    url_to_label = {}
+    for entry in species_entries:
+        if isinstance(entry, dict):
+            url_to_label[entry["url"]] = entry.get("label", "reference")
+
+    print(f"\n  {hdr(f'STYLE REFERENCES — {species_name} (auto-selected)')}")
+    print(f"  {C.DIM}" + "─" * 60 + C.RESET)
+    for i, url in enumerate(selected_urls, 1):
+        label = url_to_label.get(url, "reference")
+        short_url = url[:50] + "…" if len(url) > 50 else url
+        print(f"    {ok('+')} {C.BRIGHT_WHITE}{label}{C.RESET}")
+        print(f"      {dim(short_url)}")
+    print(f"  {dim(f'{len(selected_urls)} of {len(species_entries)} refs selected for this scene')}")
 
 
 # ---------------------------------------------------------------------------
@@ -3731,6 +3892,15 @@ def ab_test_main(args) -> None:
     # Save the test
     test_id = save_ab_test(conn, species["id"], axis, ctrl_val, var_val)
 
+    # --- Context-aware sref auto-selection for A/B tests (Session 20) ---
+    ab_sref_urls = []
+    if not args.sref:
+        ab_sref_urls = select_sref_urls(
+            species["name"], output_mode, habitat, lighting_param["name"]
+        )
+    else:
+        ab_sref_urls = [args.sref]
+
     # Build both prompts
     required_params = fetch_species_required_params(conn, species["id"])
     variant_labels = [("A", ctrl_val, ctrl_obj), ("B", var_val, var_obj)]
@@ -3776,12 +3946,13 @@ def ab_test_main(args) -> None:
             quality=args.quality,
             output_mode=v_output_mode,
             placement=v_placement,
-            has_sref=bool(args.sref),
+            has_sref=bool(ab_sref_urls),
             habitat=habitat,
         )
 
-        if args.sref:
-            prompt_text += f" --sref {args.sref}"
+        if ab_sref_urls:
+            ab_sref_joined = " ".join(ab_sref_urls)
+            prompt_text += f" --sref {ab_sref_joined}"
         if args.cref:
             prompt_text += f" --cref {args.cref}"
 
@@ -3927,12 +4098,6 @@ def main() -> None:
             else:
                 interaction_type = "coexisting"
 
-    # --- Style reference suggestion (only if --sref not already passed) ---
-    if not args.sref:
-        suggested_sref = prompt_sref_suggestion(species["name"])
-        if suggested_sref:
-            args.sref = suggested_sref
-
     required_params = fetch_species_required_params(conn, species["id"])
     if required_params:
         sname = species["name"]
@@ -4029,6 +4194,23 @@ def main() -> None:
     print(f"    {ok('+')} {dim('[weather]')}  {C.WHITE}{weather_param['name'].replace('_', ' ')}{C.RESET}")
     print()
 
+    # --- Context-aware sref auto-selection (Session 20) ---
+    # Now that species, mode, habitat, AND lighting are all known, auto-pick
+    # the best --sref URLs from sref_urls.json based on scene context.
+    sref_urls_list = []
+    if not args.sref:
+        sref_urls_list = select_sref_urls(
+            species["name"], output_mode, habitat, lighting_param["name"]
+        )
+        all_sref_data = load_sref_urls()
+        display_sref_selection(
+            species["name"], sref_urls_list,
+            all_sref_data.get(species["name"], [])
+        )
+    else:
+        # CLI --sref passed: use it as-is (single URL from command line)
+        sref_urls_list = [args.sref]
+
     # --- Build prompt ---
     prompt_text = assemble_prompt(
         species, science, style_param, lighting_param, camera_param, mood_param,
@@ -4043,7 +4225,7 @@ def main() -> None:
         quality=args.quality,
         output_mode=output_mode,
         placement=placement,
-        has_sref=bool(args.sref),
+        has_sref=bool(sref_urls_list),
         habitat=habitat,
         secondary_species=secondary_species,
         interaction_type=interaction_type,
@@ -4055,8 +4237,9 @@ def main() -> None:
                       weather_param=weather_param, output_mode=output_mode)
 
     # --- Append reference URLs to prompt ---
-    if args.sref:
-        prompt_text += f" --sref {args.sref}"
+    if sref_urls_list:
+        sref_joined = " ".join(sref_urls_list)
+        prompt_text += f" --sref {sref_joined}"
     if args.cref:
         prompt_text += f" --cref {args.cref}"
 
@@ -4083,8 +4266,9 @@ def main() -> None:
     print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
     print(f"\n  {C.WHITE}Title :{C.RESET} {C.BRIGHT_WHITE}{title}{C.RESET}")
     print(f"  {C.WHITE}Tags  :{C.RESET} {dim(tags)}")
-    if args.sref:
-        print(f"  {C.WHITE}sref  :{C.RESET} {dim(args.sref)}")
+    if sref_urls_list:
+        sref_display = f"{len(sref_urls_list)} URLs auto-selected"
+        print(f"  {C.WHITE}sref  :{C.RESET} {dim(sref_display)}")
     if args.cref:
         print(f"  {C.WHITE}cref  :{C.RESET} {dim(args.cref)}")
     print()
