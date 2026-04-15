@@ -94,6 +94,19 @@ CATEGORY_SPECIES_MAP = {
     "ammonite": [
         "Ammonite",
     ],
+    "skeletal": [
+        "Tyrannosaurus rex", "Triceratops", "Stegosaurus", "Ankylosaurus",
+        "Brachiosaurus", "Parasaurolophus", "Velociraptor", "Dilophosaurus",
+        "Spinosaurus", "Mosasaurus", "Kronosaurus", "Liopleurodon",
+        "Elasmosaurus", "Ichthyosaurus", "Megalodon", "Cretoxyrhina",
+        "Helicoprion", "Dunkleosteus", "Xiphactinus", "Leedsichthys",
+        "Archelon", "Pteranodon", "Quetzalcoatlus", "Rhamphorhynchus",
+        "Dimorphodon", "Meganeura", "Arthropleura", "Jaekelopterus",
+        "Pulmonoscorpius", "Megarachne", "Anomalocaris", "Eurypterus",
+        "Megalograptus", "Araucaria", "Calamites", "Lepidodendron",
+        "Sigillaria", "Archaefructus", "Glossopteris", "Wattieza",
+        "Williamsonia", "Ammonite",
+    ],
 }
 
 

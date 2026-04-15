@@ -3276,53 +3276,60 @@ MAX_SREF_URLS = 5
 # detail refs (komodo, crocodile) because those are the hardest for MJ.
 
 # ── Mode-based priorities ──────────────────────────────────────────────────
+# "skeletal" is injected into position 1-2 for ALL modes to anchor the correct
+# body plan / silhouette.  Without it MJ copies the living-animal ref's
+# anatomy (e.g. rhino body for Triceratops).  skeletal ensures at least one
+# --sref slot carries the species' actual skeleton or fossil reconstruction.
 SREF_MODE_PRIORITY = {
     # Close-up / detail modes → mouth, claw, skin texture refs dominate
-    "portrait":         ["komodo", "crocodile", "tall_predator", "feathered_biped"],
-    "extreme_closeup":  ["komodo", "crocodile", "tall_predator", "feathered_biped"],
-    "eye_contact":      ["komodo", "crocodile", "tall_predator", "feathered_biped"],
-    "jaws_detail":      ["komodo", "crocodile", "tall_predator", "feathered_biped"],
-    "action_freeze":    ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    "portrait":         ["komodo", "skeletal", "crocodile", "tall_predator", "feathered_biped"],
+    "extreme_closeup":  ["komodo", "skeletal", "crocodile", "tall_predator", "feathered_biped"],
+    "eye_contact":      ["komodo", "skeletal", "crocodile", "tall_predator", "feathered_biped"],
+    "jaws_detail":      ["komodo", "skeletal", "crocodile", "tall_predator", "feathered_biped"],
+    "action_freeze":    ["komodo", "skeletal", "crocodile", "tall_predator", "feathered_biped"],
     # Mid-range full body
-    "canvas":           ["waterhole", "tall_predator", "komodo", "crocodile", "feathered_biped"],
-    "tracking_side":    ["tall_predator", "komodo", "crocodile", "feathered_biped"],
-    "ground_level":     ["tall_predator", "komodo", "crocodile", "feathered_biped"],
-    "camera_trap":      ["waterhole", "komodo", "crocodile", "tall_predator"],
-    "confrontation":    ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    "canvas":           ["skeletal", "waterhole", "tall_predator", "komodo", "crocodile", "feathered_biped"],
+    "tracking_side":    ["skeletal", "tall_predator", "komodo", "crocodile", "feathered_biped"],
+    "ground_level":     ["skeletal", "tall_predator", "komodo", "crocodile", "feathered_biped"],
+    "camera_trap":      ["skeletal", "waterhole", "komodo", "crocodile", "tall_predator"],
+    "confrontation":    ["skeletal", "komodo", "crocodile", "tall_predator", "feathered_biped"],
     # Epic wide / landscape
-    "environmental":    ["waterhole", "migration", "family", "tall_predator", "komodo"],
-    "valley_panorama":  ["waterhole", "migration", "family", "tall_predator"],
-    "ridgeline_silhouette": ["waterhole", "migration", "tall_predator"],
-    "river_crossing":   ["waterhole", "migration", "crocodile", "tall_predator"],
-    "misty_dawn":       ["waterhole", "migration", "family", "tall_predator"],
-    "storm_front":      ["waterhole", "migration", "tall_predator"],
+    "environmental":    ["skeletal", "waterhole", "migration", "family", "tall_predator", "komodo"],
+    "valley_panorama":  ["skeletal", "waterhole", "migration", "family", "tall_predator"],
+    "ridgeline_silhouette": ["skeletal", "waterhole", "migration", "tall_predator"],
+    "river_crossing":   ["skeletal", "waterhole", "migration", "crocodile", "tall_predator"],
+    "misty_dawn":       ["skeletal", "waterhole", "migration", "family", "tall_predator"],
+    "storm_front":      ["skeletal", "waterhole", "migration", "tall_predator"],
     # Specialty
-    "aerial_overhead":  ["waterhole", "migration", "tall_predator"],
-    "dusk_long_exp":    ["waterhole", "migration", "tall_predator"],
-    "shoreline":        ["waterhole", "crocodile", "marine", "tall_predator"],
+    "aerial_overhead":  ["skeletal", "waterhole", "migration", "tall_predator"],
+    "dusk_long_exp":    ["skeletal", "waterhole", "migration", "tall_predator"],
+    "shoreline":        ["skeletal", "waterhole", "crocodile", "marine", "tall_predator"],
     # Group / multi-animal
-    "group_herd":       ["family", "migration", "waterhole", "tall_predator", "komodo"],
-    "family_group":     ["family", "migration", "waterhole", "tall_predator"],
-    "waterhole_gather": ["waterhole", "family", "migration", "crocodile", "tall_predator"],
-    "migration_march":  ["migration", "family", "waterhole", "tall_predator"],
+    "group_herd":       ["skeletal", "family", "migration", "waterhole", "tall_predator", "komodo"],
+    "family_group":     ["skeletal", "family", "migration", "waterhole", "tall_predator"],
+    "waterhole_gather": ["skeletal", "waterhole", "family", "migration", "crocodile", "tall_predator"],
+    "migration_march":  ["skeletal", "migration", "family", "waterhole", "tall_predator"],
     # Marine
-    "surface_break":    ["marine", "crocodile", "komodo"],
-    "underwater":       ["marine", "crocodile", "komodo"],
+    "surface_break":    ["skeletal", "marine", "crocodile", "komodo"],
+    "underwater":       ["skeletal", "marine", "crocodile", "komodo"],
     # Aerial
-    "soaring_thermal":  ["raptor_flight", "feathered_biped"],
-    "dive_strike":      ["raptor_flight", "feathered_biped"],
-    "perched":          ["raptor_flight", "feathered_biped", "komodo", "crocodile"],
+    "soaring_thermal":  ["skeletal", "raptor_flight", "feathered_biped"],
+    "dive_strike":      ["skeletal", "raptor_flight", "feathered_biped"],
+    "perched":          ["skeletal", "raptor_flight", "feathered_biped", "komodo", "crocodile"],
     # Multi-subject
-    "predator_prey":    ["komodo", "crocodile", "tall_predator", "waterhole"],
-    "ecosystem_diorama":["waterhole", "family", "migration", "tall_predator"],
+    "predator_prey":    ["skeletal", "komodo", "crocodile", "tall_predator", "waterhole"],
+    "ecosystem_diorama":["skeletal", "waterhole", "family", "migration", "tall_predator"],
 }
 
 # ── Habitat-based overrides (applied before mode priorities) ───────────────
+# skeletal is injected first for ALL habitat types — body-plan anchor is
+# always the highest-priority signal to prevent MJ from copying the wrong
+# animal's anatomy from texture refs.
 SREF_HABITAT_INJECT = {
-    "marine":    ["marine"],
-    "aerial":    ["raptor_flight", "feathered_biped"],
-    "arthropod": ["arthropod_group", "sea_scorpion"],
-    "plant":     ["paleo_plant"],
+    "marine":    ["skeletal", "marine"],
+    "aerial":    ["skeletal", "raptor_flight", "feathered_biped"],
+    "arthropod": ["skeletal", "arthropod_group", "sea_scorpion"],
+    "plant":     ["skeletal", "paleo_plant"],
 }
 
 # ── Lighting-based bonus categories (appended if slots remain) ─────────────
