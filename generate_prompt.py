@@ -4059,9 +4059,6 @@ def main() -> None:
     print(f"  {C.BOLD_CYAN}DINOSAUR ART PROMPT GENERATOR{C.RESET}")
     print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
 
-    # --- Startup: reference image scan ---
-    display_reference_scan()
-
     # --- Habitat selection (first thing the user sees) ---
     habitat = select_habitat()
 
