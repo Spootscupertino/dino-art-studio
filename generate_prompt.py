@@ -3262,78 +3262,101 @@ def print_prompt_box(prompt_text: str) -> None:
 
 SREF_FILE = Path(__file__).parent / "sref_urls.json"
 
-# Max --sref URLs per prompt (MJ has no hard limit, but Discord's 2000-char
-# message cap and diminishing returns make 5 the practical sweet spot).
-MAX_SREF_URLS = 5
+# ---------------------------------------------------------------------------
+# Dual-ref system: --sref (skeletal/fossil) + --cref (wildlife photos)
+# ---------------------------------------------------------------------------
+# MJ allows up to 5 URLs per --sref and 5 per --cref.  We use ALL slots:
+#   --sref: skeletal/fossil refs ONLY → guides anatomy without texture bleed
+#   --cref: wildlife photo refs → guides feel/texture at lower --cw weight
+#           so giraffe patterns don't bleed onto Brachiosaurus skin etc.
+#
+# --cw (character weight) controls how literally MJ copies the --cref.
+# Lower values = influence feel/mood without literal texture transfer.
+MAX_SREF_URLS = 5   # max skeletal/fossil refs for --sref
+MAX_CREF_URLS = 5   # max wildlife photo refs for --cref
+DEFAULT_CW = 50     # --cw weight: low enough to avoid texture bleed
 
 # ---------------------------------------------------------------------------
-# Context → sref-category priority mapping  (Session 20)
+# Habitat → allowed ref categories (strict filtering)
 # ---------------------------------------------------------------------------
-# Each key is a "context signal" derived from output_mode, habitat, or lighting.
-# Values are ordered lists of sref label-prefix categories, highest priority first.
-# The system walks these lists, pulls matching URLs from the species' library,
-# and fills slots up to MAX_SREF_URLS.  Strongest emphasis on mouth/claw/toe
-# detail refs (komodo, crocodile) because those are the hardest for MJ.
+# Prevents cross-contamination: land animal refs can't appear in underwater
+# scenes, marine refs can't appear in terrestrial scenes, etc.
+HABITAT_ALLOWED_CATEGORIES = {
+    "marine":      {"marine", "sea_scorpion", "skeletal"},
+    "terrestrial": {"waterhole", "crocodile", "komodo", "feathered_biped",
+                    "tall_predator", "tortoise_group", "family", "migration",
+                    "skeletal"},
+    "aerial":      {"raptor_flight", "feathered_biped", "skeletal"},
+    "arthropod":   {"arthropod_group", "sea_scorpion", "skeletal"},
+    "plant":       {"paleo_plant", "skeletal"},
+}
 
-# ── Mode-based priorities ──────────────────────────────────────────────────
-# "skeletal" is injected into position 1-2 for ALL modes to anchor the correct
-# body plan / silhouette.  Without it MJ copies the living-animal ref's
-# anatomy (e.g. rhino body for Triceratops).  skeletal ensures at least one
-# --sref slot carries the species' actual skeleton or fossil reconstruction.
-SREF_MODE_PRIORITY = {
+# Category that goes to --sref (anatomy guide, no texture bleed).
+# Everything else is a wildlife photo → --cref.
+SREF_ONLY_CATEGORIES = {"skeletal"}
+
+# ---------------------------------------------------------------------------
+# Categories with mouth/claw/toe detail — prioritized in --cref ordering
+# ---------------------------------------------------------------------------
+# These are the hardest features for MJ; refs showing them get top slots.
+MOUTH_CLAW_PRIORITY_CATEGORIES = ["komodo", "crocodile", "tall_predator"]
+
+# ---------------------------------------------------------------------------
+# Context → cref-category priority mapping  (Session 21)
+# ---------------------------------------------------------------------------
+# Mode-based priorities determine which wildlife photo categories fill --cref
+# slots.  skeletal is no longer in these lists — it always goes to --sref.
+CREF_MODE_PRIORITY = {
     # Close-up / detail modes → mouth, claw, skin texture refs dominate
-    "portrait":         ["komodo", "skeletal", "crocodile", "tall_predator", "feathered_biped"],
-    "extreme_closeup":  ["komodo", "skeletal", "crocodile", "tall_predator", "feathered_biped"],
-    "eye_contact":      ["komodo", "skeletal", "crocodile", "tall_predator", "feathered_biped"],
-    "jaws_detail":      ["komodo", "skeletal", "crocodile", "tall_predator", "feathered_biped"],
-    "action_freeze":    ["komodo", "skeletal", "crocodile", "tall_predator", "feathered_biped"],
+    "portrait":         ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    "extreme_closeup":  ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    "eye_contact":      ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    "jaws_detail":      ["komodo", "crocodile", "tall_predator", "feathered_biped"],
+    "action_freeze":    ["komodo", "crocodile", "tall_predator", "feathered_biped"],
     # Mid-range full body
-    "canvas":           ["skeletal", "waterhole", "tall_predator", "komodo", "crocodile", "feathered_biped"],
-    "tracking_side":    ["skeletal", "tall_predator", "komodo", "crocodile", "feathered_biped"],
-    "ground_level":     ["skeletal", "tall_predator", "komodo", "crocodile", "feathered_biped"],
-    "camera_trap":      ["skeletal", "waterhole", "komodo", "crocodile", "tall_predator"],
-    "confrontation":    ["skeletal", "komodo", "crocodile", "tall_predator", "feathered_biped"],
+    "canvas":           ["waterhole", "tall_predator", "komodo", "crocodile", "feathered_biped"],
+    "tracking_side":    ["tall_predator", "komodo", "crocodile", "feathered_biped"],
+    "ground_level":     ["tall_predator", "komodo", "crocodile", "feathered_biped"],
+    "camera_trap":      ["waterhole", "komodo", "crocodile", "tall_predator"],
+    "confrontation":    ["komodo", "crocodile", "tall_predator", "feathered_biped"],
     # Epic wide / landscape
-    "environmental":    ["skeletal", "waterhole", "migration", "family", "tall_predator", "komodo"],
-    "valley_panorama":  ["skeletal", "waterhole", "migration", "family", "tall_predator"],
-    "ridgeline_silhouette": ["skeletal", "waterhole", "migration", "tall_predator"],
-    "river_crossing":   ["skeletal", "waterhole", "migration", "crocodile", "tall_predator"],
-    "misty_dawn":       ["skeletal", "waterhole", "migration", "family", "tall_predator"],
-    "storm_front":      ["skeletal", "waterhole", "migration", "tall_predator"],
+    "environmental":    ["waterhole", "migration", "family", "tall_predator", "komodo"],
+    "valley_panorama":  ["waterhole", "migration", "family", "tall_predator"],
+    "ridgeline_silhouette": ["waterhole", "migration", "tall_predator"],
+    "river_crossing":   ["waterhole", "migration", "crocodile", "tall_predator"],
+    "misty_dawn":       ["waterhole", "migration", "family", "tall_predator"],
+    "storm_front":      ["waterhole", "migration", "tall_predator"],
     # Specialty
-    "aerial_overhead":  ["skeletal", "waterhole", "migration", "tall_predator"],
-    "dusk_long_exp":    ["skeletal", "waterhole", "migration", "tall_predator"],
-    "shoreline":        ["skeletal", "waterhole", "crocodile", "marine", "tall_predator"],
+    "aerial_overhead":  ["waterhole", "migration", "tall_predator"],
+    "dusk_long_exp":    ["waterhole", "migration", "tall_predator"],
+    "shoreline":        ["waterhole", "crocodile", "marine", "tall_predator"],
     # Group / multi-animal
-    "group_herd":       ["skeletal", "family", "migration", "waterhole", "tall_predator", "komodo"],
-    "family_group":     ["skeletal", "family", "migration", "waterhole", "tall_predator"],
-    "waterhole_gather": ["skeletal", "waterhole", "family", "migration", "crocodile", "tall_predator"],
-    "migration_march":  ["skeletal", "migration", "family", "waterhole", "tall_predator"],
+    "group_herd":       ["family", "migration", "waterhole", "tall_predator", "komodo"],
+    "family_group":     ["family", "migration", "waterhole", "tall_predator"],
+    "waterhole_gather": ["waterhole", "family", "migration", "crocodile", "tall_predator"],
+    "migration_march":  ["migration", "family", "waterhole", "tall_predator"],
     # Marine
-    "surface_break":    ["skeletal", "marine", "crocodile", "komodo"],
-    "underwater":       ["skeletal", "marine", "crocodile", "komodo"],
+    "surface_break":    ["marine", "sea_scorpion"],
+    "underwater":       ["marine", "sea_scorpion"],
     # Aerial
-    "soaring_thermal":  ["skeletal", "raptor_flight", "feathered_biped"],
-    "dive_strike":      ["skeletal", "raptor_flight", "feathered_biped"],
-    "perched":          ["skeletal", "raptor_flight", "feathered_biped", "komodo", "crocodile"],
+    "soaring_thermal":  ["raptor_flight", "feathered_biped"],
+    "dive_strike":      ["raptor_flight", "feathered_biped"],
+    "perched":          ["raptor_flight", "feathered_biped", "komodo", "crocodile"],
     # Multi-subject
-    "predator_prey":    ["skeletal", "komodo", "crocodile", "tall_predator", "waterhole"],
-    "ecosystem_diorama":["skeletal", "waterhole", "family", "migration", "tall_predator"],
+    "predator_prey":    ["komodo", "crocodile", "tall_predator", "waterhole"],
+    "ecosystem_diorama":["waterhole", "family", "migration", "tall_predator"],
 }
 
-# ── Habitat-based overrides (applied before mode priorities) ───────────────
-# skeletal is injected first for ALL habitat types — body-plan anchor is
-# always the highest-priority signal to prevent MJ from copying the wrong
-# animal's anatomy from texture refs.
-SREF_HABITAT_INJECT = {
-    "marine":    ["skeletal", "marine"],
-    "aerial":    ["skeletal", "raptor_flight", "feathered_biped"],
-    "arthropod": ["skeletal", "arthropod_group", "sea_scorpion"],
-    "plant":     ["skeletal", "paleo_plant"],
+# ── Habitat-based cref injection (applied before mode priorities) ──────────
+CREF_HABITAT_INJECT = {
+    "marine":    ["marine"],
+    "aerial":    ["raptor_flight", "feathered_biped"],
+    "arthropod": ["arthropod_group", "sea_scorpion"],
+    "plant":     ["paleo_plant"],
 }
 
-# ── Lighting-based bonus categories (appended if slots remain) ─────────────
-SREF_LIGHTING_BONUS = {
+# ── Lighting-based bonus categories (appended if cref slots remain) ────────
+CREF_LIGHTING_BONUS = {
     "golden_hour":      ["waterhole", "migration"],
     "sunset_warm":      ["waterhole", "migration"],
     "dawn_first_light": ["waterhole", "migration"],
@@ -3366,74 +3389,44 @@ def _extract_category(label):
     return ""
 
 
-def select_sref_urls(species_name, output_mode, habitat, lighting_name):
-    """Context-aware auto-selection of --sref URLs.
+def select_refs(species_name, output_mode, habitat, lighting_name):
+    """Context-aware dual-ref selection: --sref (skeletal) + --cref (wildlife).
 
-    Picks up to MAX_SREF_URLS from the species' reference library, ranked by
-    relevance to the current scene context (mode + habitat + lighting).
+    Splits refs into two buckets:
+      --sref: skeletal/fossil refs only → guides anatomy without texture bleed
+      --cref: wildlife photo refs → guides feel/texture at lower --cw weight
 
-    Priority order:
-      1. Habitat-injected categories (marine species always get marine refs)
-      2. Mode-based category priorities (close-ups get mouth/claw refs)
-      3. Lighting bonus categories (golden hour adds waterhole/migration)
-      4. Any remaining categories to fill slots
+    Filtering:
+      - Only categories allowed for the current habitat can appear
+      - Mouth/claw detail categories (komodo, crocodile, tall_predator) are
+        prioritized in --cref to emphasize the hardest MJ features
 
-    Returns list of URL strings (may be empty if species has no refs).
+    Returns (sref_urls, cref_urls, cw_weight) where:
+      sref_urls: list of URL strings for --sref (skeletal only)
+      cref_urls: list of URL strings for --cref (wildlife photos)
+      cw_weight: int for --cw parameter
     """
     all_urls = load_sref_urls()
     species_entries = all_urls.get(species_name, [])
     if not species_entries:
-        return []
+        return [], [], DEFAULT_CW
 
-    # Build category → [url_entries] index for this species
+    # Strict habitat filtering: only allowed categories pass through
+    allowed = HABITAT_ALLOWED_CATEGORIES.get(habitat, HABITAT_ALLOWED_CATEGORIES["terrestrial"])
+
+    # Build category → [url_entries] index, filtered by habitat
     cat_index = {}
     for entry in species_entries:
         if isinstance(entry, dict):
             cat = _extract_category(entry.get("label", ""))
-            url = entry["url"]
         else:
             cat = ""
-            url = entry
+        if cat and cat not in allowed:
+            continue  # habitat filter: reject this ref entirely
         cat_index.setdefault(cat, []).append(entry)
 
-    # Build ordered priority list of categories
-    priority_cats = []
-
-    # 1. Habitat injection (always first — marine species must get marine refs)
-    for cat in SREF_HABITAT_INJECT.get(habitat, []):
-        if cat not in priority_cats:
-            priority_cats.append(cat)
-
-    # 2. Mode-based priorities
-    for cat in SREF_MODE_PRIORITY.get(output_mode, []):
-        if cat not in priority_cats:
-            priority_cats.append(cat)
-
-    # 3. Lighting bonus
-    for cat in SREF_LIGHTING_BONUS.get(lighting_name, []):
-        if cat not in priority_cats:
-            priority_cats.append(cat)
-
-    # 4. Any remaining categories the species has (catch-all)
-    for cat in cat_index:
-        if cat and cat not in priority_cats:
-            priority_cats.append(cat)
-
-    # Select URLs: round-robin across priority categories for diversity.
-    # Take ONE entry from each category first, then cycle back for seconds.
-    # This ensures MJ sees varied texture/detail types (mouth, claw, skin,
-    # habitat) rather than 5 images from the same category.
-    #
-    # CRITICAL: Deduplicate by source filename, not CDN URL.
-    # The same image (e.g. Gharial_san_diego.jpg) may be uploaded to Discord
-    # once per category, producing different CDN URLs for identical content.
-    # Sending the same photo twice wastes an --sref slot.
-    selected_urls = []
-    used_urls = set()
-    used_filenames = set()  # track source image identity
-
+    # --- Helper: extract filename for dedup ---
     def _extract_filename(entry):
-        """Extract source filename from label for content deduplication."""
         if isinstance(entry, dict):
             label = entry.get("label", "")
             if "/" in label:
@@ -3441,43 +3434,92 @@ def select_sref_urls(species_name, output_mode, habitat, lighting_name):
             return label.lower()
         return ""
 
-    # Filter to categories that actually have entries for this species
-    available_cats = [c for c in priority_cats if c in cat_index]
-    cat_cursors = {c: 0 for c in available_cats}  # track position in each category
+    used_urls = set()
+    used_filenames = set()
 
-    rounds = 0
-    while len(selected_urls) < MAX_SREF_URLS and rounds < MAX_SREF_URLS:
-        added_this_round = False
-        for cat in available_cats:
-            if len(selected_urls) >= MAX_SREF_URLS:
-                break
-            entries = cat_index[cat]
-            cursor = cat_cursors[cat]
-            while cursor < len(entries):
-                entry = entries[cursor]
-                url = entry["url"] if isinstance(entry, dict) else entry
-                fname = _extract_filename(entry)
-                cursor += 1
-                # Skip if same source image already selected (even under different CDN URL)
-                if url not in used_urls and fname not in used_filenames:
-                    selected_urls.append(url)
-                    used_urls.add(url)
-                    if fname:
-                        used_filenames.add(fname)
-                    cat_cursors[cat] = cursor
-                    added_this_round = True
+    def _pick_from_cats(cat_list, max_count):
+        """Round-robin pick URLs from ordered category list up to max_count."""
+        available = [c for c in cat_list if c in cat_index]
+        cursors = {c: 0 for c in available}
+        picked = []
+        rounds = 0
+        while len(picked) < max_count and rounds < max_count:
+            added = False
+            for cat in available:
+                if len(picked) >= max_count:
                     break
-            cat_cursors[cat] = cursor
-        if not added_this_round:
-            break
-        rounds += 1
+                entries = cat_index[cat]
+                cursor = cursors[cat]
+                while cursor < len(entries):
+                    entry = entries[cursor]
+                    url = entry["url"] if isinstance(entry, dict) else entry
+                    fname = _extract_filename(entry)
+                    cursor += 1
+                    if url not in used_urls and fname not in used_filenames:
+                        picked.append(url)
+                        used_urls.add(url)
+                        if fname:
+                            used_filenames.add(fname)
+                        cursors[cat] = cursor
+                        added = True
+                        break
+                cursors[cat] = cursor
+            if not added:
+                break
+            rounds += 1
+        return picked
 
-    return selected_urls
+    # ── 1. --sref: skeletal/fossil refs only ──────────────────────────────
+    sref_cats = [c for c in cat_index if c in SREF_ONLY_CATEGORIES]
+    sref_urls = _pick_from_cats(sref_cats, MAX_SREF_URLS)
+
+    # ── 2. --cref: wildlife photo refs (non-skeletal) ─────────────────────
+    # Build priority order for cref categories (mouth/claw first)
+    cref_priority = []
+
+    # 2a. Mouth/claw emphasis: always inject detail categories first
+    for cat in MOUTH_CLAW_PRIORITY_CATEGORIES:
+        if cat in allowed and cat not in SREF_ONLY_CATEGORIES and cat not in cref_priority:
+            cref_priority.append(cat)
+
+    # 2b. Habitat injection
+    for cat in CREF_HABITAT_INJECT.get(habitat, []):
+        if cat not in SREF_ONLY_CATEGORIES and cat not in cref_priority:
+            cref_priority.append(cat)
+
+    # 2c. Mode-based priorities
+    for cat in CREF_MODE_PRIORITY.get(output_mode, []):
+        if cat not in SREF_ONLY_CATEGORIES and cat not in cref_priority:
+            cref_priority.append(cat)
+
+    # 2d. Lighting bonus
+    for cat in CREF_LIGHTING_BONUS.get(lighting_name, []):
+        if cat not in SREF_ONLY_CATEGORIES and cat not in cref_priority:
+            cref_priority.append(cat)
+
+    # 2e. Any remaining non-skeletal categories
+    for cat in cat_index:
+        if cat and cat not in SREF_ONLY_CATEGORIES and cat not in cref_priority:
+            cref_priority.append(cat)
+
+    # Filter cref_priority to only habitat-allowed categories
+    cref_priority = [c for c in cref_priority if c in allowed]
+
+    cref_urls = _pick_from_cats(cref_priority, MAX_CREF_URLS)
+
+    return sref_urls, cref_urls, DEFAULT_CW
 
 
-def display_sref_selection(species_name, selected_urls, species_entries):
-    """Print the auto-selected sref URLs with labels for user visibility."""
-    if not selected_urls:
+# Back-compat wrapper for any callers still using the old API
+def select_sref_urls(species_name, output_mode, habitat, lighting_name):
+    """Legacy wrapper — returns combined URL list for backward compat."""
+    sref, cref, _ = select_refs(species_name, output_mode, habitat, lighting_name)
+    return sref + cref
+
+
+def display_ref_selection(species_name, sref_urls, cref_urls, cw_weight, species_entries):
+    """Print the auto-selected sref + cref URLs with labels for user visibility."""
+    if not sref_urls and not cref_urls:
         return
 
     # Build url → label lookup
@@ -3486,14 +3528,34 @@ def display_sref_selection(species_name, selected_urls, species_entries):
         if isinstance(entry, dict):
             url_to_label[entry["url"]] = entry.get("label", "reference")
 
-    print(f"\n  {hdr(f'STYLE REFERENCES — {species_name} (auto-selected)')}")
+    total_refs = len(species_entries)
+    total_selected = len(sref_urls) + len(cref_urls)
+
+    print(f"\n  {hdr(f'REFERENCES — {species_name} (auto-selected)')}")
     print(f"  {C.DIM}" + "─" * 60 + C.RESET)
-    for i, url in enumerate(selected_urls, 1):
-        label = url_to_label.get(url, "reference")
-        short_url = url[:50] + "…" if len(url) > 50 else url
-        print(f"    {ok('+')} {C.BRIGHT_WHITE}{label}{C.RESET}")
-        print(f"      {dim(short_url)}")
-    print(f"  {dim(f'{len(selected_urls)} of {len(species_entries)} refs selected for this scene')}")
+
+    if sref_urls:
+        print(f"  {C.WHITE}--sref (skeletal/anatomy guide):{C.RESET}")
+        for url in sref_urls:
+            label = url_to_label.get(url, "reference")
+            short_url = url[:50] + "..." if len(url) > 50 else url
+            print(f"    {ok('+')} {C.BRIGHT_WHITE}{label}{C.RESET}")
+            print(f"      {dim(short_url)}")
+
+    if cref_urls:
+        print(f"  {C.WHITE}--cref (wildlife feel, --cw {cw_weight}):{C.RESET}")
+        for url in cref_urls:
+            label = url_to_label.get(url, "reference")
+            short_url = url[:50] + "..." if len(url) > 50 else url
+            print(f"    {ok('+')} {C.BRIGHT_WHITE}{label}{C.RESET}")
+            print(f"      {dim(short_url)}")
+
+    print(f"  {dim(f'{total_selected} of {total_refs} refs selected ({len(sref_urls)} sref + {len(cref_urls)} cref)')}")
+
+
+def display_sref_selection(species_name, selected_urls, species_entries):
+    """Legacy wrapper for display — used by A/B test path."""
+    display_ref_selection(species_name, selected_urls, [], DEFAULT_CW, species_entries)
 
 
 # ---------------------------------------------------------------------------
@@ -3918,10 +3980,12 @@ def ab_test_main(args) -> None:
     # Save the test
     test_id = save_ab_test(conn, species["id"], axis, ctrl_val, var_val)
 
-    # --- Context-aware sref auto-selection for A/B tests (Session 20) ---
+    # --- Context-aware dual-ref selection for A/B tests (Session 21) ---
     ab_sref_urls = []
+    ab_cref_urls = []
+    ab_cw = DEFAULT_CW
     if not args.sref:
-        ab_sref_urls = select_sref_urls(
+        ab_sref_urls, ab_cref_urls, ab_cw = select_refs(
             species["name"], output_mode, habitat, lighting_param["name"]
         )
     else:
@@ -3972,14 +4036,17 @@ def ab_test_main(args) -> None:
             quality=args.quality,
             output_mode=v_output_mode,
             placement=v_placement,
-            has_sref=bool(ab_sref_urls),
+            has_sref=bool(ab_sref_urls or ab_cref_urls),
             habitat=habitat,
         )
 
         if ab_sref_urls:
             ab_sref_joined = " ".join(ab_sref_urls)
             prompt_text += f" --sref {ab_sref_joined}"
-        if args.cref:
+        if ab_cref_urls:
+            ab_cref_joined = " ".join(ab_cref_urls)
+            prompt_text += f" --cref {ab_cref_joined}"
+        elif args.cref:
             prompt_text += f" --cref {args.cref}"
 
         title = make_title(species, v_mood, output_mode=v_output_mode)
@@ -4217,17 +4284,20 @@ def main() -> None:
     print(f"    {ok('+')} {dim('[weather]')}  {C.WHITE}{weather_param['name'].replace('_', ' ')}{C.RESET}")
     print()
 
-    # --- Context-aware sref auto-selection (Session 20) ---
-    # Now that species, mode, habitat, AND lighting are all known, auto-pick
-    # the best --sref URLs from sref_urls.json based on scene context.
+    # --- Context-aware dual-ref selection (Session 21) ---
+    # --sref: skeletal/fossil refs (anatomy guide, no texture bleed)
+    # --cref: wildlife photo refs (feel/texture at lower --cw weight)
+    # Strict habitat filtering prevents cross-contamination.
     sref_urls_list = []
+    cref_urls_list = []
+    cw_weight = DEFAULT_CW
     if not args.sref:
-        sref_urls_list = select_sref_urls(
+        sref_urls_list, cref_urls_list, cw_weight = select_refs(
             species["name"], output_mode, habitat, lighting_param["name"]
         )
         all_sref_data = load_sref_urls()
-        display_sref_selection(
-            species["name"], sref_urls_list,
+        display_ref_selection(
+            species["name"], sref_urls_list, cref_urls_list, cw_weight,
             all_sref_data.get(species["name"], [])
         )
     else:
@@ -4248,7 +4318,7 @@ def main() -> None:
         quality=args.quality,
         output_mode=output_mode,
         placement=placement,
-        has_sref=bool(sref_urls_list),
+        has_sref=bool(sref_urls_list or cref_urls_list),
         habitat=habitat,
         secondary_species=secondary_species,
         interaction_type=interaction_type,
@@ -4263,7 +4333,10 @@ def main() -> None:
     if sref_urls_list:
         sref_joined = " ".join(sref_urls_list)
         prompt_text += f" --sref {sref_joined}"
-    if args.cref:
+    if cref_urls_list:
+        cref_joined = " ".join(cref_urls_list)
+        prompt_text += f" --cref {cref_joined}"
+    elif args.cref:
         prompt_text += f" --cref {args.cref}"
 
     # --- Build fix prompts ---
@@ -4290,9 +4363,12 @@ def main() -> None:
     print(f"\n  {C.WHITE}Title :{C.RESET} {C.BRIGHT_WHITE}{title}{C.RESET}")
     print(f"  {C.WHITE}Tags  :{C.RESET} {dim(tags)}")
     if sref_urls_list:
-        sref_display = f"{len(sref_urls_list)} URLs auto-selected"
+        sref_display = f"{len(sref_urls_list)} skeletal refs"
         print(f"  {C.WHITE}sref  :{C.RESET} {dim(sref_display)}")
-    if args.cref:
+    if cref_urls_list:
+        cref_display = f"{len(cref_urls_list)} wildlife refs (--cw {cw_weight})"
+        print(f"  {C.WHITE}cref  :{C.RESET} {dim(cref_display)}")
+    elif args.cref:
         print(f"  {C.WHITE}cref  :{C.RESET} {dim(args.cref)}")
     print()
     validate_prompt(prompt_text, allow_mj_params=True,  label="STEP 1 main")
