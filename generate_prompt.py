@@ -2330,6 +2330,27 @@ def select_mode(habitat: str) -> str:
         print(f"  {err(f'Please enter a number between 1 and {len(keys)}.')}")
 
 
+def select_perspective() -> str:
+    """Ask the user for camera angle/perspective. Returns a key from CAMERA_PERSPECTIVES."""
+    keys = list(CAMERA_PERSPECTIVES.keys())
+    print(f"\n  {hdr('Camera perspective')}")
+    print(f"  {C.DIM}" + "─" * 60 + C.RESET)
+    for i, key in enumerate(keys, 1):
+        cfg = CAMERA_PERSPECTIVES[key]
+        print(f"  {C.DIM}{i:>2}.{C.RESET}  {opt(cfg['display'])}")
+    print()
+    while True:
+        raw = input(f"  {C.BOLD_CYAN}Choose 1–{len(keys)} (Enter for default):{C.RESET} ").strip()
+        if raw == "":
+            print(f"  {ok('✓')} {ok('Default (mode built-in angle)')}\n")
+            return "default"
+        if raw.isdigit() and 1 <= int(raw) <= len(keys):
+            chosen_key = keys[int(raw) - 1]
+            print(f"  {ok('✓')} {ok(CAMERA_PERSPECTIVES[chosen_key]['display'])}\n")
+            return chosen_key
+        print(f"  {err(f'Please enter a number between 1 and {len(keys)}, or press Enter.')}")
+
+
 def select_canvas_placement() -> tuple[str, str]:
     """Ask how the animal is positioned in frame.
     Returns (composition_phrase, space_side).
