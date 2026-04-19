@@ -44,6 +44,10 @@ CAMERA_PERSPECTIVES = {
         "display": "Drone / elevated 45° — angled down",
         "lead":    "drone photograph from 20m altitude at 45-degree angle looking down, elevated perspective, ground visible around animal, slight horizon",
     },
+    "epic_aerial": {
+        "display": "Epic aerial — vast landscape, animal small in frame",
+        "lead":    "epic aerial photograph from 200m altitude, vast sweeping landscape dominates the frame, ultra-wide establishing shot, animals tiny in the environment, enormous scale, cinematic landscape photography, shot on ultra-wide 14mm lens",
+    },
     "ground_level": {
         "display": "Ground level — eye height with animal",
         "lead":    "camera at animal eye level on the ground, low angle, ground surface visible in foreground, horizon at eye height",
@@ -3145,8 +3149,8 @@ def assemble_prompt(
         perspective_lead = CAMERA_PERSPECTIVES["drone_overhead"]["lead"]
 
     if perspective_lead:
-        # Perspective-first assembly: angle → subject → environment → lighting
-        sections = [perspective_lead, subject, environment, lighting]
+        # Perspective-first assembly: angle → subject → environment → details → lighting
+        sections = [perspective_lead, subject, camera, environment, interaction, lighting]
     elif wide_mode:
         sections = [subject, camera, environment, lighting, interaction]
     else:
