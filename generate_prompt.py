@@ -3327,31 +3327,23 @@ def print_prompt_box(prompt_text: str) -> None:
 
 
 SREF_FILE = Path(__file__).parent / "sref_urls.json"
+PALEOART_FILE = Path(__file__).parent / "paleoart_refs.json"
 
 # ---------------------------------------------------------------------------
-# Style-ref system: --sref (wildlife photos ONLY)
+# Reference system: 3-layer approach (Session 23)
 # ---------------------------------------------------------------------------
-# Session 22 overhaul — lesson learned:
-#   --sref copies VISUAL STYLE → skeletal photos made outputs look like fossils
-#   --cref copies LIKENESS     → shark photos made Mosasaurus look like a shark
+#   Layer 1 — --sref (wildlife photos): photographic style, lighting, texture
+#   Layer 2 — --cref (paleoart renditions): what the animal LOOKS LIKE alive
+#   Layer 3 — --cref fallback (skeletal diagrams): body proportions if no paleoart
 #
-# New approach:
-#   --sref: wildlife/nature photography ONLY → guides photographic feel, skin
-#           texture style, lighting quality — NOT literal likeness transfer
-#   --cref: REMOVED — too literal; bleeds reference animal appearance
-#   skeletal: REMOVED from refs — anatomy already encoded in text prompts via
-#             species modules (SkullAnatomy, LimbStructure, mj_shorthand, etc.)
-#
-# Wildlife --sref gives MJ the "real National Geographic photography" feel
-# without forcing the dinosaur to look like the reference animal.
-MAX_SREF_URLS = 2   # wildlife photo refs for --sref (style guide, less = less bleed)
-MAX_CREF_URLS = 1   # --cref: skeletal ref for anatomical proportions/silhouette
-DEFAULT_CW = 10     # --cw 10: very subtle likeness transfer — body proportions
-                    # only, NOT visual style. Keeps animal alive-looking while
-                    # guiding MJ on correct limb ratios, skull shape, body plan.
-DEFAULT_SW = 20     # --sw (style weight): how much --sref influences output
-                    # Default 100 is WAY too strong — copies ref animal appearance.
-                    # 20 = subtle photographic feel without shape/texture takeover.
+# The key insight: --sref copies VISUAL STYLE, --cref copies LIKENESS.
+# Wildlife --sref → "real National Geographic photography" feel
+# Paleoart --cref → correct morphology (NOT a crocodile, NOT a shark)
+# Skeletal --cref → body proportions fallback when paleoart unavailable
+MAX_SREF_URLS = 2   # wildlife photo refs for --sref (style guide)
+MAX_CREF_URLS = 1   # paleoart or skeletal ref for --cref (likeness/morphology)
+DEFAULT_CW = 10     # unused in MJ v7 but kept for reference
+DEFAULT_SW = 20     # --sw (style weight): subtle photographic feel
 
 # ---------------------------------------------------------------------------
 # Habitat → allowed ref categories (strict filtering)
@@ -3367,12 +3359,12 @@ HABITAT_ALLOWED_CATEGORIES = {
     "plant":       {"paleo_plant"},
 }
 
-# Categories EXCLUDED from --sref selection — skeletal/fossil images make MJ
-# render the output as a literal skeleton when used as style ref.
-# Skeletal refs are now used via --cref at low --cw for anatomical proportions.
-SREF_EXCLUDED_CATEGORIES = {"skeletal"}
+# Categories EXCLUDED from --sref selection — skeletal and paleoart should NOT
+# be used as style refs (makes output look like a fossil or a painting).
+SREF_EXCLUDED_CATEGORIES = {"skeletal", "paleoart"}
 
-# Category used ONLY for --cref (anatomical silhouette/proportions)
+# Categories used for --cref (likeness): paleoart preferred, skeletal fallback
+CREF_PALEOART_CATEGORY = "paleoart"
 CREF_SKELETAL_CATEGORY = "skeletal"
 
 # ---------------------------------------------------------------------------
@@ -3470,6 +3462,14 @@ def load_sref_urls():
     if not SREF_FILE.exists():
         return {}
     with open(SREF_FILE) as f:
+        return json.load(f)
+
+
+def load_paleoart_refs():
+    """Load species → [{label, url}, ...] paleoart mapping."""
+    if not PALEOART_FILE.exists():
+        return {}
+    with open(PALEOART_FILE) as f:
         return json.load(f)
 
 
@@ -3603,15 +3603,27 @@ def select_refs(species_name, output_mode, habitat, lighting_name):
 
     sref_urls = _pick_from_cats(sref_priority, MAX_SREF_URLS)
 
-    # --cref: skeletal refs for anatomical proportions (Session 23 re-enable)
-    # Low --cw (10) transfers body silhouette/proportions without fossil aesthetic.
-    # Wildlife --sref keeps the photographic style; skeletal --cref keeps anatomy.
+    # --cref: paleoart (preferred) or skeletal (fallback) for likeness/morphology
+    # Paleoart shows the animal ALIVE with correct morphology — prevents MJ from
+    # making a Mosasaurus look like a crocodile or a Quetzalcoatlus look like a stork.
+    # Skeletal fallback provides body proportions when no paleoart available.
     cref_urls = []
-    if MAX_CREF_URLS > 0 and skeletal_entries:
-        picked = random.sample(skeletal_entries, min(MAX_CREF_URLS, len(skeletal_entries)))
-        cref_urls = [e["url"] if isinstance(e, dict) else e for e in picked]
+    cref_source = ""  # for display: "paleoart" or "skeletal"
+    if MAX_CREF_URLS > 0:
+        # Try paleoart first (from paleoart_refs.json — Wikimedia direct URLs)
+        paleoart_data = load_paleoart_refs()
+        paleoart_entries = paleoart_data.get(species_name, [])
+        if paleoart_entries:
+            picked = random.sample(paleoart_entries, min(MAX_CREF_URLS, len(paleoart_entries)))
+            cref_urls = [e["url"] if isinstance(e, dict) else e for e in picked]
+            cref_source = "paleoart"
+        elif skeletal_entries:
+            # Fallback to skeletal (from sref_urls.json, already on Discord CDN)
+            picked = random.sample(skeletal_entries, min(MAX_CREF_URLS, len(skeletal_entries)))
+            cref_urls = [e["url"] if isinstance(e, dict) else e for e in picked]
+            cref_source = "skeletal"
 
-    return sref_urls, cref_urls, DEFAULT_CW
+    return sref_urls, cref_urls, cref_source
 
 
 # Back-compat wrapper for any callers still using the old API
@@ -3621,8 +3633,8 @@ def select_sref_urls(species_name, output_mode, habitat, lighting_name):
     return sref + cref
 
 
-def display_ref_selection(species_name, sref_urls, cref_urls, cw_weight, species_entries):
-    """Print the auto-selected --sref URLs with labels for user visibility."""
+def display_ref_selection(species_name, sref_urls, cref_urls, cref_source, species_entries):
+    """Print the auto-selected --sref and --cref URLs with labels."""
     if not sref_urls and not cref_urls:
         return
 
@@ -3647,7 +3659,8 @@ def display_ref_selection(species_name, sref_urls, cref_urls, cw_weight, species
             print(f"      {dim(short_url)}")
 
     if cref_urls:
-        print(f"  {C.WHITE}--cref (skeletal anatomy):{C.RESET}")
+        source_label = "paleoart rendition" if cref_source == "paleoart" else "skeletal anatomy"
+        print(f"  {C.WHITE}--cref ({source_label}):{C.RESET}")
         for url in cref_urls:
             label = url_to_label.get(url, "skeletal reference")
             short_url = url[:50] + "..." if len(url) > 50 else url
@@ -3655,7 +3668,8 @@ def display_ref_selection(species_name, sref_urls, cref_urls, cw_weight, species
             print(f"      {dim(short_url)}")
 
     skel_count = len(cref_urls)
-    print(f"  {dim(f'{total_selected} wildlife --sref (--sw {DEFAULT_SW}) + {skel_count} skeletal --cref')}")
+    src = cref_source or "none"
+    print(f"  {dim(f'{total_selected} wildlife --sref (--sw {DEFAULT_SW}) + {skel_count} {src} --cref')}")
 
 
 def display_sref_selection(species_name, selected_urls, species_entries):
@@ -4090,9 +4104,9 @@ def ab_test_main(args) -> None:
     # --- Context-aware dual-ref selection for A/B tests (Session 21) ---
     ab_sref_urls = []
     ab_cref_urls = []
-    ab_cw = DEFAULT_CW
+    ab_cref_source = ""
     if not args.sref:
-        ab_sref_urls, ab_cref_urls, ab_cw = select_refs(
+        ab_sref_urls, ab_cref_urls, ab_cref_source = select_refs(
             species["name"], output_mode, habitat, lighting_param["name"]
         )
     else:
@@ -4393,20 +4407,19 @@ def main() -> None:
     print(f"    {ok('+')} {dim('[weather]')}  {C.WHITE}{weather_param['name'].replace('_', ' ')}{C.RESET}")
     print()
 
-    # --- Context-aware wildlife style refs (Session 22 overhaul) ---
-    # --sref: wildlife photos ONLY → photographic style guide
-    # --cref: DISABLED — too literal, bleeds reference animal likeness
-    # Skeletal refs excluded — anatomy encoded in text prompts already.
+    # --- Context-aware refs (Session 23: 3-layer system) ---
+    # --sref: wildlife photos → photographic style guide
+    # --cref: paleoart renditions → correct morphology (or skeletal fallback)
     sref_urls_list = []
     cref_urls_list = []
-    cw_weight = DEFAULT_CW
+    cref_source = ""
     if not args.sref:
-        sref_urls_list, cref_urls_list, cw_weight = select_refs(
+        sref_urls_list, cref_urls_list, cref_source = select_refs(
             species["name"], output_mode, habitat, lighting_param["name"]
         )
         all_sref_data = load_sref_urls()
         display_ref_selection(
-            species["name"], sref_urls_list, cref_urls_list, cw_weight,
+            species["name"], sref_urls_list, cref_urls_list, cref_source,
             all_sref_data.get(species["name"], [])
         )
     else:
@@ -4480,7 +4493,7 @@ def main() -> None:
         sref_display = f"{len(sref_urls_list)} wildlife refs (--sw {DEFAULT_SW})"
         print(f"  {C.WHITE}sref  :{C.RESET} {dim(sref_display)}")
     if cref_urls_list:
-        cref_display = f"{len(cref_urls_list)} skeletal refs"
+        cref_display = f"{len(cref_urls_list)} {cref_source} refs"
         print(f"  {C.WHITE}cref  :{C.RESET} {dim(cref_display)}")
     elif args.cref:
         print(f"  {C.WHITE}cref  :{C.RESET} {dim(args.cref)}")
