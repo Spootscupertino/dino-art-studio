@@ -3647,7 +3647,7 @@ def display_ref_selection(species_name, sref_urls, cref_urls, cw_weight, species
             print(f"      {dim(short_url)}")
 
     if cref_urls:
-        print(f"  {C.WHITE}--cref (skeletal anatomy, --cw {DEFAULT_CW}):{C.RESET}")
+        print(f"  {C.WHITE}--cref (skeletal anatomy):{C.RESET}")
         for url in cref_urls:
             label = url_to_label.get(url, "skeletal reference")
             short_url = url[:50] + "..." if len(url) > 50 else url
@@ -3655,7 +3655,7 @@ def display_ref_selection(species_name, sref_urls, cref_urls, cw_weight, species
             print(f"      {dim(short_url)}")
 
     skel_count = len(cref_urls)
-    print(f"  {dim(f'{total_selected} wildlife --sref (--sw {DEFAULT_SW}) + {skel_count} skeletal --cref (--cw {DEFAULT_CW})')}")
+    print(f"  {dim(f'{total_selected} wildlife --sref (--sw {DEFAULT_SW}) + {skel_count} skeletal --cref')}")
 
 
 def display_sref_selection(species_name, selected_urls, species_entries):
@@ -4447,7 +4447,7 @@ def main() -> None:
     # --cref: skeletal refs for anatomical proportions (low --cw)
     if cref_urls_list:
         cref_joined = " ".join(cref_urls_list)
-        prompt_text += f" --cref {cref_joined} --cw {cw_weight}"
+        prompt_text += f" --cref {cref_joined}"
     elif args.cref:
         prompt_text += f" --cref {args.cref}"
 
@@ -4480,7 +4480,7 @@ def main() -> None:
         sref_display = f"{len(sref_urls_list)} wildlife refs (--sw {DEFAULT_SW})"
         print(f"  {C.WHITE}sref  :{C.RESET} {dim(sref_display)}")
     if cref_urls_list:
-        cref_display = f"{len(cref_urls_list)} skeletal refs (--cw {cw_weight})"
+        cref_display = f"{len(cref_urls_list)} skeletal refs"
         print(f"  {C.WHITE}cref  :{C.RESET} {dim(cref_display)}")
     elif args.cref:
         print(f"  {C.WHITE}cref  :{C.RESET} {dim(args.cref)}")
