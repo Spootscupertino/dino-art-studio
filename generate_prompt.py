@@ -3345,8 +3345,10 @@ SREF_FILE = Path(__file__).parent / "sref_urls.json"
 # Wildlife --sref gives MJ the "real National Geographic photography" feel
 # without forcing the dinosaur to look like the reference animal.
 MAX_SREF_URLS = 2   # wildlife photo refs for --sref (style guide, less = less bleed)
-MAX_CREF_URLS = 0   # --cref DISABLED — too literal, causes likeness bleed
-DEFAULT_CW = 50     # kept for backward compat but unused
+MAX_CREF_URLS = 1   # --cref: skeletal ref for anatomical proportions/silhouette
+DEFAULT_CW = 10     # --cw 10: very subtle likeness transfer — body proportions
+                    # only, NOT visual style. Keeps animal alive-looking while
+                    # guiding MJ on correct limb ratios, skull shape, body plan.
 DEFAULT_SW = 20     # --sw (style weight): how much --sref influences output
                     # Default 100 is WAY too strong — copies ref animal appearance.
                     # 20 = subtle photographic feel without shape/texture takeover.
@@ -3365,10 +3367,13 @@ HABITAT_ALLOWED_CATEGORIES = {
     "plant":       {"paleo_plant"},
 }
 
-# Categories EXCLUDED from all ref selection — skeletal/fossil images make MJ
-# render the output as a literal skeleton/statue.  Anatomy is already encoded
-# in the text-based species modules.
-EXCLUDED_CATEGORIES = {"skeletal"}
+# Categories EXCLUDED from --sref selection — skeletal/fossil images make MJ
+# render the output as a literal skeleton when used as style ref.
+# Skeletal refs are now used via --cref at low --cw for anatomical proportions.
+SREF_EXCLUDED_CATEGORIES = {"skeletal"}
+
+# Category used ONLY for --cref (anatomical silhouette/proportions)
+CREF_SKELETAL_CATEGORY = "skeletal"
 
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
@@ -3500,14 +3505,18 @@ def select_refs(species_name, output_mode, habitat, lighting_name):
     allowed = HABITAT_ALLOWED_CATEGORIES.get(habitat, HABITAT_ALLOWED_CATEGORIES["terrestrial"])
 
     # Build category → [url_entries] index, filtered by habitat + exclusions
-    cat_index = {}
+    cat_index = {}       # wildlife refs (for --sref)
+    skeletal_entries = [] # skeletal refs (for --cref)
     for entry in species_entries:
         if isinstance(entry, dict):
             cat = _extract_category(entry.get("label", ""))
         else:
             cat = ""
-        if cat in EXCLUDED_CATEGORIES:
-            continue  # skeletal/fossil refs excluded entirely
+        if cat == CREF_SKELETAL_CATEGORY:
+            skeletal_entries.append(entry)  # collect for --cref
+            continue
+        if cat in SREF_EXCLUDED_CATEGORIES:
+            continue
         if cat in BIRD_CATEGORIES:
             continue  # bird refs excluded — make dinosaurs look like birds
         if cat and cat not in allowed:
@@ -3566,27 +3575,27 @@ def select_refs(species_name, output_mode, habitat, lighting_name):
 
     # 1. Mouth/claw emphasis: detail categories first (hardest MJ features)
     for cat in MOUTH_CLAW_PRIORITY_CATEGORIES:
-        if cat in allowed and cat not in EXCLUDED_CATEGORIES and cat not in sref_priority:
+        if cat in allowed and cat not in SREF_EXCLUDED_CATEGORIES and cat not in sref_priority:
             sref_priority.append(cat)
 
     # 2. Habitat injection
     for cat in SREF_HABITAT_INJECT.get(habitat, []):
-        if cat not in EXCLUDED_CATEGORIES and cat not in sref_priority:
+        if cat not in SREF_EXCLUDED_CATEGORIES and cat not in sref_priority:
             sref_priority.append(cat)
 
     # 3. Mode-based priorities
     for cat in SREF_MODE_PRIORITY.get(output_mode, []):
-        if cat not in EXCLUDED_CATEGORIES and cat not in sref_priority:
+        if cat not in SREF_EXCLUDED_CATEGORIES and cat not in sref_priority:
             sref_priority.append(cat)
 
     # 4. Lighting bonus
     for cat in SREF_LIGHTING_BONUS.get(lighting_name, []):
-        if cat not in EXCLUDED_CATEGORIES and cat not in sref_priority:
+        if cat not in SREF_EXCLUDED_CATEGORIES and cat not in sref_priority:
             sref_priority.append(cat)
 
     # 5. Any remaining non-excluded categories
     for cat in cat_index:
-        if cat and cat not in EXCLUDED_CATEGORIES and cat not in sref_priority:
+        if cat and cat not in SREF_EXCLUDED_CATEGORIES and cat not in sref_priority:
             sref_priority.append(cat)
 
     # Filter to only habitat-allowed categories
@@ -3594,8 +3603,13 @@ def select_refs(species_name, output_mode, habitat, lighting_name):
 
     sref_urls = _pick_from_cats(sref_priority, MAX_SREF_URLS)
 
-    # --cref disabled (Session 22) — too literal, bleeds reference animal appearance
+    # --cref: skeletal refs for anatomical proportions (Session 23 re-enable)
+    # Low --cw (10) transfers body silhouette/proportions without fossil aesthetic.
+    # Wildlife --sref keeps the photographic style; skeletal --cref keeps anatomy.
     cref_urls = []
+    if MAX_CREF_URLS > 0 and skeletal_entries:
+        picked = random.sample(skeletal_entries, min(MAX_CREF_URLS, len(skeletal_entries)))
+        cref_urls = [e["url"] if isinstance(e, dict) else e for e in picked]
 
     return sref_urls, cref_urls, DEFAULT_CW
 
@@ -3632,7 +3646,16 @@ def display_ref_selection(species_name, sref_urls, cref_urls, cw_weight, species
             print(f"    {ok('+')} {C.BRIGHT_WHITE}{label}{C.RESET}")
             print(f"      {dim(short_url)}")
 
-    print(f"  {dim(f'{total_selected} of {total_refs} refs selected (wildlife --sref --sw {DEFAULT_SW}, skeletal/bird excluded)')}")
+    if cref_urls:
+        print(f"  {C.WHITE}--cref (skeletal anatomy, --cw {DEFAULT_CW}):{C.RESET}")
+        for url in cref_urls:
+            label = url_to_label.get(url, "skeletal reference")
+            short_url = url[:50] + "..." if len(url) > 50 else url
+            print(f"    {ok('+')} {C.BRIGHT_WHITE}{label}{C.RESET}")
+            print(f"      {dim(short_url)}")
+
+    skel_count = len(cref_urls)
+    print(f"  {dim(f'{total_selected} wildlife --sref (--sw {DEFAULT_SW}) + {skel_count} skeletal --cref (--cw {DEFAULT_CW})')}")
 
 
 def display_sref_selection(species_name, selected_urls, species_entries):
@@ -4421,9 +4444,11 @@ def main() -> None:
     if sref_urls_list:
         sref_joined = " ".join(sref_urls_list)
         prompt_text += f" --sref {sref_joined} --sw {DEFAULT_SW}"
-    # --cref disabled: bleeds reference animal likeness onto dinosaur output
-    # Manual CLI --cref still honored if user explicitly passes one
-    if args.cref:
+    # --cref: skeletal refs for anatomical proportions (low --cw)
+    if cref_urls_list:
+        cref_joined = " ".join(cref_urls_list)
+        prompt_text += f" --cref {cref_joined} --cw {cw_weight}"
+    elif args.cref:
         prompt_text += f" --cref {args.cref}"
 
     # --- Build fix prompts ---
@@ -4452,10 +4477,10 @@ def main() -> None:
     print(f"\n  {C.WHITE}Title :{C.RESET} {C.BRIGHT_WHITE}{title}{C.RESET}")
     print(f"  {C.WHITE}Tags  :{C.RESET} {dim(tags)}")
     if sref_urls_list:
-        sref_display = f"{len(sref_urls_list)} skeletal refs"
+        sref_display = f"{len(sref_urls_list)} wildlife refs (--sw {DEFAULT_SW})"
         print(f"  {C.WHITE}sref  :{C.RESET} {dim(sref_display)}")
     if cref_urls_list:
-        cref_display = f"{len(cref_urls_list)} wildlife refs (--cw {cw_weight})"
+        cref_display = f"{len(cref_urls_list)} skeletal refs (--cw {cw_weight})"
         print(f"  {C.WHITE}cref  :{C.RESET} {dim(cref_display)}")
     elif args.cref:
         print(f"  {C.WHITE}cref  :{C.RESET} {dim(args.cref)}")
