@@ -1,3 +1,7 @@
+---
+import Hero from '../components/Hero.astro';
+import Gallery from '../components/Gallery.astro';
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +9,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jurassinkart — Prehistoric Art That Feels Alive</title>
   <meta name="description" content="Cinematic dinosaur artwork inspired by ancient jungles, deep oceans, and primeval skies. Shop prints at Jurassinkart." />
-  <style>
+  <style is:global>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -187,53 +191,10 @@
 <body>
 
   <!-- ── Hero with looping video ── -->
-  <section class="hero">
-    <video autoplay loop muted playsinline>
-      <source src="assets/forest-canopy-loop.mp4" type="video/mp4" />
-    </video>
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <h1>Prehistoric art that feels alive.</h1>
-      <p>
-        Cinematic dinosaur artwork inspired by ancient jungles, deep oceans,
-        and primeval skies. Every piece is made to spark curiosity, stir
-        imagination, and bring a little wonder to your wall.
-      </p>
-      <a class="btn" href="https://www.etsy.com/shop/Jurassinkart" target="_blank" rel="noopener">Shop the Collection</a>
-    </div>
-  </section>
+  <Hero />
 
   <!-- ── Gallery ── -->
-  <section class="gallery">
-    <h2>Featured Works</h2>
-    <div class="gallery-grid">
-
-      <div class="gallery-item">
-        <img src="assets/spootscupertino_deep_teal_and_blue_color_grading_with_golden_su_79abce6a-7013-47ff-9f07-36a22a5bedee.png" alt="Marine reptile gliding through shafts of light in a kelp forest" />
-        <div class="gallery-caption">
-          <h3>Kelp Cathedral</h3>
-          <p>A giant from another age drifts through deep blue water and columns of light.</p>
-        </div>
-      </div>
-
-      <div class="gallery-item">
-        <img src="assets/spootscupertino_high_micro_detail_scratches_cracks_uneven_ename_446282af-5fc4-4f17-83cd-ea9caa6926b3.png" alt="Extreme close-up of dinosaur teeth and jaw detail" />
-        <div class="gallery-caption">
-          <h3>Jurassic Understory</h3>
-          <p>Step into a tiny world that feels ancient, wild, and full of secrets.</p>
-        </div>
-      </div>
-
-      <div class="gallery-item">
-        <img src="assets/spootscupertino_extreme_macro_herbivorous_dinosaur_eye_hyper_de_af864357-cb79-4eff-8ddb-72c46fc56de7.png" alt="Close-up of a dinosaur eye reflecting a roaring T. rex" />
-        <div class="gallery-caption">
-          <h3>Eye of the Predator</h3>
-          <p>A close-up moment with a dinosaur that feels curious, powerful, and unforgettable.</p>
-        </div>
-      </div>
-
-    </div>
-  </section>
+  <Gallery />
 
   <!-- ── World ── -->
   <section class="world">

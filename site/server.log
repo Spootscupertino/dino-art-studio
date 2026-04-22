@@ -1,0 +1,12 @@
+
+> temp@0.0.1 dev
+> astro dev --host
+
+[vite] connected.
+11:44:28 [types] Generated 0ms
+11:44:28 [WARN] [content] Content config not loaded
+ astro  v6.1.8 ready in 512 ms
+┃ Local    http://localhost:4321/
+┃ Network  http://10.0.0.252:4321/
+11:44:28 watching for file changes...
+11:44:28 [200] / 10ms
