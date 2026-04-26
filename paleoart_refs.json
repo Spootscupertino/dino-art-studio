@@ -1,8 +1,9 @@
 {
   "Tyrannosaurus rex": [
-    {"label": "paleoart/T_rex_profile_steveoc86.png", "url": "https://upload.wikimedia.org/wikipedia/commons/1/15/Tyrannosaurus-rex-Profile-steveoc86.png"},
-    {"label": "paleoart/T_rex_colored_pencil.jpg", "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Tyrannosaurus_rex_colored_pencil_drawing.jpg"},
-    {"label": "paleoart/T_rex_illustration.jpg", "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Tyrannosaurus_illustration.jpg"}
+    {"label": "paleoart/T_rex_witton_2013.png", "url": "https://upload.wikimedia.org/wikipedia/commons/a/a6/Tyrannosaurus_by_Mark_P._Witton.png"},
+    {"label": "paleoart/T_rex_STAN_head_fabiosauria.jpg", "url": "https://upload.wikimedia.org/wikipedia/commons/c/cc/STAN_BHI_3033_head_life_restoration.jpg"},
+    {"label": "paleoart/T_rex_rising_caneer2021.png", "url": "https://upload.wikimedia.org/wikipedia/commons/5/59/T._rex_rising_%28Caneer_et.al._2021%29.png"},
+    {"label": "paleoart/T_rex_sue_skeletal_LMR2016.png", "url": "https://upload.wikimedia.org/wikipedia/commons/1/14/Tyrannosaurus_2016_LMR.png"}
   ],
   "Triceratops": [
     {"label": "paleoart/Triceratops_liveDB.jpg", "url": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Triceratops_liveDB.jpg"},

@@ -1,5 +1,33 @@
 # RECAP — Dinosaur Art Prompt Generator
 
+---
+
+### Session 24 — T. rex paleoart refs replaced (2026-04-26)
+
+**What changed:** All three Tyrannosaurus rex entries in `paleoart_refs.json` replaced; one new entry added (4 refs total, up from 3).
+
+| Old label | Old URL | Reason removed |
+|-----------|---------|----------------|
+| `T_rex_profile_steveoc86.png` | `Tyrannosaurus-rex-Profile-steveoc86.png` | Low-quality profile sketch; no scientific publication backing; poor resolution for cref use |
+| `T_rex_colored_pencil.jpg` | `Tyrannosaurus_rex_colored_pencil_drawing.jpg` | Amateur colored pencil medium; illustrative not photorealistic; no anatomical source cited |
+| `T_rex_illustration.jpg` | `Tyrannosaurus_illustration.jpg` | Generic illustration; artist and anatomical basis unknown |
+
+| New label | New URL | Reason added |
+|-----------|---------|--------------|
+| `T_rex_witton_2013.png` | `Tyrannosaurus_by_Mark_P._Witton.png` | Mark P. Witton, published in Acta Palaeontologica Polonica; credentialed paleoartist-scientist; 1810×1160, CC BY 2.0 |
+| `T_rex_STAN_head_fabiosauria.jpg` | `STAN_BHI_3033_head_life_restoration.jpg` | Fabio Pastori (Fabiosauria); based on STAN specimen BHI 3033 with Nature paper references; 4032×3024 (highest res); excellent cref for skull/facial anatomy |
+| `T_rex_rising_caneer2021.png` | `T._rex_rising_(Caneer_et.al._2021).png` | Based on Caneer et al. 2021 trackway evidence for T. rex rising from rest; 2937×1656; lipped; only evidence-based behavioral pose ref in the set |
+| `T_rex_sue_skeletal_LMR2016.png` | `Tyrannosaurus_2016_LMR.png` | Based on Sue (FMNH PR2081) skeletal with Larramendi/Molina-Pérez peer review; 2652×956; clean full-body lateral for body proportions |
+
+**Evidence basis for exclusions:**
+- RJ Palmer (`Rjpalmer_tyrannosaurusrex`) — Commons accuracy flag: "too extensively feathered." Contradicts Bell et al. 2017 (PLOS Biology) which confirmed adult T. rex integument as pebbly mosaic scales at neck, abdomen, hips, tail base — no feather evidence.
+- Matt Martyniuk (`Tyrannosaurus_rex_mmartyniuk`) — explicitly "feathering at lower plausible extreme" per file description. Same Bell et al. conflict.
+- Durbed (`Tyrannosaurus_rex_by_durbed`) — "minimal feathers based on phylogenetic bracketing." Phylogenetic inference overridden by direct skin evidence per Bell et al.
+
+**Next step:** Re-run `upload_refs.py` for Tyrannosaurus rex entries to push the 4 new Wikimedia URLs through to Discord CDN → `sref_urls.json`. The old Discord CDN URLs for T. rex paleoart are now stale.
+
+---
+
 ## System
 - **Machine:** Mac mini, Terminal, Python 3.9.6
 - **Main files:** `/Users/ericeldridge/dino_art/`

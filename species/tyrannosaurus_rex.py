@@ -1,4 +1,14 @@
-"""Tyrannosaurus rex — scientifically accurate anatomy module."""
+"""Tyrannosaurus rex — scientifically accurate anatomy module.
+
+Integument hypothesis: hybrid scaly + sparse dorsal filaments.
+Direct evidence: Bell et al. 2017 (Biology Letters) — scale impressions
+from neck, pelvis, and tail of multiple tyrannosaurines (T. rex, Tarbosaurus,
+Albertosaurus, Daspletosaurus, Gorgosaurus). All scaly, no feather impressions.
+Inference: Yutyrannus huali (earlier tyrannosauroid) had extensive filaments,
+so a sparse retained dorsal-midline filament ridge is defensible as a display
+structure in unsampled body regions. Body is otherwise scaly and pebbly,
+comparable to a Komodo dragon or Nile crocodile.
+"""
 
 from species.base import (
     SpeciesAnatomy, SkullAnatomy, DentitionProfile, LimbStructure,
@@ -34,9 +44,9 @@ ANATOMY = SpeciesAnatomy(
     ),
 
     integument=Integument(
-        primary_covering="dense filamentous proto-feathers over body, longer display plumes on arms and tail, bare scaly skin on snout and lower legs",
-        texture_detail="shaggy hair-like filaments like cassowary body feathers, coarser quilled plumes along dorsal ridge and arms",
-        special_structures="iridescent display plumes on forearms and tail fan, bare facial skin with pebbly texture like vulture or cassowary head",
+        primary_covering="predominantly scaly hide across body, pebbly skin texture on flanks, belly, and tail; sparse coarse filamentous ridge along dorsal midline (nape to mid-back) as display structure; bare pebbly skin on head and lower legs",
+        texture_detail="tight pebbly non-overlapping scales like Komodo dragon or Nile crocodile across most of body, coarse dark hair-like filaments only along dorsal ridge from nape to shoulders, scaly hide elsewhere — Bell et al. 2017 skin impressions",
+        special_structures="sparse dark dorsal filament ridge as low display structure (think bristle-mane, not plumes), bare pebbly facial skin with possible flushed coloration like cassowary or vulture head, no feathers on arms or tail",
     ),
 
     body=BodyProportions(
@@ -45,13 +55,13 @@ ANATOMY = SpeciesAnatomy(
         build="massive deep-chested body, enormous skull relative to body, powerful haunches, robust and muscular throughout",
         neck="short thick muscular S-curved neck supporting massive skull",
         tail="long heavy muscular tail held rigidly horizontal as counterbalance — caudofemoralis muscle powered locomotion",
-        silhouette="massive feathered bipedal predator with giant skull, tiny arms, thick horizontal tail, deep chest",
+        silhouette="massive scaly bipedal predator with giant skull, tiny arms, thick horizontal tail, deep chest, sparse dark dorsal filament ridge along back",
         size_comparison="12m long, 4m at hip, 8+ tonnes — one of the largest land predators ever",
     ),
 
     coloration=ColorationEvidence(
-        likely_pattern="earth-toned plumage like golden eagle — dark brown dorsal feathers, tawny underside, countershaded",
-        display_structures="iridescent sheen on display plumes like crow or starling, bare facial skin flushed red-orange like cassowary wattle",
+        likely_pattern="earth-toned scaly hide — dark olive-brown to slate-grey dorsal scales, tawny or buff underbelly, countershaded like a Nile crocodile or large monitor lizard",
+        display_structures="dark dorsal filament ridge in contrasting tone, bare facial skin flushed red-orange or rust like cassowary wattle, possible facial markings around orbits and snout",
     ),
 
     locomotion=LocomotionProfile(
@@ -73,14 +83,17 @@ ANATOMY = SpeciesAnatomy(
         "tail held rigidly horizontal as active counterbalance — NEVER dragging on the ground",
         "lips probable — teeth not permanently exposed; keratinous lip tissue covered teeth when mouth closed",
         "no pronated wrists — palms face inward (clapping position), NOT downward",
+        "predominantly scaly hide per Bell et al. 2017 skin impressions — NOT fully feathered like Yutyrannus",
     ],
 
     mj_shorthand=[
         "massive deep skull with binocular eyes",
         "tiny two-fingered arms",
-        "dense shaggy proto-feathers like cassowary plumage",
-        "earth-toned brown feathers with iridescent sheen",
-        "thick horizontal feathered tail as counterbalance",
+        "tight pebbly scaly hide like Komodo dragon or Nile crocodile",
+        "earth-toned olive-brown scales, countershaded with tawny underbelly",
+        "sparse dark filamentous ridge along dorsal midline only",
+        "bare pebbly facial skin flushed red-orange like cassowary head",
+        "thick horizontal scaly tail as counterbalance",
         "powerful pillar-like biped legs with bare scaly feet",
         "12m long bus-sized predator",
     ],
@@ -92,6 +105,7 @@ ANATOMY = SpeciesAnatomy(
         "dragging tail — MJ defaults to tail on ground; must specify horizontal",
         "pronated wrists — MJ renders palms-down; correct is palms-inward",
         "exposed teeth when mouth closed — lips probable, teeth covered",
-        "rainbow/parrot feathers — use cassowary/eagle references to keep plumage realistic and earth-toned",
+        "fully feathered body — adult T. rex was predominantly scaly per Bell et al. 2017; only a sparse dorsal-midline filament ridge is defensible, NOT shaggy plumage over the whole body",
+        "rainbow/parrot coloration — keep palette earth-toned (olive, slate, tawny) like a large monitor or crocodile",
     ],
 )
