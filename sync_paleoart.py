@@ -79,15 +79,31 @@ def main():
     if not files_to_upload:
         sys.exit("No files to upload.")
 
+    # Look up which catalog labels are already on the CDN — skip those.
+    sref = json.loads(SREF_URLS.read_text()) if SREF_URLS.exists() else {}
+    existing_paleoart = {
+        e.get("label"): e
+        for e in sref.get(species, [])
+        if isinstance(e, dict) and e.get("label", "").startswith("paleoart/")
+    }
+    catalog_labels = {label for label, _ in files_to_upload}
+
     if args.dry_run:
-        print(f"\n  [dry-run] would upload {len(files_to_upload)} files to Discord")
-        print(f"  [dry-run] would replace paleoart/* entries for {species!r} in sref_urls.json")
+        to_upload = [(l, d) for l, d in files_to_upload if l not in existing_paleoart]
+        already = len(catalog_labels & set(existing_paleoart.keys()))
+        print(f"\n  [dry-run] {already} catalog entries already on CDN, would skip")
+        print(f"  [dry-run] would upload {len(to_upload)} new files to Discord")
+        print(f"  [dry-run] would prune stale paleoart/* entries no longer in catalog")
         return
 
-    # --- step 2: upload to discord ---
+    # --- step 2: upload only what's missing ---
     webhook = upload_refs.load_webhook_url()
     new_paleoart_entries = []
     for label, dest in files_to_upload:
+        if label in existing_paleoart:
+            print(f"  [skip upload] {dest.name} already on CDN")
+            new_paleoart_entries.append(existing_paleoart[label])
+            continue
         if not dest.exists():
             print(f"  [skip upload] {dest.name} missing on disk")
             continue
@@ -103,7 +119,6 @@ def main():
         sys.exit("All Discord uploads failed.")
 
     # --- step 3: rewrite sref_urls.json for this species ---
-    sref = json.loads(SREF_URLS.read_text())
     old_entries = sref.get(species, [])
     kept = [
         e for e in old_entries
