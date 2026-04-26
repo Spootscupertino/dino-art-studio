@@ -73,10 +73,18 @@ try {
     background: #1a1a1a;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Base styles for scroll animation */
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
   }
   
-  .gallery-card:hover {
+  .gallery-card.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1); /* Return to original state */
+  }
+
+  .gallery-card.visible:hover {
     transform: scale(1.03);
     box-shadow: 0 8px 25px rgba(0,0,0,0.5);
   }
@@ -130,3 +138,38 @@ try {
     text-shadow: 0 2px 4px rgba(0,0,0,0.6);
   }
 </style>
+
+<script>
+  // Wait for the DOM to be fully loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    // Observer options
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px -10% 0px', // Trigger when 10% from the bottom of the viewport
+      threshold: 0.1 // Trigger when 10% of the element is visible
+    };
+
+    // The observer callback function
+    const observerCallback = (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          // Add the visible class to trigger the CSS transition
+          entry.target.classList.add('visible');
+          // Stop observing once it's visible so it doesn't animate out and back in
+          observer.unobserve(entry.target);
+        }
+      });
+    };
+
+    // Create the Intersection Observer
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // Find all gallery cards and start observing them
+    const cards = document.querySelectorAll('.gallery-card');
+    cards.forEach((card, index) => {
+      // Add a slight staggered delay based on 3-column grid position so rows don't just appear simultaneously
+      (card as HTMLElement).style.transitionDelay = `${(index % 3) * 0.1}s`;
+      observer.observe(card);
+    });
+  });
+</script>

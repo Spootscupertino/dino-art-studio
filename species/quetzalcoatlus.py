@@ -26,26 +26,26 @@ ANATOMY = SpeciesAnatomy(
     ),
 
     limbs=LimbStructure(
-        forelimb="enormously long wing arms with elongated fourth finger supporting massive wing membrane",
-        hindlimb="proportionally long and robust hindlimbs compared to other pterosaurs, adapted for terrestrial stalking",
-        wing_or_flipper="massive wing membrane spanning up to 10–11m tip-to-tip when spread",
-        stance="quadrupedal on ground — walked upright on folded wings and long hindlimbs, giraffe-like terrestrial posture",
+        forelimb="enormously long wing arms with elongated fourth finger supporting massive leathery wing membrane, bat-like wings with no feathers",
+        hindlimb="proportionally long and robust hindlimbs compared to other pterosaurs, adapted for quadrupedal terrestrial locomotion",
+        wing_or_flipper="massive leathery skin wing membrane spanning up to 10–11m tip-to-tip when spread, bat-like wings, no feathers, no plumage",
+        stance="quadrupedal stance, walking on folded wing knuckles, front limbs acting as front legs supporting weight, bat-like terrestrial crawling — NOT bipedal, NOT bird-like",
         digit_count="three small clawed fingers at wing wrist, elongated fourth finger supports membrane",
     ),
 
     integument=Integument(
-        primary_covering="pycnofibers covering body, hair-like filaments",
-        texture_detail="dense pycnofiber covering, leathery wing membrane",
-        membrane="massive wing membrane, thin and leathery, supported by elongated fourth finger",
+        primary_covering="hair-like pycnofibers covering body, fuzz, mammalian-like hair — NOT feathers, NOT plumage, NOT avian",
+        texture_detail="dense hair-like pycnofiber fuzz across body, leathery bat-like wing membrane, mammalian-hair texture not feather texture",
+        membrane="leathery skin wing membrane, bat-like wings, thin and translucent, supported by elongated fourth finger, no feathers",
     ),
 
     body=BodyProportions(
         body_length_m=3.0,
         body_mass_kg=250,
-        build="extremely tall when standing, lightweight hollow-boned body, giraffe-height on ground",
-        neck="extremely long stiff neck, held nearly vertical when standing",
+        build="extremely tall when quadrupedal, lightweight hollow-boned body, giraffe-height on ground standing on four limbs",
+        neck="extremely long stiff neck, held nearly vertical when quadrupedal",
         tail="vestigial short tail",
-        silhouette="giraffe-sized pterosaur standing on folded wings, impossibly long neck and beak, massive wingspan in flight",
+        silhouette="giraffe-sized pterosaur in quadrupedal stance walking on folded wing knuckles, impossibly long neck and beak, massive bat-like leathery wings in flight, no feathers",
         size_comparison="largest known flying animal ever — 10–11m wingspan, standing height of a giraffe (5m+), yet only ~250kg",
     ),
 
@@ -54,9 +54,9 @@ ANATOMY = SpeciesAnatomy(
     ),
 
     locomotion=LocomotionProfile(
-        primary_mode="soaring flight and terrestrial stalking predation",
+        primary_mode="soaring flight and quadrupedal terrestrial stalking predation",
         flight="soaring flight using thermals and slope lift, minimal flapping at this scale",
-        gait_detail="quadrupedal terrestrial stalking — walked on ground hunting small prey like a giant stork",
+        gait_detail="quadrupedal terrestrial stalking — walked on folded wing knuckles, bat-like crawling stance with front limbs supporting body weight",
         special="launched quadrupedally from all fours — quad launch essential at this body size, no running takeoff possible",
     ),
 
@@ -67,25 +67,27 @@ ANATOMY = SpeciesAnatomy(
     ),
 
     unique_features=[
-        "largest flying animal in Earth's history — giraffe-height when standing, fighter-jet wingspan",
-        "primarily a terrestrial stalking predator like a giant stork, not exclusively a fish-catcher",
+        "largest flying animal in Earth's history — giraffe-height when quadrupedal, fighter-jet wingspan",
+        "primarily a quadrupedal terrestrial stalking predator, NOT a bird-like biped",
         "quadrupedal launch was the ONLY way it could take off — biomechanically impossible to run-and-flap",
     ],
 
     mj_shorthand=[
-        "giraffe-height standing on folded wings",
+        "quadrupedal stance walking on folded wing knuckles",
         "extremely long lancet-shaped toothless beak",
-        "10-11m wingspan largest flying animal ever",
-        "pycnofiber-covered lightweight hollow bones",
-        "long stiff vertical neck when standing",
-        "terrestrial stork-like stalking posture",
+        "10-11m leathery bat-like wings no feathers",
+        "hair-like pycnofibers fuzz mammalian-like hair",
+        "long stiff vertical neck when quadrupedal",
+        "bat-like terrestrial crawling on four limbs",
     ],
 
     recommended_stylize=(75, 125, 250),
 
     known_failures=[
         "teeth — Quetzalcoatlus is TOOTHLESS",
-        "small size — giraffe-height when standing; must not look small",
-        "exclusively aquatic — primarily a terrestrial stalking predator, like a giant stork",
+        "small size — giraffe-height when quadrupedal; must not look small",
+        "bird morphology — NOT a stork, heron, or pelican; quadrupedal with bat-like wings",
+        "feathers — pycnofibers are hair-like fuzz, not plumage or flight feathers",
+        "bipedal standing — quadrupedal on ground, walking on folded wing knuckles",
     ],
 )

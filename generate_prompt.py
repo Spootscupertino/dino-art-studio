@@ -1329,7 +1329,7 @@ HYPERREALISM_STYLE = CLADE_STYLE["terrestrial"]
 # Mouth / teeth / saliva — diet-aware, injected as a dedicated prompt block
 # ---------------------------------------------------------------------------
 
-MOUTH_TEETH_CARNIVORE = "yellowed uneven teeth"
+MOUTH_TEETH_CARNIVORE = "bone-stained teeth, uneven jagged edges, thick saliva, healthy pink gums"
 MOUTH_TEETH_HERBIVORE = "grinding teeth worn flat"
 
 # ---------------------------------------------------------------------------
@@ -1378,8 +1378,15 @@ HABITAT_NEGATIVE = {
         "no water, dry skin, dusty"
     ),
     "aerial": (
+        # Grounded-pose blockers (aerial species should be in flight)
         "standing on ground, walking, sitting, grounded, "
-        "feet on dirt, terrestrial pose, folded wings"
+        "feet on dirt, terrestrial pose, folded wings, "
+        # Aggressive anti-bird blockers (Session 24) — every aerial species is
+        # a pterosaur, and MJ's text encoder morphs "winged + fuzz" into birds.
+        # Banning specific species (stork/pelican/heron) kills the exact
+        # morphs MJ keeps falling back to.
+        "feathers, plumage, avian, bird, stork, pelican, heron, "
+        "primary feathers, flight feathers, bird legs, bipedal standing"
     ),
     "arthropod": (
         "mammal, dinosaur, vertebrate, furry, feathered, "
@@ -1412,15 +1419,16 @@ CANVAS_PRINT = ""
 # that dilute attention from the negatives that matter.
 # ---------------------------------------------------------------------------
 
-# Vertebrate extremity errors — only relevant to clades with toes/fingers/claws
-# osteoderms live here (not in fossil block) because they are a vertebrate skin
-# feature; arthropods/plants don't have them so should never see them in --no.
+# Vertebrate extremity errors — only relevant to clades with toes/fingers/claws.
+# Session 24: osteoderm blockers moved out of this constant. They are no longer
+# hardcoded — build_negative_prompt() injects "osteoderms" dynamically only for
+# species whose anatomy does NOT declare armor/scutes (so Ankylosaurus keeps
+# its plates, T. rex still gets osteoderms blocked).
 NEG_VERTEBRATE_ANATOMY = (
     "fused digits, merged toes, webbed feet, blob hands, extra fingers, "
     "missing claws, undefined claw tips, floating toes, amputated digits, "
     "incorrect toe count, melted feet, smooth footpad with no digit separation, "
-    "smeared claws, indistinct talons, CGI smoothness on extremities, "
-    "osteoderms, osteoderm"
+    "smeared claws, indistinct talons, CGI smoothness on extremities"
 )
 
 # Arthropod-specific anatomy errors — segmented chitin, jointed legs, mandibles
@@ -1471,7 +1479,50 @@ NEG_CGI = (
 )
 
 
-def build_negative_prompt(habitat: str) -> str:
+def _anatomy_has_armor(anatomy) -> bool:
+    """True if the species has bony armor / scutes / osteoderms.
+
+    Drives the osteoderm-blocker decision in build_negative_prompt — we only
+    want to ban osteoderms for species that don't actually have them (so
+    Ankylosaurus keeps its armor, T. rex does not grow osteoderms).
+    """
+    if not anatomy or not anatomy.integument:
+        return False
+    text = " ".join([
+        anatomy.integument.armor or "",
+        anatomy.integument.primary_covering or "",
+        anatomy.integument.special_structures or "",
+    ]).lower()
+    return any(k in text for k in ("osteoderm", "scute", "armor plat", "bony plate", "bony boss"))
+
+
+def _anatomy_negative_extras(anatomy, habitat: str) -> str:
+    """Anatomy-driven negative-prompt additions (Session 24).
+
+    * Appends "osteoderms" only when the species does NOT have armor/scutes.
+    * Mutually exclusive integument blockers: feathered/pycnofiber species
+      ban "scaly skin, reptilian scales"; scaly species ban "feathers,
+      plumage, fur". This stops MJ from mixing feathered theropods with
+      reptile scale textures (a common CGI-hybrid failure).
+    """
+    if not anatomy or habitat in ("plant", "arthropod"):
+        return ""
+    extras: list[str] = []
+    if not _anatomy_has_armor(anatomy):
+        extras.append("osteoderms")
+    covering = ""
+    if anatomy.integument and anatomy.integument.primary_covering:
+        covering = anatomy.integument.primary_covering.lower()
+    has_feathers = any(k in covering for k in ("feather", "pycnofiber", "plumage", "filament"))
+    has_scales   = any(k in covering for k in ("scale", "scaly"))
+    if has_feathers:
+        extras.append("scaly skin, reptilian scales")
+    elif has_scales:
+        extras.append("feathers, plumage, fur")
+    return ", ".join(extras)
+
+
+def build_negative_prompt(habitat: str, anatomy=None) -> str:
     """Assemble the --no clause from clade-appropriate blocks only.
 
     Plants get studio + plant-fossil + indoor + CGI + plant-specific —
@@ -1480,7 +1531,9 @@ def build_negative_prompt(habitat: str) -> str:
     Arthropods get arthropod anatomy + studio + animal-fossil + indoor + CGI +
     arthropod-specific — no vertebrate digit/talon language.
 
-    Vertebrate clades (terrestrial / marine / aerial) get the full set.
+    Vertebrate clades (terrestrial / marine / aerial) get the full set plus
+    anatomy-driven extras (osteoderm block for non-armored species, integument
+    exclusivity blocker for scaly vs feathered species).
     """
     if habitat == "plant":
         blocks = [NEG_STUDIO, NEG_FOSSIL_PLANT, NEG_INDOOR, NEG_CGI]
@@ -1491,7 +1544,12 @@ def build_negative_prompt(habitat: str) -> str:
 
     base = ", ".join(blocks)
     extra = HABITAT_NEGATIVE.get(habitat, "")
-    return f"{base}, {extra}" if extra else base
+    result = f"{base}, {extra}" if extra else base
+
+    anatomy_extras = _anatomy_negative_extras(anatomy, habitat)
+    if anatomy_extras:
+        result = f"{result}, {anatomy_extras}"
+    return result
 
 
 # Back-compat shim for any external reference: vertebrate-flavoured default.
@@ -3127,6 +3185,18 @@ def assemble_prompt(
     # injected — almost always duplicates lighting. Both stay in tags / branching.
     lighting = lighting_param["value"].split(", ")[0]
 
+    # Session 24: environment/lighting contradiction scrub. Wide / open-landscape
+    # modes (including epic aerials and placement_wide shots) can't coexist with
+    # enclosed-canopy lighting — MJ picks a side and usually renders a fake CGI
+    # compromise. Detect enclosed-space phrasing and substitute ambient sunlight.
+    _ENCLOSED_LIGHT_MARKERS = (
+        "canopy", "forest floor", "dappled", "dense canopy",
+        "shaft of light", "shaft through", "under dense", "deep shade under",
+        "understory",
+    )
+    if wide_mode and any(m in lighting.lower() for m in _ENCLOSED_LIGHT_MARKERS):
+        lighting = "natural ambient sunlight"
+
     # ── SECTION 5: CAMERA ─────────────────────────────────────────────────────
     # Session 11: camera brands and lens specs stripped from active output —
     # they were pushing MJ toward staged product-shot/specimen framing.
@@ -3147,6 +3217,14 @@ def assemble_prompt(
     # aerial_overhead mode implies drone_overhead perspective if user kept default
     if output_mode == "aerial_overhead" and not perspective_lead:
         perspective_lead = CAMERA_PERSPECTIVES["drone_overhead"]["lead"]
+
+    # Session 24: camera duplication guard. When the perspective lead already
+    # carries a lens/focal-length spec (e.g. epic_aerial → "14mm lens"), the
+    # wide-mode camera string ("ultra-wide 16mm lens") would double-inject and
+    # confuse MJ into rendering with conflicting optics. Blank the camera slot.
+    _lead_lc = perspective_lead.lower()
+    if perspective_lead and ("lens" in _lead_lc or "mm" in _lead_lc):
+        camera = ""
 
     if perspective_lead:
         # Perspective-first assembly: angle → subject → environment → details → lighting
@@ -3182,8 +3260,12 @@ def assemble_prompt(
         else:
             base_blocks = [NEG_VERTEBRATE_ANATOMY, NEG_STUDIO, NEG_FOSSIL_VERTEBRATE, NEG_INDOOR, NEG_CGI]
         neg = ", ".join(base_blocks)
+        # Anatomy-driven extras still apply in perched mode (Session 24)
+        perched_extras = _anatomy_negative_extras(anatomy, habitat)
+        if perched_extras:
+            neg = f"{neg}, {perched_extras}"
     else:
-        neg = build_negative_prompt(habitat)
+        neg = build_negative_prompt(habitat, anatomy)
     # Session 13: wide modes get additional negative prompt blockers to
     # prevent MJ from drifting back toward portrait/close-up composition.
     if wide_mode:
@@ -3340,10 +3422,16 @@ PALEOART_FILE = Path(__file__).parent / "paleoart_refs.json"
 # Wildlife --sref → "real National Geographic photography" feel
 # Paleoart --cref → correct morphology (NOT a crocodile, NOT a shark)
 # Skeletal --cref → body proportions fallback when paleoart unavailable
+#
+# Hard rules enforced below (Session 24):
+#   * --cref: EXACTLY 1 URL, paleoart preferred, skeletal fallback, never both
+#   * --sref: up to 2 URLs, wildlife only (no birds, no skeletal, no paleoart)
+#   * --sw 20 hardcoded whenever --sref is emitted
+#   * --cw NEVER emitted (MJ v7 dropped it)
+#   * All URLs MUST be on Discord CDN — MJ rejects Wikimedia direct links
 MAX_SREF_URLS = 2   # wildlife photo refs for --sref (style guide)
 MAX_CREF_URLS = 1   # paleoart or skeletal ref for --cref (likeness/morphology)
-DEFAULT_CW = 10     # unused in MJ v7 but kept for reference
-DEFAULT_SW = 20     # --sw (style weight): subtle photographic feel
+DEFAULT_SW = 20     # --sw (style weight): subtle photographic feel, hardcoded
 
 # ---------------------------------------------------------------------------
 # Habitat → allowed ref categories (strict filtering)
@@ -3480,39 +3568,60 @@ def _extract_category(label):
     return ""
 
 
+_DISCORD_CDN_HOSTS = ("cdn.discordapp.com", "media.discordapp.net")
+
+
+def _is_discord_cdn_url(url):
+    """Return True iff `url` is hosted on the Discord CDN.
+
+    MJ rejects Wikimedia (and most external) URLs, so --sref/--cref refs
+    must be re-hosted on Discord CDN before they flow into a prompt.
+    """
+    if not isinstance(url, str) or not url:
+        return False
+    return any(host in url for host in _DISCORD_CDN_HOSTS)
+
+
 def select_refs(species_name, output_mode, habitat, lighting_name):
-    """Context-aware wildlife --sref selection (Session 22 overhaul).
+    """Context-aware 3-layer reference selection (Session 23+).
 
-    Session 22 lesson:
-      --sref copies VISUAL STYLE → skeletal photos made outputs look fossilized
-      --cref copies LIKENESS     → shark photos made Mosasaurus look like a shark
+    Layer 1 — --sref (up to 2 wildlife photos): photographic style guide.
+              Skeletal + paleoart + bird categories excluded.
+    Layer 2 — --cref (exactly 1 paleoart): correct living-animal morphology.
+    Layer 3 — --cref fallback (1 skeletal diagram): used only when no
+              paleoart ref is available for this species.
 
-    New approach:  wildlife photos → --sref ONLY (photographic style guide).
-    Skeletal refs excluded entirely — anatomy encoded in text prompts.
-    --cref removed — too literal for cross-species reference.
+    All URLs are hard-filtered to the Discord CDN — MJ rejects Wikimedia
+    and other external hosts, so a stray non-CDN entry in sref_urls.json
+    must not reach the output.
 
-    Returns (sref_urls, cref_urls, cw_weight) where:
-      sref_urls: list of URL strings for --sref (wildlife style refs)
-      cref_urls: always [] (--cref disabled)
-      cw_weight: int (kept for backward compat, unused)
+    Returns (sref_urls, cref_urls, cref_source):
+      sref_urls   : list[str]  — up to MAX_SREF_URLS wildlife URLs
+      cref_urls   : list[str]  — exactly 0 or 1 URL
+      cref_source : str        — "paleoart", "skeletal", or "" if none
     """
     all_urls = load_sref_urls()
     species_entries = all_urls.get(species_name, [])
     if not species_entries:
-        return [], [], DEFAULT_CW
+        return [], [], ""
 
     # Strict habitat filtering: only allowed categories pass through
     allowed = HABITAT_ALLOWED_CATEGORIES.get(habitat, HABITAT_ALLOWED_CATEGORIES["terrestrial"])
 
-    # Build category → [url_entries] index, filtered by habitat + exclusions
+    # Build category → [url_entries] index, filtered by habitat + exclusions.
+    # Every entry is also required to live on the Discord CDN.
     cat_index = {}         # wildlife refs (for --sref)
     paleoart_entries = []  # paleoart refs (for --cref, preferred)
     skeletal_entries = []  # skeletal refs (for --cref, fallback)
     for entry in species_entries:
         if isinstance(entry, dict):
             cat = _extract_category(entry.get("label", ""))
+            url = entry.get("url", "")
         else:
             cat = ""
+            url = entry if isinstance(entry, str) else ""
+        if not _is_discord_cdn_url(url):
+            continue  # URL validation: Discord CDN only (MJ rejects the rest)
         if cat == CREF_PALEOART_CATEGORY:
             paleoart_entries.append(entry)  # collect for --cref (preferred)
             continue
@@ -3675,7 +3784,7 @@ def display_ref_selection(species_name, sref_urls, cref_urls, cref_source, speci
 
 def display_sref_selection(species_name, selected_urls, species_entries):
     """Legacy wrapper for display — used by A/B test path."""
-    display_ref_selection(species_name, selected_urls, [], DEFAULT_CW, species_entries)
+    display_ref_selection(species_name, selected_urls, [], "", species_entries)
 
 
 # ---------------------------------------------------------------------------
@@ -4166,9 +4275,12 @@ def ab_test_main(args) -> None:
         if ab_sref_urls:
             ab_sref_joined = " ".join(ab_sref_urls)
             prompt_text += f" --sref {ab_sref_joined} --sw {DEFAULT_SW}"
-        # --cref disabled (Session 22) — manual CLI override still honored
-        if args.cref:
+        # --cref: exactly 1 URL (paleoart preferred, skeletal fallback).
+        # Manual CLI override wins if explicitly passed and Discord-hosted.
+        if args.cref and _is_discord_cdn_url(args.cref):
             prompt_text += f" --cref {args.cref}"
+        elif ab_cref_urls:
+            prompt_text += f" --cref {ab_cref_urls[0]}"
 
         title = make_title(species, v_mood, output_mode=v_output_mode)
         tags = make_tags(species, style_param, v_lighting, camera_param, v_mood,
@@ -4240,6 +4352,14 @@ def main() -> None:
     parser.add_argument("--ab-score",   type=int,  default=None, metavar="ID", help="Score an existing A/B test by ID")
     parser.add_argument("--ab-history", action="store_true", help="Show A/B test history")
     args = parser.parse_args()
+
+    # MJ rejects non-Discord-CDN URLs. If the user passes one on the CLI,
+    # drop it with a warning rather than shipping a prompt MJ will reject.
+    for flag_name in ("sref", "cref"):
+        val = getattr(args, flag_name, None)
+        if val and not _is_discord_cdn_url(val):
+            print(f"  {warn(f'⚠  --{flag_name} URL is not on Discord CDN — ignoring (MJ v7 rejects external hosts)')}")
+            setattr(args, flag_name, None)
 
     # Route to A/B testing mode if any A/B flag is set
     if args.ab_test or args.ab_score or args.ab_history:
@@ -4453,17 +4573,17 @@ def main() -> None:
                       condition_param=condition_param, behavior_param=behavior_param,
                       weather_param=weather_param, output_mode=output_mode)
 
-    # --- Append reference URLs to prompt ---
-    # Session 22: wildlife --sref only, --cref disabled (too literal)
+    # --- Append reference URLs to prompt (3-layer system) ---
+    # --sref: up to 2 wildlife photos, --sw 20 hardcoded.
+    # --cref: exactly 1 paleoart URL (skeletal fallback).  No --cw in v7.
     if sref_urls_list:
         sref_joined = " ".join(sref_urls_list)
         prompt_text += f" --sref {sref_joined} --sw {DEFAULT_SW}"
-    # --cref: skeletal refs for anatomical proportions (low --cw)
-    if cref_urls_list:
-        cref_joined = " ".join(cref_urls_list)
-        prompt_text += f" --cref {cref_joined}"
-    elif args.cref:
+    # CLI --cref wins when provided and Discord-hosted; otherwise use auto-pick.
+    if args.cref and _is_discord_cdn_url(args.cref):
         prompt_text += f" --cref {args.cref}"
+    elif cref_urls_list:
+        prompt_text += f" --cref {cref_urls_list[0]}"
 
     # --- Build fix prompts ---
     period = species["period"] or "Other"

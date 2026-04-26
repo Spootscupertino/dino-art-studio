@@ -31,6 +31,7 @@ import sys
 import time
 import urllib.request
 import urllib.error
+import urllib.parse
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -56,10 +57,12 @@ CATEGORY_SPECIES_MAP = {
     "crocodile": [
         "Tyrannosaurus rex", "Spinosaurus", "Mosasaurus", "Kronosaurus",
         "Liopleurodon", "Dilophosaurus",
+        # Pterosaurs: leathery skin like crocs, not feathered (Session 22)
+        "Pteranodon", "Quetzalcoatlus", "Rhamphorhynchus", "Dimorphodon",
     ],
     "feathered_biped": [
+        # Only ACTUALLY feathered theropods — pterosaurs removed (Session 22)
         "Tyrannosaurus rex", "Velociraptor", "Dilophosaurus",
-        "Pteranodon", "Quetzalcoatlus", "Rhamphorhynchus", "Dimorphodon",
     ],
     "tall_predator": [
         "Velociraptor", "Dilophosaurus", "Tyrannosaurus rex",
@@ -68,6 +71,8 @@ CATEGORY_SPECIES_MAP = {
     "komodo": [
         "Tyrannosaurus rex", "Velociraptor", "Dilophosaurus",
         "Spinosaurus", "Mosasaurus", "Kronosaurus", "Liopleurodon",
+        # Pterosaurs: leathery membrane skin, komodo texture is ideal ref
+        "Pteranodon", "Quetzalcoatlus", "Rhamphorhynchus", "Dimorphodon",
     ],
     "arthropod_group": [
         "Meganeura", "Arthropleura", "Jaekelopterus", "Pulmonoscorpius",
@@ -107,6 +112,19 @@ CATEGORY_SPECIES_MAP = {
         "Sigillaria", "Archaefructus", "Glossopteris", "Wattieza",
         "Williamsonia", "Ammonite",
     ],
+    "paleoart": [
+        "Tyrannosaurus rex", "Triceratops", "Stegosaurus", "Ankylosaurus",
+        "Brachiosaurus", "Parasaurolophus", "Velociraptor", "Dilophosaurus",
+        "Spinosaurus", "Mosasaurus", "Kronosaurus", "Liopleurodon",
+        "Elasmosaurus", "Ichthyosaurus", "Megalodon", "Cretoxyrhina",
+        "Helicoprion", "Dunkleosteus", "Xiphactinus", "Leedsichthys",
+        "Archelon", "Pteranodon", "Quetzalcoatlus", "Rhamphorhynchus",
+        "Dimorphodon", "Meganeura", "Arthropleura", "Jaekelopterus",
+        "Pulmonoscorpius", "Megarachne", "Anomalocaris", "Eurypterus",
+        "Megalograptus", "Araucaria", "Calamites", "Lepidodendron",
+        "Sigillaria", "Archaefructus", "Glossopteris", "Wattieza",
+        "Williamsonia", "Ammonite",
+    ],
 }
 
 
@@ -118,6 +136,119 @@ def load_webhook_url():
         if line.startswith("DISCORD_WEBHOOK_URL="):
             return line.split("=", 1)[1].strip()
     sys.exit("DISCORD_WEBHOOK_URL not found in .env")
+
+
+def _to_thumb_url(original_url, width=1024):
+    """Convert a Wikimedia Commons file URL to a thumbnail URL.
+
+    Wikimedia aggressively rate-limits requests to full-resolution originals
+    (HTTP 429) but serves thumbnails from CDN without issue.
+    Example:
+      IN:  https://upload.wikimedia.org/wikipedia/commons/a/a8/Filename.JPG
+      OUT: https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Filename.JPG/1024px-Filename.JPG
+
+    For SVG files the thumbnail is rendered as PNG.
+    """
+    if "/thumb/" in original_url:
+        return original_url  # already a thumbnail URL
+
+    # Standard commons URL: .../commons/a/a8/Filename.ext
+    # Thumb URL:            .../commons/thumb/a/a8/Filename.ext/1024px-Filename.ext
+    url = original_url.replace("/wikipedia/commons/", "/wikipedia/commons/thumb/")
+    filename = original_url.rsplit("/", 1)[-1]
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    if ext == "svg":
+        # SVG thumbnails are rendered as PNG
+        thumb_name = "%dpx-%s.png" % (width, filename)
+    else:
+        thumb_name = "%dpx-%s" % (width, filename)
+
+    return "%s/%s" % (url, thumb_name)
+
+
+def _get_api_thumb_url(original_url, width=1024):
+    """Use Wikimedia Commons API to get a proper thumbnail download URL.
+
+    The API endpoint (commons.wikimedia.org/w/api.php) has separate, more
+    generous rate limits than direct file URLs on upload.wikimedia.org.
+    Returns the thumbnail URL string, or empty string on failure.
+    """
+    # Extract filename from URL: .../commons/a/a8/Filename.JPG -> Filename.JPG
+    filename = original_url.rsplit("/", 1)[-1]
+    # The API wants "File:Filename.JPG"
+    api_url = (
+        "https://commons.wikimedia.org/w/api.php?"
+        "action=query&titles=File:%s&prop=imageinfo"
+        "&iiprop=url&iiurlwidth=%d&format=json"
+    ) % (urllib.parse.quote(filename), width)
+
+    try:
+        req = urllib.request.Request(
+            api_url,
+            headers={"User-Agent": "DinoArtStudio/1.0 (reference download; contact github.com/Spootscupertino)"},
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read())
+        pages = data.get("query", {}).get("pages", {})
+        for page in pages.values():
+            ii = page.get("imageinfo", [{}])[0]
+            thumb = ii.get("thumburl", "")
+            if thumb:
+                return thumb
+    except Exception:
+        pass
+    return ""
+
+
+def _download_via_api(original_url, dest_path, width=1024):
+    """Download a Wikimedia image by fetching bytes through the API.
+
+    When upload.wikimedia.org is 429-blocking our IP, we can still get image
+    data by requesting the API to return it via the 'source' property, or by
+    using the Special:FilePath redirect on commons.wikimedia.org (different
+    server/rate-limit pool from upload.wikimedia.org).
+    """
+    filename = original_url.rsplit("/", 1)[-1]
+    decoded = urllib.parse.unquote(filename)
+    ua = "DinoArtStudio/1.0 (reference download; contact github.com/Spootscupertino)"
+
+    # Strategy 1: commons.wikimedia.org/wiki/Special:FilePath (redirect-based)
+    # This goes through the wiki server, not the upload CDN directly.
+    special_url = "https://commons.wikimedia.org/wiki/Special:FilePath/%s?width=%d" % (
+        urllib.parse.quote(decoded), width
+    )
+    try:
+        req = urllib.request.Request(special_url, headers={"User-Agent": ua})
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = resp.read()
+            if len(data) > 100:  # sanity check — not an error page
+                dest_path.write_bytes(data)
+                return True
+    except Exception:
+        pass
+
+    # Strategy 2: REST API v1 endpoint
+    rest_url = "https://api.wikimedia.org/core/v1/commons/file/File:%s" % (
+        urllib.parse.quote(decoded)
+    )
+    try:
+        req = urllib.request.Request(rest_url, headers={"User-Agent": ua})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            meta = json.loads(resp.read())
+        # Get the preferred thumbnail URL from REST response
+        thumb = meta.get("preferred", {}).get("url", "")
+        if not thumb:
+            thumb = meta.get("original", {}).get("url", "")
+        if thumb:
+            req2 = urllib.request.Request(thumb, headers={"User-Agent": ua})
+            with urllib.request.urlopen(req2, timeout=30) as resp2:
+                dest_path.write_bytes(resp2.read())
+            return True
+    except Exception:
+        pass
+
+    return False
 
 
 def load_sources():
@@ -354,19 +485,36 @@ def cmd_download(args):
         print("    -> %s" % dest.relative_to(SCRIPT_DIR))
 
         try:
+            # Primary: use API-based download to avoid upload.wikimedia.org
+            # 429 bans.  Falls back to direct thumb URL if API fails.
+            if _download_via_api(item["url"], dest, 1024):
+                url_to_local[item["url"]] = dest
+                total += 1
+                print("    OK")
+                time.sleep(2.0)
+                continue
+
+            # Fallback: direct thumb URL (may 429)
+            dl_url = _to_thumb_url(item["url"], 1024)
             req = urllib.request.Request(
-                item["url"],
-                headers={"User-Agent": "DinoArtStudio/1.0 (reference download)"},
+                dl_url,
+                headers={"User-Agent": "DinoArtStudio/1.0 (reference download; contact github.com/Spootscupertino)"},
             )
             with urllib.request.urlopen(req, timeout=30) as resp:
                 dest.write_bytes(resp.read())
             url_to_local[item["url"]] = dest
             total += 1
-            time.sleep(5.0)  # Rate limit courtesy for Wikimedia
+            print("    OK (direct)")
+            time.sleep(2.0)
         except Exception as ex:
-            print("    FAILED: %s" % str(ex)[:80])
+            print("    FAILED: %s" % str(ex)[:120])
+            # Clean up partial file
+            if dest.exists():
+                dest.unlink()
             failed += 1
-            time.sleep(8.0)
+            time.sleep(10.0)
+            failed += 1
+            time.sleep(10.0)
 
     print("\nDownload complete: %d new, %d copied across categories, %d skipped, %d failed"
           % (total, copied, skipped, failed))

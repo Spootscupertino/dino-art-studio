@@ -175,11 +175,16 @@ def build_anatomy_prompt(anatomy: SpeciesAnatomy, mode_type: str = "mid") -> str
     # ── Shorthand path (preferred) ───────────────────────────────────
     if anatomy.mj_shorthand:
         if mode_type == "wide":
-            # Wide: silhouette + first shorthand phrase
+            # Wide: silhouette + size_comparison ONLY (Session 24).
+            # At landscape scale MJ cannot resolve limbs, teeth, or
+            # integument micro-detail; injecting them forces MJ into
+            # CGI compromises ("tiny render with perfect sickle claws").
+            # Keep the frame honest — big shape + scale anchor only.
             parts: list[str] = []
             if anatomy.body and anatomy.body.silhouette:
                 parts.append(anatomy.body.silhouette)
-            parts.append(anatomy.mj_shorthand[0])
+            if anatomy.body and anatomy.body.size_comparison:
+                parts.append(anatomy.body.size_comparison)
             return _budget_join(parts, budget)
 
         if mode_type == "mid":
@@ -207,11 +212,14 @@ def build_anatomy_prompt(anatomy: SpeciesAnatomy, mode_type: str = "mid") -> str
 def _fallback_prompt(anatomy: SpeciesAnatomy, mode_type: str, budget: int) -> str:
     """Legacy field-extraction path — used when mj_shorthand is empty."""
     if mode_type == "wide":
+        # Session 24: strict silhouette + size_comparison only in wide mode.
+        # No limbs, teeth, or integument detail — unresolvable at landscape
+        # scale and drags MJ into CGI compromises.
         parts: list[str] = []
         if anatomy.body and anatomy.body.silhouette:
             parts.append(anatomy.body.silhouette)
-        if anatomy.unique_features:
-            parts.append(anatomy.unique_features[0])
+        if anatomy.body and anatomy.body.size_comparison:
+            parts.append(anatomy.body.size_comparison)
         return _budget_join(parts, budget)
 
     # Build a priority-ranked list from fields

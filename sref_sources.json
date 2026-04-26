@@ -23,6 +23,14 @@
     {
       "label": "Large ammonite fossil specimen lateral view",
       "url": "https://upload.wikimedia.org/wikipedia/commons/a/a4/Fossil_Ammonite_Shell_%28Anapachydiscus_peninsularis%29_-_San_Diego_Natural_History_Museum.jpg"
+    },
+    {
+      "label": "paleoart/Ammonite_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Ammonite_NT.jpg"
+    },
+    {
+      "label": "paleoart/Parapuzosia_seppenradensis.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f5/Parapuzosia_seppenradensis.jpg"
     }
   ],
   "Ankylosaurus": [
@@ -97,6 +105,14 @@
     {
       "label": "Ankylosaurus Brown 1908 Fig 18 scientific illustration",
       "url": "https://upload.wikimedia.org/wikipedia/commons/5/59/Ankylosaurus%2C_Brown_1908-_Fig._18.png"
+    },
+    {
+      "label": "paleoart/Ankylosaurus_restoration.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Ankylosaurus_magniventris_reconstruction.png"
+    },
+    {
+      "label": "paleoart/Ankylosaurus_life.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Ankylosaurus_magniventris_attack.png"
     }
   ],
   "Anomalocaris": [
@@ -155,6 +171,14 @@
     {
       "label": "Anomalocaris canadensis Smithsonian Museum display",
       "url": "https://upload.wikimedia.org/wikipedia/commons/0/09/Anomalocaris_canadensis_-_Smithsonian_Museum_of_Natural_History_-_2012-05-17.jpg"
+    },
+    {
+      "label": "paleoart/Anomalocaris_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Anomalocaris_NT.jpg"
+    },
+    {
+      "label": "paleoart/Anomalocaris_canadensis.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/37/Anomalocaris_canadensis.jpg"
     }
   ],
   "Araucaria": [
@@ -185,6 +209,10 @@
     {
       "label": "Araucaria mirabilis fossil cone detail",
       "url": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Araucaria_mirabilis.JPG"
+    },
+    {
+      "label": "paleoart/Araucaria_mirabilis.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/46/Araucaria_mirabilis.jpg"
     }
   ],
   "Archaefructus": [
@@ -211,6 +239,10 @@
     {
       "label": "Archaefructus liaoningensis fossil",
       "url": "https://upload.wikimedia.org/wikipedia/commons/2/29/Archaefructus_liaoningensis.jpg"
+    },
+    {
+      "label": "paleoart/Archaefructus_liaoningensis.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Archaefructus_liaoningensis.jpg"
     }
   ],
   "Archelon": [
@@ -253,6 +285,14 @@
     {
       "label": "Skeleton of Archelon museum display",
       "url": "https://upload.wikimedia.org/wikipedia/commons/c/ca/Skeleton_of_Archelon.jpg"
+    },
+    {
+      "label": "paleoart/Archelon_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Archelon_NT.jpg"
+    },
+    {
+      "label": "paleoart/Archelon_ischyros.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Archelon_ischyros.jpg"
     }
   ],
   "Arthropleura": [
@@ -311,6 +351,14 @@
     {
       "label": "Arthropleura 1914 scientific illustration",
       "url": "https://upload.wikimedia.org/wikipedia/commons/6/61/Arthropleura_1914.jpg"
+    },
+    {
+      "label": "paleoart/Arthropleura_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/3c/Arthropleura_NT.jpg"
+    },
+    {
+      "label": "paleoart/Arthropleura_armata.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/56/Arthropleura_armata.jpg"
     }
   ],
   "Brachiosaurus": [
@@ -365,6 +413,14 @@
     {
       "label": "Brachiosaurus altithorax full mount",
       "url": "https://upload.wikimedia.org/wikipedia/commons/9/90/Brachiosaurus_altithorax.jpg"
+    },
+    {
+      "label": "paleoart/Brachiosaurus_DB.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/90/Brachiosaurus_DB.jpg"
+    },
+    {
+      "label": "paleoart/Brachiosaurus_altithorax_life.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Brachiosaurus_altithorax_life.png"
     }
   ],
   "Calamites": [
@@ -391,6 +447,10 @@
     {
       "label": "Calamites brongniarti Commentry fossil",
       "url": "https://upload.wikimedia.org/wikipedia/commons/e/ed/Calamites_brongniarti_Commentry.jpg"
+    },
+    {
+      "label": "paleoart/Calamites_restoration.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Calamites_restoration.jpg"
     }
   ],
   "Cretoxyrhina": [
@@ -417,6 +477,14 @@
     {
       "label": "Cretoxyrhina mantelli scale comparison diagram",
       "url": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Cretoxyrhina_mantelli_scale.png"
+    },
+    {
+      "label": "paleoart/Cretoxyrhina_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Cretoxyrhina_NT.jpg"
+    },
+    {
+      "label": "paleoart/Cretoxyrhina_mantelli.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/7c/Cretoxyrhina_mantelli.jpg"
     }
   ],
   "Dilophosaurus": [
@@ -467,6 +535,14 @@
     {
       "label": "DilophosaurusROM full skeleton mount ROM",
       "url": "https://upload.wikimedia.org/wikipedia/commons/3/33/DilophosaurusROM1.JPG"
+    },
+    {
+      "label": "paleoart/Dilophosaurus_wetherilli.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Dilophosaurus_wetherilli.png"
+    },
+    {
+      "label": "paleoart/Dilophosaurus_illustration.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/84/Dilophosaurus_illustration.jpg"
     }
   ],
   "Dimorphodon": [
@@ -505,6 +581,14 @@
     {
       "label": "Dimorphodon mount museum display",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/db/Dimorphodon_mount.jpg"
+    },
+    {
+      "label": "paleoart/Dimorphodon_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/14/Dimorphodon_NT.jpg"
+    },
+    {
+      "label": "paleoart/Dimorphodon_macronyx.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d0/Dimorphodon.jpg"
     }
   ],
   "Dunkleosteus": [
@@ -535,6 +619,14 @@
     {
       "label": "Dunkleosteus terrelli skeletal reconstruction",
       "url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Dunkleosteus_terrelli_skeletal_reconstruction_1.jpg"
+    },
+    {
+      "label": "paleoart/Dunkleosteus_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Dunkleosteus_NT.jpg"
+    },
+    {
+      "label": "paleoart/Dunkleosteus_terrelli.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Dunkleosteus_terrelli.jpg"
     }
   ],
   "Elasmosaurus": [
@@ -569,6 +661,14 @@
     {
       "label": "Elasmosaurus platyurus life restoration",
       "url": "https://upload.wikimedia.org/wikipedia/commons/a/a0/Elasmosaurus_platyurus.jpg"
+    },
+    {
+      "label": "paleoart/Elasmosaurus_platyurus.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/09/Elasmosaurus_platyurus.png"
+    },
+    {
+      "label": "paleoart/Elasmosaurus_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Elasmosaurus_NT_small.jpg"
     }
   ],
   "Eurypterus": [
@@ -623,6 +723,14 @@
     {
       "label": "Eurypterus tetragonophthalmus fossil sea scorpion",
       "url": "https://upload.wikimedia.org/wikipedia/commons/3/34/Eurypterus_tetragonophthalmus_%28fossil_sea_scorpion%29_%28Upper_Silurian%3B_Podolia%2C_Ukraine%29_2.jpg"
+    },
+    {
+      "label": "paleoart/Eurypterus_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/05/Eurypterus_NT.jpg"
+    },
+    {
+      "label": "paleoart/Eurypterus_remipes.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Eurypterus_remipes.jpg"
     }
   ],
   "Glossopteris": [
@@ -653,6 +761,10 @@
     {
       "label": "Glossopteris browniana fossil impression",
       "url": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Glossopteris_browniana.JPG"
+    },
+    {
+      "label": "paleoart/Glossopteris_browniana.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Glossopteris_browniana.jpg"
     }
   ],
   "Helicoprion": [
@@ -683,6 +795,14 @@
     {
       "label": "Helicoprion ferrieri fossil shark jaw Texas",
       "url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Helicoprion_ferrieri_fossil_shark_jaw%2C_Brewster_County_TX.jpg"
+    },
+    {
+      "label": "paleoart/Helicoprion_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/40/Helicoprion_NT.jpg"
+    },
+    {
+      "label": "paleoart/Helicoprion_bessonowi.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Helicoprion_bessonowi.jpg"
     }
   ],
   "Ichthyosaurus": [
@@ -713,6 +833,14 @@
     {
       "label": "First complete ichthyosaur skeleton Mary Anning",
       "url": "https://upload.wikimedia.org/wikipedia/commons/5/56/First_complete_ichthyosaur_skeleton.jpg"
+    },
+    {
+      "label": "paleoart/Ichthyosaurus_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Ichthyosaurus_NT.jpg"
+    },
+    {
+      "label": "paleoart/Ichthyosaurus_communis.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/13/Ichthyosaurus_communis_life.jpg"
     }
   ],
   "Jaekelopterus": [
@@ -767,6 +895,14 @@
     {
       "label": "Jaekelopterus compound eyes fossil detail",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/da/Jaekelopterus_eyes.png"
+    },
+    {
+      "label": "paleoart/Jaekelopterus_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/cc/Jaekelopterus_NT.jpg"
+    },
+    {
+      "label": "paleoart/Jaekelopterus_rhenaniae.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/57/Jaekelopterus_rhenaniae.jpg"
     }
   ],
   "Kronosaurus": [
@@ -813,6 +949,14 @@
     {
       "label": "Kronosaurus boyacensis fossil specimen",
       "url": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Kronosaurus_boyacensis_fossil.jpg"
+    },
+    {
+      "label": "paleoart/Kronosaurus_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a6/Kronosaurus_NT.jpg"
+    },
+    {
+      "label": "paleoart/Kronosaurus_queenslandicus.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e4/Kronosaurus_queenslandicus.jpg"
     }
   ],
   "Leedsichthys": [
@@ -839,6 +983,14 @@
     {
       "label": "Leedsichthys problematicus reconstruction",
       "url": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Leedsichthys_problematicus.jpg"
+    },
+    {
+      "label": "paleoart/Leedsichthys_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Leedsichthys_NT.jpg"
+    },
+    {
+      "label": "paleoart/Leedsichthys_problematicus.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/00/Leedsichthys_problematicus.jpg"
     }
   ],
   "Lepidodendron": [
@@ -873,6 +1025,10 @@
     {
       "label": "Lepidodendron reconstruction illustration",
       "url": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Lepidodendron_reconstrucci%C3%B3n.jpg"
+    },
+    {
+      "label": "paleoart/Lepidodendron_restoration.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/40/Lepidodendron_restoration.jpg"
     }
   ],
   "Liopleurodon": [
@@ -919,6 +1075,14 @@
     {
       "label": "Liopleurodon holotype tooth",
       "url": "https://upload.wikimedia.org/wikipedia/commons/7/76/Liopleurodon_holotype_tooth.jpg"
+    },
+    {
+      "label": "paleoart/Liopleurodon_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Liopleurodon_NT.jpg"
+    },
+    {
+      "label": "paleoart/Liopleurodon_ferox.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Liopleurodon_ferox.jpg"
     }
   ],
   "Megalodon": [
@@ -949,6 +1113,14 @@
     {
       "label": "Megalodon jaw reconstruction frontal view",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Carcharodon_megalodon_fossil_shark_jaw_%28reconstruction%29_%28late_Cenozoic%29_3.jpg"
+    },
+    {
+      "label": "paleoart/Megalodon_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Megalodon_NT.jpg"
+    },
+    {
+      "label": "paleoart/Otodus_megalodon.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Otodus_megalodon.jpg"
     }
   ],
   "Megalograptus": [
@@ -1003,6 +1175,14 @@
     {
       "label": "Megalograptus ohioensis Elkhorn Formation fossil",
       "url": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Megalograptus_ohioensis%2C_Elkhorn_Formation.jpg"
+    },
+    {
+      "label": "paleoart/Megalograptus_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Megalograptus_NT.jpg"
+    },
+    {
+      "label": "paleoart/Megalograptus_ohioensis.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d6/Megalograptus_ohioensis.jpg"
     }
   ],
   "Meganeura": [
@@ -1057,6 +1237,14 @@
     {
       "label": "Meganeura monyi type specimen fossil",
       "url": "https://upload.wikimedia.org/wikipedia/commons/7/72/Meganeura_monyi_type.jpg"
+    },
+    {
+      "label": "paleoart/Meganeura_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Meganeura_NT.jpg"
+    },
+    {
+      "label": "paleoart/Meganeura_monyi.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Meganeura_monyi.jpg"
     }
   ],
   "Megarachne": [
@@ -1103,6 +1291,10 @@
     {
       "label": "Megarachne hypothetical reconstruction",
       "url": "https://upload.wikimedia.org/wikipedia/commons/6/60/20210116_Megarachne_hypothetical_reconstruction.png"
+    },
+    {
+      "label": "paleoart/Megarachne_servinei.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/59/Megarachne_servinei.jpg"
     }
   ],
   "Mosasaurus": [
@@ -1153,6 +1345,18 @@
     {
       "label": "Mosasaurus hoffmanni skull illustration",
       "url": "https://upload.wikimedia.org/wikipedia/commons/0/03/Mosasaurus_hoffmanni.png"
+    },
+    {
+      "label": "paleoart/Mosasaurus_hoffmanni_life.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/58/Mosasaurus_hoffmanni_life.jpg"
+    },
+    {
+      "label": "paleoart/Mosasaurus_missouriensis_NT.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/4c/Mosasaurus_missouriensis_NT.png"
+    },
+    {
+      "label": "paleoart/Mosasaurus_hoffmannii.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Mosasaurus_hoffmannii.JPG"
     }
   ],
   "Parasaurolophus": [
@@ -1211,6 +1415,14 @@
     {
       "label": "Parasaurolophus walkeri Plate II type description",
       "url": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Parasaurolophus_walkeri%2C_a_new_genus_and_species_of_trachodont_dinosaur_-_PLATE_II.png"
+    },
+    {
+      "label": "paleoart/Parasaurolophus_life_restoration.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/64/Parasaurolophus_cyrtocristatus.jpg"
+    },
+    {
+      "label": "paleoart/Parasaurolophus_pair.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Parasaurolophus_walkeri_restoration.jpg"
     }
   ],
   "Pteranodon": [
@@ -1249,6 +1461,14 @@
     {
       "label": "Old Pteranodon mount historic display",
       "url": "https://upload.wikimedia.org/wikipedia/commons/2/22/Old_Pteranodon_mount.jpg"
+    },
+    {
+      "label": "paleoart/Pteranodon_longiceps.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/2c/Pteranodon_longiceps_mmartyniuk_wiki.png"
+    },
+    {
+      "label": "paleoart/Pteranodon_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Pteranodon_NT.jpg"
     }
   ],
   "Pulmonoscorpius": [
@@ -1299,6 +1519,10 @@
     {
       "label": "Pulmonoscorpius top view reconstruction",
       "url": "https://upload.wikimedia.org/wikipedia/commons/8/80/Pulmonoscorpius_top_view_reconstruction.png"
+    },
+    {
+      "label": "paleoart/Pulmonoscorpius_kirktonensis.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/ea/Pulmonoscorpius_kirktonensis.jpg"
     }
   ],
   "Quetzalcoatlus": [
@@ -1345,6 +1569,18 @@
     {
       "label": "Quetzalcoatlus in flight Perot Museum mount",
       "url": "https://upload.wikimedia.org/wikipedia/commons/0/07/Quetzalcoatlus_in_flight_Perot.jpg"
+    },
+    {
+      "label": "paleoart/Quetzalcoatlus_northropi.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/04/Quetzalcoatlus_northropi.png"
+    },
+    {
+      "label": "paleoart/Quetzalcoatlus_lawsoni.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/db/Quetzalcoatlus_lawsoni.png"
+    },
+    {
+      "label": "paleoart/Quetzalcoatlus_fern_prairie.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/5e/Life_restoration_of_a_group_of_giant_azhdarchids%2C_Quetzalcoatlus_northropi%2C_foraging_on_a_Cretaceous_fern_prairie.png"
     }
   ],
   "Rhamphorhynchus": [
@@ -1383,6 +1619,14 @@
     {
       "label": "Rhamphorhynchus muensteri fossil Solnhofen Limestone",
       "url": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Rhamphorhynchus_muensteri_%28fossil_pterosaur%29_%28Solnhofen_Limestone%2C_Upper_Jurassic%3B_Bavaria%2C_Germany%29_%2836543746860%29.jpg"
+    },
+    {
+      "label": "paleoart/Rhamphorhynchus_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Rhamphorhynchus_NT.jpg"
+    },
+    {
+      "label": "paleoart/Rhamphorhynchus_muensteri.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/85/Rhamphorhynchus_muensteri.jpg"
     }
   ],
   "Sigillaria": [
@@ -1413,6 +1657,10 @@
     {
       "label": "Sigillaria reconstruction illustration",
       "url": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Sigillaria_reconstrucci%C3%B3n.jpg"
+    },
+    {
+      "label": "paleoart/Sigillaria_restoration.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/25/Sigillaria_restoration.jpg"
     }
   ],
   "Spinosaurus": [
@@ -1447,6 +1695,14 @@
     {
       "label": "Digital skeletal reconstruction of Spinosaurus",
       "url": "https://upload.wikimedia.org/wikipedia/commons/4/42/Digital_skeletal_reconstruction_of_Spinosaurus.png"
+    },
+    {
+      "label": "paleoart/Spinosaurus_swimming.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Spinosaurus_swimming.jpg"
+    },
+    {
+      "label": "paleoart/Spinosaurus_life_restoration.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Spinosaurus_aegyptiacus.png"
     }
   ],
   "Stegosaurus": [
@@ -1521,6 +1777,14 @@
     {
       "label": "Stegosaurus at the Field Museum",
       "url": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Stegosaurus_at_the_Field_Museum.jpg"
+    },
+    {
+      "label": "paleoart/Stegosaurus_life_restoration.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Stegosaurus_stenops_Life_Reconstruction.png"
+    },
+    {
+      "label": "paleoart/Stegosaurus_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/51/Stegosaurus_armatus_by_durbed.jpg"
     }
   ],
   "Triceratops": [
@@ -1595,6 +1859,18 @@
     {
       "label": "Triceratops skeleton Osborn 1933 scientific illustration",
       "url": "https://upload.wikimedia.org/wikipedia/commons/7/72/Triceratops_skeleton%2C_from_Abel%2C_O._%281912%29._Grundz%C3%BCge_der_Palaeobiologie_der_Wirbeltiere.jpg"
+    },
+    {
+      "label": "paleoart/Triceratops_liveDB.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Triceratops_liveDB.jpg"
+    },
+    {
+      "label": "paleoart/Triceratops_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/ec/LA-Triceratops_mount-1.jpg"
+    },
+    {
+      "label": "paleoart/Triceratops_vs_Tyrannosaurus.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/53/Tyrannosaurus_Versus_Triceratops.jpg"
     }
   ],
   "Tyrannosaurus rex": [
@@ -1657,6 +1933,18 @@
     {
       "label": "T. rex skeletal diagram SVG",
       "url": "https://upload.wikimedia.org/wikipedia/commons/7/70/T._rex_skeleton.svg"
+    },
+    {
+      "label": "paleoart/T_rex_profile_steveoc86.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/15/Tyrannosaurus-rex-Profile-steveoc86.png"
+    },
+    {
+      "label": "paleoart/T_rex_colored_pencil.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Tyrannosaurus_rex_colored_pencil_drawing.jpg"
+    },
+    {
+      "label": "paleoart/T_rex_illustration.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Tyrannosaurus_illustration.jpg"
     }
   ],
   "Velociraptor": [
@@ -1711,6 +1999,14 @@
     {
       "label": "Velociraptor skull AMNH 6515",
       "url": "https://upload.wikimedia.org/wikipedia/commons/4/46/Velociraptor_skull_AMNH_6515.jpg"
+    },
+    {
+      "label": "paleoart/Velociraptor_feathered.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/55/Velociraptor_Restoration.png"
+    },
+    {
+      "label": "paleoart/Velociraptor_mongoliensis_life.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a6/Velociraptor_mongoliensis_jmallon.jpg"
     }
   ],
   "Wattieza": [
@@ -1741,6 +2037,10 @@
     {
       "label": "Wattieza reconstruction illustration",
       "url": "https://upload.wikimedia.org/wikipedia/commons/5/5b/Wattieza_reconstruccion.jpg"
+    },
+    {
+      "label": "paleoart/Wattieza_reconstruction.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/17/Wattieza.jpg"
     }
   ],
   "Williamsonia": [
@@ -1771,6 +2071,10 @@
     {
       "label": "Williamsonia pecten fronds scientific illustration",
       "url": "https://upload.wikimedia.org/wikipedia/commons/a/a2/EB1911_Palaeobotany_-_fronds_of_Williamsonia_pecten.jpg"
+    },
+    {
+      "label": "paleoart/Williamsonia_restoration.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Williamsonia_sewardiana_restoration.jpg"
     }
   ],
   "Xiphactinus": [
@@ -1797,6 +2101,14 @@
     {
       "label": "Xiphactinus with Gillicus prey inside fossil",
       "url": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Thryptodus_zitteli_in_Xiphactinus_audax.jpg"
+    },
+    {
+      "label": "paleoart/Xiphactinus_NT.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/80/Xiphactinus_NT.jpg"
+    },
+    {
+      "label": "paleoart/Xiphactinus_audax.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Xiphactinus_audax.jpg"
     }
   ]
 }

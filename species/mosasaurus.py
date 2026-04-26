@@ -69,7 +69,7 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
-        "keeled overlapping snake-like scales",
+        "matte leathery aquatic skin, microscopic scales, organic marine texture",
         "rounded conical snout with loose jaw hinge",
         "deep crescent tail fluke",
         "four short paddle flippers",
