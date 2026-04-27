@@ -133,15 +133,18 @@ import Gallery from '../components/Gallery.astro';
     }
     .gallery-item img {
       width: 100%;
-      height: 480px; /* Make it taller to crop further into the sweet spot */
+      height: 320px;
+      aspect-ratio: 4 / 5;
       object-fit: cover;
-      object-position: center 20%; /* Push up slightly to cut off top white space if possible */
+      object-position: center;
       display: block;
       transition: transform 0.8s ease, filter 0.8s ease;
+      border-radius: 12px;
+      background: #222;
     }
     .gallery-item:hover img {
-      transform: scale(1.08); /* Stronger scale for the flow effect */
-      filter: brightness(1.2) contrast(1.1);
+      transform: scale(1.03);
+      filter: brightness(1.1) contrast(1.1);
     }
     .gallery-caption {
       position: absolute;

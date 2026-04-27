@@ -3,12 +3,9 @@
 > astro dev
 
 [vite] connected.
-18:00:50 [types] Generated 0ms
-18:00:50 [WARN] [content] Content config not loaded
-18:00:50 [vite] Re-optimizing dependencies because vite config has changed
-18:00:50 [vite] Port 4321 is in use, trying another one...
-18:00:50 [vite] Port 4322 is in use, trying another one...
- astro  v6.1.8 ready in 516 ms
-┃ Local    http://localhost:4323/
+08:14:13 [types] Generated 0ms
+08:14:13 [WARN] [content] Content config not loaded
+ astro  v6.1.8 ready in 513 ms
+┃ Local    http://localhost:4321/
 ┃ Network  use --host to expose
-18:00:50 watching for file changes...
+08:14:13 watching for file changes...
