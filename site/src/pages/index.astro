@@ -9,12 +9,17 @@ import Gallery from '../components/Gallery.astro';
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jurassinkart — Prehistoric Art That Feels Alive</title>
   <meta name="description" content="Cinematic dinosaur artwork inspired by ancient jungles, deep oceans, and primeval skies. Shop prints at Jurassinkart." />
-  
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" />
+
   <style is:global>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Georgia', 'Times New Roman', serif;
+      font-family: 'Cormorant Garamond', 'Georgia', 'Times New Roman', serif;
+      font-weight: 400;
       background: linear-gradient(
         to bottom,
         rgba(9, 14, 23, 0.85) 0%,
@@ -22,6 +27,49 @@ import Gallery from '../components/Gallery.astro';
       ), url('/assets/prehistoric-tree.png') center/cover fixed;
       color: #e8e0d4;
       overflow-x: hidden;
+    }
+
+    h1, h2, h3, .hero-content h1 {
+      font-family: 'Cinzel', 'Georgia', serif;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Drifting jungle mist ──────────────────── */
+    .jungle-mist {
+      position: fixed;
+      inset: -10% -10% -10% -10%;
+      pointer-events: none;
+      z-index: 1;
+      mix-blend-mode: screen;
+      opacity: 0.35;
+      background:
+        radial-gradient(ellipse 60% 30% at 30% 30%, rgba(180,200,180,0.25) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 25% at 70% 60%, rgba(160,180,170,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 35% at 40% 80%, rgba(200,210,190,0.18) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 22% at 80% 25%, rgba(170,190,180,0.20) 0%, transparent 60%);
+      filter: blur(40px);
+      animation: mist-drift 60s ease-in-out infinite alternate;
+    }
+    .jungle-mist::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 55% 28% at 20% 70%, rgba(190,200,180,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 65% 30% at 85% 40%, rgba(160,180,180,0.16) 0%, transparent 60%);
+      filter: blur(50px);
+      animation: mist-drift-2 90s ease-in-out infinite alternate;
+    }
+    @keyframes mist-drift {
+      0%   { transform: translate3d(0, 0, 0); }
+      50%  { transform: translate3d(3%, -2%, 0); }
+      100% { transform: translate3d(-2%, 1.5%, 0); }
+    }
+    @keyframes mist-drift-2 {
+      0%   { transform: translate3d(0, 0, 0); }
+      50%  { transform: translate3d(-3%, 2%, 0); }
+      100% { transform: translate3d(2%, -1%, 0); }
     }
 
     /* ── Hero ─────────────────────────────────── */
@@ -102,74 +150,6 @@ import Gallery from '../components/Gallery.astro';
     }
     .btn:hover { background: #a8531e; }
 
-    /* ── Gallery ──────────────────────────────── */
-    .gallery {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 80px 24px;
-    }
-    .gallery h2 {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 48px;
-      color: #d4c9b6;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      font-weight: 400;
-    }
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 28px;
-    }
-    .gallery-item {
-      position: relative;
-      border-radius: 20px;
-      overflow: hidden;
-      background: transparent;
-      /* Smoothly feather the edges so the white wall mockups vanish into the dark jungle */
-      -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-      mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
-    }
-    .gallery-item img {
-      width: 100%;
-      height: 320px;
-      aspect-ratio: 4 / 5;
-      object-fit: cover;
-      object-position: center;
-      display: block;
-      transition: transform 0.8s ease, filter 0.8s ease;
-      border-radius: 12px;
-      background: #222;
-    }
-    .gallery-item:hover img {
-      transform: scale(1.03);
-      filter: brightness(1.1) contrast(1.1);
-    }
-    .gallery-caption {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 40px 20px 20px;
-      background: transparent;
-      text-align: center;
-      pointer-events: none;
-    }
-    .gallery-caption h3 {
-      font-size: 1.3rem;
-      margin-bottom: 6px;
-      color: #fff;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.8);
-    }
-    .gallery-caption p {
-      font-size: 0.95rem;
-      color: #dfd8cb;
-      line-height: 1.5;
-      margin: 0;
-      text-shadow: 0 1px 8px rgba(0,0,0,0.8);
-    }
-
     /* ── World section ────────────────────────── */
     .world {
       max-width: 780px;
@@ -210,12 +190,6 @@ import Gallery from '../components/Gallery.astro';
     }
     footer a { color: #7a6f5e; text-decoration: none; }
     footer a:hover { color: #c2652a; }
-
-    /* ── Mobile ───────────────────────────────── */
-    @media (max-width: 680px) {
-      .gallery-grid { grid-template-columns: 1fr; }
-      .gallery-item img { height: 420px; }
-    }
 
     /* ── Lenis Smooth Scrolling ──────────────── */
     html.lenis, html.lenis body {
@@ -289,6 +263,7 @@ import Gallery from '../components/Gallery.astro';
 <body>
 
   <div id="custom-cursor"></div>
+  <div class="jungle-mist" aria-hidden="true"></div>
   <canvas id="ambient-dust"></canvas>
 
   <!-- ── Hero with looping video ── -->
@@ -418,7 +393,7 @@ import Gallery from '../components/Gallery.astro';
         requestAnimationFrame(smoothCursor);
 
         // Hover states
-        const hoverElements = document.querySelectorAll('.gallery-card, .gallery-item, a:not(.btn)');
+        const hoverElements = document.querySelectorAll('.gallery-card, a:not(.btn)');
         hoverElements.forEach(el => {
           el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
           el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));

@@ -1,111 +1,287 @@
 ---
 import productsData from '../data/products.json';
 
-let products = productsData;
+const products = productsData;
 ---
+<link rel="stylesheet" href="https://unpkg.com/photoswipe@5.4.4/dist/photoswipe.css" />
 <section class="gallery">
-  <h2>Featured Works</h2>
-  <div class="gallery-grid">
-    {products.length > 0 ? (
-      products.map(product => (
-        <div class="gallery-card">
-          {product.image ? (
-            <img
-              src={product.image}
-              alt={product.title}
-              loading="lazy"
-              class="product-image"
-            />
-          ) : (
-            <div class="no-image">No Image</div>
-          )}
-        </div>
-      ))
-    ) : (
-      <p class="empty-state">Curating featured posters and canvas works — check back soon.</p>
-    )}
-  </div>
+  <h2 class="gallery-title">Featured Works</h2>
+  <p class="gallery-sub">Click any piece to step inside.</p>
+
+  {products.length > 0 ? (
+    <div class="gallery-grid" id="masonry-grid">
+      {products.map(product => (
+        <a
+          class="gallery-card"
+          href={product.image}
+          data-pswp-width={product.width}
+          data-pswp-height={product.height}
+          data-title={product.title}
+          data-etsy={product.etsyUrl}
+          target="_blank"
+          rel="noopener"
+        >
+          <img
+            src={product.image}
+            alt={product.title}
+            loading="lazy"
+            class="product-image"
+          />
+          <div class="card-overlay">
+            <span class="card-title">{product.title}</span>
+            <span class="card-cue">View &amp; shop &nbsp;→</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  ) : (
+    <p class="empty-state">Curating featured posters and canvas works — check back soon.</p>
+  )}
 </section>
 
-<style>
+<script type="module" is:inline>
+  import Masonry from 'https://esm.sh/masonry-layout@4.2.2';
+  import imagesLoaded from 'https://esm.sh/imagesloaded@5.0.0';
+  import PhotoSwipeLightbox from 'https://esm.sh/photoswipe@5.4.4/lightbox';
+
+  function initGallery() {
+    const grid = document.getElementById('masonry-grid');
+    if (!grid) return;
+
+    const masonry = new Masonry(grid, {
+      itemSelector: '.gallery-card',
+      columnWidth: '.gallery-card',
+      percentPosition: true,
+      gutter: 20,
+      transitionDuration: '0.3s',
+    });
+
+    imagesLoaded(grid).on('progress', () => masonry.layout());
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: '#masonry-grid',
+      children: 'a.gallery-card',
+      pswpModule: () => import('https://esm.sh/photoswipe@5.4.4'),
+      bgOpacity: 0.96,
+      showHideAnimationType: 'fade',
+    });
+
+    lightbox.on('uiRegister', () => {
+      lightbox.pswp.ui.registerElement({
+        name: 'jungle-caption',
+        order: 9,
+        isButton: false,
+        appendTo: 'root',
+        html: '',
+        onInit: (el, pswp) => {
+          el.classList.add('pswp__jungle-caption');
+          const update = () => {
+            const slideEl = pswp.currSlide?.data?.element;
+            if (!slideEl) return;
+            const title = slideEl.dataset.title || '';
+            const etsy = slideEl.dataset.etsy || 'https://www.etsy.com/shop/Jurassinkart';
+            el.innerHTML = `
+              <div class="pswp__jungle-caption-inner">
+                <h3>${title}</h3>
+                <a class="pswp__buy-btn" href="${etsy}" target="_blank" rel="noopener">Buy on Etsy →</a>
+              </div>
+            `;
+          };
+          pswp.on('change', update);
+          pswp.on('afterInit', update);
+        },
+      });
+    });
+
+    lightbox.init();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGallery);
+  } else {
+    initGallery();
+  }
+</script>
+
+<style is:global>
   .gallery {
-    padding: 2rem 0;
+    padding: 4rem 1rem 6rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
   }
-  
-  .gallery h2 {
+
+  .gallery-title {
     text-align: center;
-    margin-bottom: 2.5rem;
+    font-family: 'Cinzel', 'Georgia', serif;
+    font-weight: 500;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    letter-spacing: 0.16em;
+    color: #e6dccb;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    text-shadow: 0 2px 18px rgba(0,0,0,0.6);
   }
-  
+
+  .gallery-sub {
+    text-align: center;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: #a89e89;
+    margin-bottom: 3rem;
+    letter-spacing: 0.04em;
+  }
+
   .gallery-grid {
-    column-count: 3;
-    column-gap: 2rem;
-    padding: 0 1rem;
-    max-width: 1200px;
     margin: 0 auto;
   }
 
   .gallery-card {
-    break-inside: avoid;
-    margin-bottom: 2rem;
-    border-radius: 16px;
+    display: block;
+    width: calc(33.333% - 14px);
+    margin-bottom: 20px;
+    border-radius: 14px;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.2);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    transition: box-shadow 0.3s ease;
+    background: rgba(8, 12, 18, 0.4);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    cursor: zoom-in;
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
+                box-shadow 0.5s ease;
   }
 
   .gallery-card:hover {
-    box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+    transform: translateY(-3px);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.75),
+                0 0 0 1px rgba(193, 165, 110, 0.25);
   }
 
   .product-image {
     width: 100%;
     height: auto;
     display: block;
-    background: #222;
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease;
-    filter: saturate(1.05) contrast(1.05);
+    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+                filter 0.7s ease;
+    filter: saturate(1.05) contrast(1.04);
   }
 
   .gallery-card:hover .product-image {
-    transform: scale(1.03);
-    filter: saturate(1.1) contrast(1.1) brightness(1.1);
+    transform: scale(1.04);
+    filter: saturate(1.15) contrast(1.08) brightness(1.06);
+  }
+
+  .card-overlay {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 80px 18px 16px;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.85) 0%,
+      rgba(0, 0, 0, 0.55) 55%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .gallery-card:hover .card-overlay {
+    opacity: 1;
+  }
+
+  .card-title {
+    font-family: 'Cinzel', 'Georgia', serif;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    color: #f5ecd9;
+    text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+  }
+
+  .card-cue {
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: #c9b988;
+    letter-spacing: 0.04em;
   }
 
   @media (max-width: 900px) {
-    .gallery-grid {
-      column-count: 2;
-      column-gap: 1.2rem;
-    }
     .gallery-card {
-      margin-bottom: 1.2rem;
+      width: calc(50% - 10px);
     }
   }
 
   @media (max-width: 600px) {
-    .gallery-grid {
-      column-count: 1;
+    .gallery-card {
+      width: 100%;
     }
   }
 
-  .no-image {
-    width: 100%;
-    aspect-ratio: 4 / 5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #333;
-    color: #999;
-  }
-
   .empty-state {
-    grid-column: 1 / -1;
     text-align: center;
     color: #d4c9b6;
     font-size: 1rem;
-    letter-spacing: 0.02em;
     padding: 2rem 1rem;
   }
 
+  /* ── PhotoSwipe jungle caption + Buy CTA ── */
+  .pswp__jungle-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 28px 24px 36px;
+    background: linear-gradient(
+      to top,
+      rgba(8, 12, 18, 0.92) 0%,
+      rgba(8, 12, 18, 0.6) 70%,
+      rgba(8, 12, 18, 0) 100%
+    );
+    text-align: center;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .pswp__jungle-caption-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    pointer-events: auto;
+  }
+  .pswp__jungle-caption-inner h3 {
+    font-family: 'Cinzel', 'Georgia', serif;
+    font-size: 1.35rem;
+    letter-spacing: 0.14em;
+    color: #f5ecd9;
+    text-transform: uppercase;
+    margin: 0 0 14px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+  }
+  .pswp__buy-btn {
+    display: inline-block;
+    padding: 12px 28px;
+    background: linear-gradient(180deg, #c2652a 0%, #a8531e 100%);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-family: 'Cinzel', 'Georgia', serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.15);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  }
+  .pswp__buy-btn:hover {
+    background: linear-gradient(180deg, #d4762e 0%, #b85b1f 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.6),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+  }
 </style>
