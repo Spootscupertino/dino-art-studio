@@ -17,7 +17,6 @@ const products = productsData;
           data-pswp-width={product.width}
           data-pswp-height={product.height}
           data-title={product.title}
-          data-etsy={product.etsyUrl}
           target="_blank"
           rel="noopener"
         >
@@ -75,15 +74,15 @@ const products = productsData;
         html: '',
         onInit: (el, pswp) => {
           el.classList.add('pswp__jungle-caption');
+          const ETSY_SHOP_URL = 'https://www.etsy.com/shop/Jurassinkart';
           const update = () => {
             const slideEl = pswp.currSlide?.data?.element;
             if (!slideEl) return;
             const title = slideEl.dataset.title || '';
-            const etsy = slideEl.dataset.etsy || 'https://www.etsy.com/shop/Jurassinkart';
             el.innerHTML = `
               <div class="pswp__jungle-caption-inner">
                 <h3>${title}</h3>
-                <a class="pswp__buy-btn" href="${etsy}" target="_blank" rel="noopener">Buy on Etsy →</a>
+                <a class="pswp__buy-btn" href="${ETSY_SHOP_URL}" target="_blank" rel="noopener">Shop the Collection →</a>
               </div>
             `;
           };
