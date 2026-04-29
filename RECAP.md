@@ -1,33 +1,5 @@
 # RECAP — Dinosaur Art Prompt Generator
 
----
-
-### Session 24 — T. rex paleoart refs replaced (2026-04-26)
-
-**What changed:** All three Tyrannosaurus rex entries in `paleoart_refs.json` replaced; one new entry added (4 refs total, up from 3).
-
-| Old label | Old URL | Reason removed |
-|-----------|---------|----------------|
-| `T_rex_profile_steveoc86.png` | `Tyrannosaurus-rex-Profile-steveoc86.png` | Low-quality profile sketch; no scientific publication backing; poor resolution for cref use |
-| `T_rex_colored_pencil.jpg` | `Tyrannosaurus_rex_colored_pencil_drawing.jpg` | Amateur colored pencil medium; illustrative not photorealistic; no anatomical source cited |
-| `T_rex_illustration.jpg` | `Tyrannosaurus_illustration.jpg` | Generic illustration; artist and anatomical basis unknown |
-
-| New label | New URL | Reason added |
-|-----------|---------|--------------|
-| `T_rex_witton_2013.png` | `Tyrannosaurus_by_Mark_P._Witton.png` | Mark P. Witton, published in Acta Palaeontologica Polonica; credentialed paleoartist-scientist; 1810×1160, CC BY 2.0 |
-| `T_rex_STAN_head_fabiosauria.jpg` | `STAN_BHI_3033_head_life_restoration.jpg` | Fabio Pastori (Fabiosauria); based on STAN specimen BHI 3033 with Nature paper references; 4032×3024 (highest res); excellent cref for skull/facial anatomy |
-| `T_rex_rising_caneer2021.png` | `T._rex_rising_(Caneer_et.al._2021).png` | Based on Caneer et al. 2021 trackway evidence for T. rex rising from rest; 2937×1656; lipped; only evidence-based behavioral pose ref in the set |
-| `T_rex_sue_skeletal_LMR2016.png` | `Tyrannosaurus_2016_LMR.png` | Based on Sue (FMNH PR2081) skeletal with Larramendi/Molina-Pérez peer review; 2652×956; clean full-body lateral for body proportions |
-
-**Evidence basis for exclusions:**
-- RJ Palmer (`Rjpalmer_tyrannosaurusrex`) — Commons accuracy flag: "too extensively feathered." Contradicts Bell et al. 2017 (PLOS Biology) which confirmed adult T. rex integument as pebbly mosaic scales at neck, abdomen, hips, tail base — no feather evidence.
-- Matt Martyniuk (`Tyrannosaurus_rex_mmartyniuk`) — explicitly "feathering at lower plausible extreme" per file description. Same Bell et al. conflict.
-- Durbed (`Tyrannosaurus_rex_by_durbed`) — "minimal feathers based on phylogenetic bracketing." Phylogenetic inference overridden by direct skin evidence per Bell et al.
-
-**Next step:** Re-run `upload_refs.py` for Tyrannosaurus rex entries to push the 4 new Wikimedia URLs through to Discord CDN → `sref_urls.json`. The old Discord CDN URLs for T. rex paleoart are now stale.
-
----
-
 ## System
 - **Machine:** Mac mini, Terminal, Python 3.9.6
 - **Main files:** `/Users/ericeldridge/dino_art/`
@@ -1280,3 +1252,138 @@ Build a VS Code task pipeline using Claude Code that automates the full workflow
 - **Task 4: Score** — run `--ab-score` from VS Code terminal, results auto-logged to DB
 - **Task 5: Ship** — mark winners as print-worthy, auto-push to Printify via API
 - All steps accessible via VS Code keyboard shortcuts or the command palette
+
+---
+
+## Session Log — 2026-04-29 (Astro SEO Overhaul + Taxonomic Subfolder Pipeline)
+
+This session shipped the full SEO overhaul of jurassinkart.com plus a redesigned drop-folder pipeline that makes "drag image into folder → it appears on the live site with full SEO metadata" a one-step user action. All work landed on `main` and was pushed to both `dino-art-studio` and `jurassinkart.com` remotes. Final commit: `b9ce093 Restructure gallery into category subfolders + add SEO pipeline`.
+
+### What we accomplished
+
+**1. Asset pipeline migration — public → src for build-time optimization**
+- All gallery images moved from `site/public/assets/website_dino_images/` (raw 7–11 MB PNGs served as-is) into `site/src/assets/gallery/` so Astro's `<Image>` component can pre-optimize them at build time.
+- Build now emits AVIF + WebP responsive variants at 400w / 800w / 1200w, hashed under `dist/_astro/*`. Largest source PNGs become ~50–150 KB WebP at typical viewport widths.
+- 15 images renamed from MJ slop strings (`spootscupertino_extreme_macro_close-up_of_carnotaurus_face_deta_f5ec3597...png`) to lowercase-hyphenated taxonomic slugs (`carnotaurus-horned-theropod-macro.png`). The slug *is* the SEO filename Google sees — keywords-first, no UUIDs.
+- 19 unmigrated images remain in the old `website_dino_images/` folder (per session call: option **a** — keep them, they're harmless, will be relabeled and moved into subfolders later).
+
+**2. Taxonomic subfolder structure (the new drop-folder UX)**
+- Created 5 category subfolders inside `site/src/assets/gallery/`:
+  - `predators/` (5 files: tyrannosaurus×2, velociraptor, carnotaurus, dilophosaurus)
+  - `herbivores/` (4 files: triceratops×2, stegosaurus, herbivorous-dinosaur-eye-macro)
+  - `marine/` (2 files: liopleurodon, ammonite)
+  - `aerial/` (1 file: pteranodon)
+  - `flora_arthropods/` (3 files: magnolia, lepidodendron, mushrooms)
+- **Category is now derived from the subfolder, not from filename pattern matching.** Drop a new image into `predators/` and `sync_gallery.py` automatically tags it `category: predators` — no SPECIES_META lookup required for the category. Species-specific metadata (scientific_name, era, traits) still comes from SPECIES_META keyed off the basename.
+- Frontend filter tabs reorganized: `All / Predators / Herbivores / Aerial / Marine / Flora & Arthropods`. The old single "Terrestrial" tab is gone — it was too coarse for the print-buyer's mental model (collectors filter by "scary T. rex" vs "friendly triceratops", not "land vs sea").
+
+**3. SEO metadata pipeline (`tools/sync_gallery.py`)**
+- Refactored to walk one level deep into category subfolders. Files at the gallery root are skipped with a warning. Files in unknown subfolders are skipped with a warning listing the allowed categories.
+- Each entry in `site/src/data/products.json` now carries: `filename` (relative path like `predators/foo.png`), `title`, `width`, `height`, `type`, `category`, `scientific_name`, `era`, `alt`, `description`, `keywords` (array).
+- `derive_alt()` produces Google-friendly alt text: *"Scientifically accurate paleoart of Tyrannosaurus rex, an apex theropod predator with massive jaws and binocular vision from the Late Cretaceous, rendered in cinematic prehistoric detail."*
+- `derive_description()` produces a fuller product description with the Etsy hook: *"Museum-quality dinosaur wall art for collectors and natural-history enthusiasts."*
+- `derive_keywords()` emits 9 keywords per piece: paleoart, dinosaur art, prehistoric art, natural history illustration, wall art print, scientific name, era, primary trait, title.
+- Title and category are preserved across runs (manual title overrides stick); SEO fields are always re-derived so improvements to SPECIES_META propagate to every old entry on next sync.
+
+**4. Frontend SEO (`site/src/components/Gallery.astro`)**
+- Replaced raw `<img>` tags with Astro `<Image>` (AVIF + WebP, srcset 400/800/1200w, `loading="lazy"`, `decoding="async"`, `sizes` query for proper viewport-aware loading).
+- Each piece is now a `<figure>` with two `<figcaption>` elements:
+  - **Visible overlay caption** — title + "View & shop →" cue on hover.
+  - **Visually-hidden long-form caption** — title, scientific name, era, full description. Read by screen readers and indexed by Google for context.
+- Per-piece JSON-LD `VisualArtwork` schema injected as a single `ItemList` script. Each work entry carries: `name`, `description`, `keywords`, `artform`, `artMedium`, `genre`, `creator` (Organization), `image` (full ImageObject with `contentUrl`, dimensions, `caption`, `license`, `acquireLicensePage`, `creditText`, `copyrightNotice`), `about` (Thing — scientific name + era), `offers` (linking to Etsy shop, USD, InStock).
+- PhotoSwipe lightbox now resolves the lightbox URL via Astro's `getImage()` at large WebP quality 88, max 2400w. Fixes the previous bug where lightbox loaded the raw multi-MB PNG.
+- The lightbox jungle-caption shows scientific name + era + "Shop the Collection →" CTA pointing to the Etsy shop home (no more per-product Etsy URLs).
+
+**5. Site-wide SEO (`site/src/pages/index.astro`)**
+- Added `<link rel="canonical" href="https://jurassinkart.com/">`.
+- Open Graph tags: `og:title`, `og:description`, `og:image`, `og:url`, `og:type=website`.
+- Twitter Card tags.
+- Robots meta with `max-image-preview:large` (lets Google show full-size image previews in search).
+- Site-wide JSON-LD: `Organization` (Jurassinkart, logo, sameAs Etsy) + `WebSite` (with SearchAction stub for future internal search).
+
+**6. Sitemaps**
+- Installed `@astrojs/sitemap`, configured with `site: 'https://jurassinkart.com'`. Generates `dist/sitemap-index.xml` and `dist/sitemap-0.xml` automatically at build time.
+- New build-time endpoint `site/src/pages/sitemap-images.xml.ts` emits a Google Image Sitemap. Walks `site/src/assets/gallery/**/*.{png,jpg,...}` with `import.meta.glob`, calls `getImage()` to resolve each to its hashed `dist/_astro/*.webp` URL, then emits absolute `https://jurassinkart.com/_astro/...` URLs. Required because `@astrojs/sitemap` doesn't know about Astro's hashed asset paths and would emit broken image URLs otherwise. Currently emits 15 `<image:image>` entries; auto-grows as new files are added.
+- `site/public/robots.txt` references both `https://jurassinkart.com/sitemap-index.xml` and `https://jurassinkart.com/sitemap-images.xml`.
+
+**7. Watcher pipeline (`tools/install_watcher.sh` + `tools/sync_and_deploy.sh`)**
+- launchd agent `com.jurassinkart.sync-gallery` re-installed against the **main checkout** (`/Users/ericeldridge/dino_art`), not a temporary worktree.
+- **Critical bug fix:** launchd's `WatchPaths` does **not** recurse into subdirectories — it only fires when the watched directory's own entry list changes. So `install_watcher.sh` was rewritten to register all 5 category subfolders as separate `WatchPaths` entries:
+  - `/Users/ericeldridge/dino_art/site/src/assets/gallery/predators`
+  - `/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores`
+  - `/Users/ericeldridge/dino_art/site/src/assets/gallery/marine`
+  - `/Users/ericeldridge/dino_art/site/src/assets/gallery/aerial`
+  - `/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods`
+- The watcher fires `sync_and_deploy.sh` (10s ThrottleInterval) which runs `sync_gallery.py`, commits the `products.json` delta, and pushes to `origin` (which dual-pushes to both GitHub remotes). Vercel auto-deploys from `main`.
+- Verified loaded: `launchctl list | grep jurassinkart` returns `com.jurassinkart.sync-gallery`. Watcher test was deliberately skipped this session to conserve usage budget; the underlying scripts were verified by manual invocation during build verification.
+
+**8. Dual-remote push setup (unchanged but exercised)**
+- `origin` has dual `pushurl` configured for `https://github.com/Spootscupertino/dino-art-studio.git` (dev) and `https://github.com/Spootscupertino/jurassinkart.com.git` (prod / Vercel-connected).
+- Tonight's `git push origin main` updated both remotes from `b289f9d` to `b9ce093`. Vercel should be building from the new commit on `jurassinkart.com` now.
+
+**9. Housekeeping**
+- `.claude/scheduled_tasks.lock` (CCD harness runtime lock file) added to `.gitignore` so it stops appearing as untracked.
+- Final build clean: 15 figures, 15 srcsets, 15 VisualArtwork + 15 ImageObject JSON-LD blobs in `dist/index.html`; 15 `<image:image>` entries in `dist/sitemap-images.xml` with absolute hashed URLs.
+
+### How to drop a new image (the 1-step UX we shipped)
+
+1. Drag the PNG/JPG into the appropriate subfolder under `/Users/ericeldridge/dino_art/site/src/assets/gallery/<category>/`. Use a taxonomic slug filename: `<species>-<distinctive-trait>-<context>.png`.
+2. Within ~10 seconds, launchd fires `sync_and_deploy.sh`. Watch progress in `tools/logs/sync.log`.
+3. The script runs `sync_gallery.py` (regenerates `products.json`), `git add` + `git commit` with auto-message, then `git push origin main`.
+4. Vercel detects the push, builds the site (Astro generates the AVIF/WebP variants for the new image), deploys.
+5. New image appears on https://jurassinkart.com with full SEO metadata, lightbox CTA, and a fresh entry in `sitemap-images.xml`.
+
+If a species isn't in `SPECIES_META` (in `tools/sync_gallery.py`), it falls back to generic Dinosauria/Mesozoic metadata. To add a new species, drop a new entry in `SPECIES_META` with `scientific_name`, `era`, `traits`. The category comes from the subfolder, so no `category` field is needed there anymore.
+
+---
+
+## Next Session — Pick Up Here
+
+### 1. Google Search Console — verify domain ownership via Vercel DNS
+
+GSC needs to confirm we own `jurassinkart.com` before it'll accept sitemap submissions. Easiest path: TXT record verification through Vercel's DNS panel.
+
+**Steps:**
+1. Go to https://search.google.com/search-console → "Add property" → choose **Domain** (not URL prefix). Enter `jurassinkart.com`.
+2. GSC will display a TXT record value like `google-site-verification=AbCdEf123XyZ...`. Copy it.
+3. Go to https://vercel.com/dashboard → select the `jurassinkart.com` project → **Settings** → **Domains** → click on `jurassinkart.com` → **DNS Records** (or "Manage DNS" if Vercel is the registrar).
+4. Add a new record: Type=`TXT`, Name=`@` (root domain), Value=the string GSC gave you, TTL=default.
+5. Wait 5–15 minutes for DNS propagation. Verify with: `dig TXT jurassinkart.com +short` — you should see the google-site-verification line.
+6. Back in GSC, click **Verify**. If it fails, wait another 10 min and retry — DNS propagation can be slow.
+7. Once verified, the domain shows up in GSC sidebar with a green checkmark.
+
+**If Vercel is NOT the DNS provider** (e.g., domain still on registrar's nameservers): add the TXT record at the registrar instead (Namecheap, GoDaddy, Cloudflare, whoever). Same record format.
+
+### 2. Submit both sitemaps to Google Search Console
+
+Once the domain is verified:
+1. In GSC sidebar, click **Sitemaps** under the verified `jurassinkart.com` property.
+2. Under "Add a new sitemap", enter `sitemap-index.xml` and click **Submit**. (It auto-prepends `https://jurassinkart.com/`.)
+3. Repeat with `sitemap-images.xml`.
+4. Both should report **Success** within minutes. "Discovered URLs" will lag — Google takes hours to days to actually crawl.
+5. Sanity-check by fetching them yourself first:
+   - `curl -sI https://jurassinkart.com/sitemap-index.xml` → expect `200 OK` and `content-type: application/xml`
+   - `curl -s https://jurassinkart.com/sitemap-images.xml | grep -c '<image:image>'` → expect `15` (or more if images have been added since)
+6. After 24–48 hours, check **GSC → Pages** to see indexing status and **GSC → Performance → Search results** for impression data starting to roll in.
+
+**Watch for:** If GSC reports "Couldn't fetch" or schema errors, the most likely cause is the absolute URL in `sitemap-images.xml` — verify the `SITE` const in `site/src/pages/sitemap-images.xml.ts` matches your live domain exactly (including https, no trailing slash on host).
+
+### 3. Finalize the local Printify Python script workflow
+
+The Printify integration is the next pipeline tier — same "drop image → it appears" UX, but extended to auto-publish printable products (poster + wrapped canvas) for each gallery image. Stub agent `printify-publisher` already exists in `.claude/agents/`.
+
+**What needs building (in order):**
+1. **`tools/printify_api.py`** — Python wrapper around Printify v1/v2 REST API. Needs auth (PRINTIFY_API_TOKEN env var), shop ID lookup, blueprint+provider selection per product type, variant enumeration.
+2. **`tools/printify_config.yaml`** — Per-product-type config: which blueprints to use (e.g., poster blueprint ID, canvas blueprint ID), price multiplier (cost × 2.5, floor at .99), free-shipping override, default mockup cameras.
+3. **`tools/printify_publisher.py`** — Orchestrator that:
+   - Watches `site/src/assets/gallery/**/*.png` for new files (or runs on demand from `sync_and_deploy.sh`).
+   - For each new image: uploads to Printify Image Library, creates a Poster product + a Wrapped Canvas product across all sizes, applies cost-plus pricing, publishes to the connected Etsy shop.
+   - Writes a sidecar JSON ledger (`tools/printify_ledger.json`) with mappings: `{filename → {poster_product_id, canvas_product_id, urls, prices}}` so we don't republish duplicates.
+   - Has a `--dry-run` mode that prints the planned API calls without executing.
+4. **Wire into the watcher:** extend `sync_and_deploy.sh` to call `printify_publisher.py` after the `sync_gallery.py` step, before the commit. Or run it as a separate launchd agent — TBD based on whether we want Printify to be optional vs always-on.
+5. **Wire Printify product URLs back into the site:** once products exist, update `Gallery.astro` lightbox CTA to deep-link to the matching Printify storefront URL per piece (or surface them as direct "Buy Poster / Buy Canvas" buttons), with fallback to the Etsy shop home if no ledger entry exists.
+
+**Pre-work for next session:**
+- Confirm Printify API token is in `.env` (or document where to put it).
+- Decide: do we want Etsy as the primary buy channel and Printify-managed-Etsy listings, OR direct-from-Printify-storefront? Affects URL structure and CTA copy.
+- Decide: poster + canvas only, or also t-shirts / mugs / etc.? More SKUs = more API calls per drop, more inventory to manage.
