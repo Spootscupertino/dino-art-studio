@@ -37,6 +37,9 @@ env/
 .claude/worktrees/
 .claude/projects/
 
+# Gallery sync watcher logs (machine-local)
+tools/logs/
+
 # Environment
 .env
 

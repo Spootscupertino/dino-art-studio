@@ -11,26 +11,44 @@ const products = productsData;
   {products.length > 0 ? (
     <div class="gallery-grid" id="masonry-grid">
       {products.map(product => (
-        <a
-          class="gallery-card"
-          href={product.image}
-          data-pswp-width={product.width}
-          data-pswp-height={product.height}
-          data-title={product.title}
-          target="_blank"
-          rel="noopener"
-        >
-          <img
-            src={product.image}
-            alt={product.title}
-            loading="lazy"
-            class="product-image"
-          />
-          <div class="card-overlay">
-            <span class="card-title">{product.title}</span>
-            <span class="card-cue">View &amp; shop &nbsp;→</span>
+        product.type === 'video' ? (
+          <div class="gallery-card video-card">
+            <video
+              src={product.image}
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="metadata"
+              class="product-image"
+            ></video>
+            <div class="card-overlay">
+              <span class="card-title">{product.title}</span>
+              <span class="card-cue">Available as a print &nbsp;→</span>
+            </div>
           </div>
-        </a>
+        ) : (
+          <a
+            class="gallery-card"
+            href={product.image}
+            data-pswp-width={product.width}
+            data-pswp-height={product.height}
+            data-title={product.title}
+            target="_blank"
+            rel="noopener"
+          >
+            <img
+              src={product.image}
+              alt={product.title}
+              loading="lazy"
+              class="product-image"
+            />
+            <div class="card-overlay">
+              <span class="card-title">{product.title}</span>
+              <span class="card-cue">View &amp; shop &nbsp;→</span>
+            </div>
+          </a>
+        )
       ))}
     </div>
   ) : (
