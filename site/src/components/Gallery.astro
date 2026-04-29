@@ -8,11 +8,19 @@ const products = productsData;
   <h2 class="gallery-title">Featured Works</h2>
   <p class="gallery-sub">Click any piece to step inside.</p>
 
+  <div class="gallery-filters" role="tablist" aria-label="Filter by category">
+    <button class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">All</button>
+    <button class="filter-btn" data-filter="terrestrial" role="tab">Terrestrial</button>
+    <button class="filter-btn" data-filter="aerial" role="tab">Aerial</button>
+    <button class="filter-btn" data-filter="marine" role="tab">Marine</button>
+    <button class="filter-btn" data-filter="flora_arthropods" role="tab">Flora &amp; Arthropods</button>
+  </div>
+
   {products.length > 0 ? (
     <div class="gallery-grid" id="masonry-grid">
       {products.map(product => (
         product.type === 'video' ? (
-          <div class="gallery-card video-card">
+          <div class="gallery-card video-card" data-category={product.category || 'terrestrial'}>
             <video
               src={product.image}
               autoplay
@@ -30,6 +38,7 @@ const products = productsData;
         ) : (
           <a
             class="gallery-card"
+            data-category={product.category || 'terrestrial'}
             href={product.image}
             data-pswp-width={product.width}
             data-pswp-height={product.height}
@@ -75,9 +84,27 @@ const products = productsData;
 
     imagesLoaded(grid).on('progress', () => masonry.layout());
 
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = grid.querySelectorAll('.gallery-card');
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        filterBtns.forEach(b => {
+          const active = b === btn;
+          b.classList.toggle('is-active', active);
+          b.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        cards.forEach(c => {
+          const match = filter === 'all' || c.dataset.category === filter;
+          c.classList.toggle('is-hidden', !match);
+        });
+        masonry.layout();
+      });
+    });
+
     const lightbox = new PhotoSwipeLightbox({
       gallery: '#masonry-grid',
-      children: 'a.gallery-card',
+      children: 'a.gallery-card:not(.is-hidden)',
       pswpModule: () => import('https://esm.sh/photoswipe@5.4.4'),
       bgOpacity: 0.96,
       showHideAnimationType: 'fade',
@@ -146,8 +173,47 @@ const products = productsData;
     font-style: italic;
     font-size: 1.05rem;
     color: #a89e89;
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
     letter-spacing: 0.04em;
+  }
+
+  .gallery-filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 auto 2.5rem;
+    padding: 0 1rem;
+  }
+  .filter-btn {
+    background: transparent;
+    color: #a89e89;
+    border: 1px solid rgba(193, 165, 110, 0.18);
+    padding: 8px 18px;
+    font-family: 'Cinzel', 'Georgia', serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 0.25s ease, border-color 0.25s ease,
+                background 0.25s ease, transform 0.25s ease;
+  }
+  .filter-btn:hover {
+    color: #e6dccb;
+    border-color: rgba(193, 165, 110, 0.5);
+    transform: translateY(-1px);
+  }
+  .filter-btn.is-active {
+    color: #f5ecd9;
+    border-color: rgba(193, 165, 110, 0.7);
+    background: rgba(193, 165, 110, 0.08);
+    box-shadow: 0 0 0 1px rgba(193, 165, 110, 0.25),
+                0 6px 16px rgba(0,0,0,0.3);
+  }
+  .gallery-card.is-hidden {
+    display: none !important;
   }
 
   .gallery-grid {

@@ -19,19 +19,100 @@ PUBLIC_PREFIX = "/assets/website_dino_images/"
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 VIDEO_EXTS = {".mp4", ".webm", ".mov"}
 
-SPECIES = [
-    "tyrannosaurus rex", "t-rex", "t rex",
-    "tyrannosaurus", "pteranodon", "triceratops", "stegosaurus",
-    "velociraptor", "liopleurodon", "ammonite", "carnotaurus",
-    "dilophosaurus", "lepidodendron", "brachiosaurus", "allosaurus",
-    "spinosaurus", "apatosaurus", "iguanodon", "parasaurolophus",
-    "ankylosaurus", "pachycephalosaurus", "plesiosaurus", "mosasaurus",
-    "archaeopteryx", "compsognathus", "ichthyosaurus", "megalodon",
-    "deinonychus", "utahraptor", "diplodocus", "gallimimus",
-    "oviraptor", "therizinosaurus", "elasmosaurus", "kronosaurus",
-    "pliosaurus", "quetzalcoatlus", "dimetrodon", "trilobite",
-    "anomalocaris", "dunkleosteus", "smilodon", "mammoth",
-]
+# Species → category map. Categories mirror the prompt generator's habitats,
+# but arthropods + plants share one tab on the site.
+# Categories: terrestrial | aerial | marine | flora_arthropods
+SPECIES_CATEGORY = {
+    # Terrestrial — land dinosaurs and large land vertebrates
+    "tyrannosaurus rex":   "terrestrial",
+    "tyrannosaurus":       "terrestrial",
+    "t-rex":               "terrestrial",
+    "t rex":               "terrestrial",
+    "trex":                "terrestrial",
+    "triceratops":         "terrestrial",
+    "stegosaurus":         "terrestrial",
+    "velociraptor":        "terrestrial",
+    "carnotaurus":         "terrestrial",
+    "dilophosaurus":       "terrestrial",
+    "brachiosaurus":       "terrestrial",
+    "allosaurus":          "terrestrial",
+    "spinosaurus":         "terrestrial",
+    "apatosaurus":         "terrestrial",
+    "iguanodon":           "terrestrial",
+    "parasaurolophus":     "terrestrial",
+    "ankylosaurus":        "terrestrial",
+    "pachycephalosaurus":  "terrestrial",
+    "deinonychus":         "terrestrial",
+    "utahraptor":          "terrestrial",
+    "diplodocus":          "terrestrial",
+    "gallimimus":          "terrestrial",
+    "oviraptor":           "terrestrial",
+    "therizinosaurus":     "terrestrial",
+    "compsognathus":       "terrestrial",
+    "dimetrodon":          "terrestrial",
+    "smilodon":            "terrestrial",
+    "mammoth":             "terrestrial",
+    "dinosaur":            "terrestrial",
+    "dino":                "terrestrial",
+
+    # Aerial — pterosaurs and flying species
+    "pteranodon":          "aerial",
+    "quetzalcoatlus":      "aerial",
+    "archaeopteryx":       "aerial",
+    "rhamphorhynchus":     "aerial",
+    "pterodactyl":         "aerial",
+    "pterodactylus":       "aerial",
+    "pterosaur":           "aerial",
+    "dimorphodon":         "aerial",
+
+    # Marine — ocean, water-dwelling
+    "liopleurodon":        "marine",
+    "ammonite":            "marine",
+    "plesiosaurus":        "marine",
+    "mosasaurus":          "marine",
+    "ichthyosaurus":       "marine",
+    "megalodon":           "marine",
+    "elasmosaurus":        "marine",
+    "kronosaurus":         "marine",
+    "pliosaurus":          "marine",
+    "dunkleosteus":        "marine",
+    "nautilus":            "marine",
+    "shark":               "marine",
+    "whale":               "marine",
+
+    # Flora & Arthropods — plants, insects, giant invertebrates
+    "lepidodendron":       "flora_arthropods",
+    "trilobite":           "flora_arthropods",
+    "anomalocaris":        "flora_arthropods",
+    "meganeura":           "flora_arthropods",
+    "arthropleura":        "flora_arthropods",
+    "pulmonoscorpius":     "flora_arthropods",
+    "dragonfly":           "flora_arthropods",
+    "scorpion":            "flora_arthropods",
+    "millipede":           "flora_arthropods",
+    "centipede":           "flora_arthropods",
+    "fern":                "flora_arthropods",
+    "cycad":               "flora_arthropods",
+    "mushroom":            "flora_arthropods",
+    "bloom":               "flora_arthropods",
+    "flower":              "flora_arthropods",
+    "tree":                "flora_arthropods",
+    "forest":              "flora_arthropods",
+    "lycopsid":            "flora_arthropods",
+    "conifer":             "flora_arthropods",
+}
+
+SPECIES = list(SPECIES_CATEGORY.keys())
+
+
+def derive_category(filename: str, title: str = "") -> str:
+    stem = Path(filename).stem.lower()
+    stem = UUID_PATTERN.sub("", stem)
+    haystack = f"{stem} {title.lower()}"
+    for sp in sorted(SPECIES_CATEGORY.keys(), key=len, reverse=True):
+        if sp in haystack:
+            return SPECIES_CATEGORY[sp]
+    return "terrestrial"
 
 UUID_PATTERN = re.compile(r"_[a-f0-9]{8,}(-[a-f0-9-]+)?$")
 FILLER = {
@@ -122,6 +203,7 @@ def main() -> int:
             "width": entry.get("width") or 1024,
             "height": entry.get("height") or 1024,
             "type": "video" if ext in VIDEO_EXTS else "image",
+            "category": entry.get("category") or derive_category(fname, entry.get("title", "")),
         }
 
     actual_files = {
@@ -153,6 +235,7 @@ def main() -> int:
             "width": dims[0],
             "height": dims[1],
             "type": entry_type,
+            "category": derive_category(fname, title),
         }
         new_count += 1
 
