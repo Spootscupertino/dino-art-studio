@@ -160,5 +160,23 @@
     "height": 2688,
     "type": "image",
     "category": "marine"
+  },
+  {
+    "filename": "spootscupertino_large_Glossopteris_large_seed_fern_with_disti_67501304-18bc-41aa-8fbc-0791b38b5b73_3.png",
+    "title": "Fern",
+    "image": "/assets/website_dino_images/spootscupertino_large_Glossopteris_large_seed_fern_with_disti_67501304-18bc-41aa-8fbc-0791b38b5b73_3.png",
+    "width": 1344,
+    "height": 896,
+    "type": "image",
+    "category": "flora_arthropods"
+  },
+  {
+    "filename": "spootscupertino_large_Calamites_giant_horsetail_tree_up_to_20m__8c98b77f-776c-4242-a320-296f26e2d233.png",
+    "title": "Tree",
+    "image": "/assets/website_dino_images/spootscupertino_large_Calamites_giant_horsetail_tree_up_to_20m__8c98b77f-776c-4242-a320-296f26e2d233.png",
+    "width": 1792,
+    "height": 2688,
+    "type": "image",
+    "category": "flora_arthropods"
   }
 ]
