@@ -36,6 +36,7 @@ env/
 .claude/settings.local.json
 .claude/worktrees/
 .claude/projects/
+.claude/scheduled_tasks.lock
 
 # Gallery sync watcher logs (machine-local)
 tools/logs/

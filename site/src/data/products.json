@@ -1,299 +1,344 @@
 [
   {
-    "filename": "triceratops_2.png",
-    "title": "Triceratops 2",
-    "image": "/assets/website_dino_images/triceratops_2.png",
-    "width": 1792,
-    "height": 2688,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "triceratops_1.png",
-    "title": "Triceratops 1",
-    "image": "/assets/website_dino_images/triceratops_1.png",
-    "width": 2688,
-    "height": 1792,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "spootscupertino_massive_Tyrannosaurus_rex_Apex_predator_of_the__cbfaadf6-fd1d-4204-b620-a947cb94db3a.png",
-    "title": "Tyrannosaurus Rex — Apex Predator II",
-    "image": "/assets/website_dino_images/spootscupertino_massive_Tyrannosaurus_rex_Apex_predator_of_the__cbfaadf6-fd1d-4204-b620-a947cb94db3a.png",
-    "width": 2688,
-    "height": 1792,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "spootscupertino_massive_Tyrannosaurus_rex_Apex_predator_of_the__ac4a947d-3486-412f-89f5-7106ce6895fe.png",
-    "title": "Tyrannosaurus Rex — Apex Predator I",
-    "image": "/assets/website_dino_images/spootscupertino_massive_Tyrannosaurus_rex_Apex_predator_of_the__ac4a947d-3486-412f-89f5-7106ce6895fe.png",
-    "width": 2688,
-    "height": 1792,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "spootscupertino_massive_Lepidodendron_towering_lycopsid_tree_up_eed49402-e7a5-4997-84a2-87f62b17866f.png",
-    "title": "Lepidodendron Lycopsid Tree",
-    "image": "/assets/website_dino_images/spootscupertino_massive_Lepidodendron_towering_lycopsid_tree_up_eed49402-e7a5-4997-84a2-87f62b17866f.png",
-    "width": 1792,
-    "height": 2688,
-    "type": "image",
-    "category": "flora_arthropods"
-  },
-  {
-    "filename": "spootscupertino_large_Stegosaurus_Plated_herbivore_with_thagomi_360ee2f0-d476-49bd-96c9-1fc971c5612a.png",
-    "title": "Stegosaurus Plated Herbivore",
-    "image": "/assets/website_dino_images/spootscupertino_large_Stegosaurus_Plated_herbivore_with_thagomi_360ee2f0-d476-49bd-96c9-1fc971c5612a.png",
-    "width": 2688,
-    "height": 1792,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "spootscupertino_feathered_velociraptor_scientifically_accurate__a5344240-e5ab-4630-a793-55aecc4a86f0.png",
-    "title": "Feathered Velociraptor",
-    "image": "/assets/website_dino_images/spootscupertino_feathered_velociraptor_scientifically_accurate__a5344240-e5ab-4630-a793-55aecc4a86f0.png",
+    "filename": "predators/velociraptor-feathered-cretaceous-raptor.png",
+    "title": "Velociraptor",
     "width": 4352,
     "height": 1088,
     "type": "image",
-    "category": "terrestrial"
+    "category": "predators",
+    "scientific_name": "Velociraptor mongoliensis",
+    "era": "Late Cretaceous",
+    "alt": "Scientifically accurate paleoart of Velociraptor mongoliensis, a feathered dromaeosaurid raptor with a sickle claw from the Late Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Velociraptor — fine-art paleoart print depicting Velociraptor mongoliensis, feathered dromaeosaurid raptor with a sickle claw, native to the Late Cretaceous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Velociraptor mongoliensis",
+      "Late Cretaceous",
+      "feathered dromaeosaurid raptor with a sickle claw",
+      "Velociraptor"
+    ]
   },
   {
-    "filename": "spootscupertino_extreme_macro_close-up_of_carnotaurus_face_deta_f5ec3597-0a01-40e9-9f01-03edaf444992.png",
-    "title": "Carnotaurus Macro Close-up",
-    "image": "/assets/website_dino_images/spootscupertino_extreme_macro_close-up_of_carnotaurus_face_deta_f5ec3597-0a01-40e9-9f01-03edaf444992.png",
+    "filename": "predators/tyrannosaurus-rex-apex-predator-stalking.png",
+    "title": "Tyrannosaurus rex",
+    "width": 2688,
+    "height": 1792,
+    "type": "image",
+    "category": "predators",
+    "scientific_name": "Tyrannosaurus rex",
+    "era": "Late Cretaceous",
+    "alt": "Scientifically accurate paleoart of Tyrannosaurus rex, an apex theropod predator with massive jaws and binocular vision from the Late Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Tyrannosaurus rex — fine-art paleoart print depicting Tyrannosaurus rex, apex theropod predator with massive jaws and binocular vision, native to the Late Cretaceous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Tyrannosaurus rex",
+      "Late Cretaceous",
+      "apex theropod predator with massive jaws and binocular vision"
+    ]
+  },
+  {
+    "filename": "predators/tyrannosaurus-rex-apex-predator-roar.png",
+    "title": "Tyrannosaurus rex",
+    "width": 2688,
+    "height": 1792,
+    "type": "image",
+    "category": "predators",
+    "scientific_name": "Tyrannosaurus rex",
+    "era": "Late Cretaceous",
+    "alt": "Scientifically accurate paleoart of Tyrannosaurus rex, an apex theropod predator with massive jaws and binocular vision from the Late Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Tyrannosaurus rex — fine-art paleoart print depicting Tyrannosaurus rex, apex theropod predator with massive jaws and binocular vision, native to the Late Cretaceous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Tyrannosaurus rex",
+      "Late Cretaceous",
+      "apex theropod predator with massive jaws and binocular vision"
+    ]
+  },
+  {
+    "filename": "predators/dilophosaurus-crested-jurassic-theropod.png",
+    "title": "Dilophosaurus",
+    "width": 2688,
+    "height": 1792,
+    "type": "image",
+    "category": "predators",
+    "scientific_name": "Dilophosaurus wetherilli",
+    "era": "Early Jurassic",
+    "alt": "Scientifically accurate paleoart of Dilophosaurus wetherilli, a double-crested early theropod predator from the Early Jurassic, rendered in cinematic prehistoric detail.",
+    "description": "Dilophosaurus — fine-art paleoart print depicting Dilophosaurus wetherilli, double-crested early theropod predator, native to the Early Jurassic. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Dilophosaurus wetherilli",
+      "Early Jurassic",
+      "double-crested early theropod predator",
+      "Dilophosaurus"
+    ]
+  },
+  {
+    "filename": "predators/carnotaurus-horned-theropod-macro.png",
+    "title": "Carnotaurus",
     "width": 2400,
     "height": 1920,
     "type": "image",
-    "category": "terrestrial"
+    "category": "predators",
+    "scientific_name": "Carnotaurus sastrei",
+    "era": "Late Cretaceous",
+    "alt": "Scientifically accurate paleoart of Carnotaurus sastrei, a horned abelisaurid theropod with a powerful tail from the Late Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Carnotaurus — fine-art paleoart print depicting Carnotaurus sastrei, horned abelisaurid theropod with a powerful tail, native to the Late Cretaceous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Carnotaurus sastrei",
+      "Late Cretaceous",
+      "horned abelisaurid theropod with a powerful tail",
+      "Carnotaurus"
+    ]
   },
   {
-    "filename": "spootscupertino_column_of_five_medium_Dilophosaurus_walking_in__255a75d1-7d71-46c3-b850-03766e2fdc4e.png",
-    "title": "Dilophosaurus Column",
-    "image": "/assets/website_dino_images/spootscupertino_column_of_five_medium_Dilophosaurus_walking_in__255a75d1-7d71-46c3-b850-03766e2fdc4e.png",
+    "filename": "marine/liopleurodon-jurassic-pliosaur.png",
+    "title": "Liopleurodon",
     "width": 2688,
     "height": 1792,
     "type": "image",
-    "category": "terrestrial"
+    "category": "marine",
+    "scientific_name": "Liopleurodon ferox",
+    "era": "Middle to Late Jurassic",
+    "alt": "Scientifically accurate paleoart of Liopleurodon ferox, a short-necked apex pliosaur from the Middle to Late Jurassic, rendered in cinematic prehistoric detail.",
+    "description": "Liopleurodon — fine-art paleoart print depicting Liopleurodon ferox, short-necked apex pliosaur, native to the Middle to Late Jurassic. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Liopleurodon ferox",
+      "Middle to Late Jurassic",
+      "short-necked apex pliosaur",
+      "Liopleurodon"
+    ]
   },
   {
-    "filename": "pteranodon.png",
-    "title": "Pteranodon Over Purple Asters",
-    "image": "/assets/website_dino_images/pteranodon.png",
-    "width": 1024,
-    "height": 1024,
+    "filename": "marine/ammonite-mesozoic-spiral-cephalopod.png",
+    "title": "Ammonite",
+    "width": 2688,
+    "height": 1792,
     "type": "image",
-    "category": "aerial"
+    "category": "marine",
+    "scientific_name": "Ammonoidea",
+    "era": "Devonian to Cretaceous",
+    "alt": "Scientifically accurate paleoart of Ammonoidea, a spiral-shelled cephalopod mollusk from the Devonian to Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Ammonite — fine-art paleoart print depicting Ammonoidea, spiral-shelled cephalopod mollusk, native to the Devonian to Cretaceous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Ammonoidea",
+      "Devonian to Cretaceous",
+      "spiral-shelled cephalopod mollusk",
+      "Ammonite"
+    ]
   },
   {
-    "filename": "mushrooms.png",
-    "title": "Prehistoric Forest Mushrooms",
-    "image": "/assets/website_dino_images/mushrooms.png",
+    "filename": "herbivores/triceratops-three-horned-late-cretaceous.png",
+    "title": "Triceratops",
+    "width": 2688,
+    "height": 1792,
+    "type": "image",
+    "category": "herbivores",
+    "scientific_name": "Triceratops horridus",
+    "era": "Late Cretaceous",
+    "alt": "Scientifically accurate paleoart of Triceratops horridus, a three-horned ceratopsian herbivore with a bony neck frill from the Late Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Triceratops — fine-art paleoart print depicting Triceratops horridus, three-horned ceratopsian herbivore with a bony neck frill, native to the Late Cretaceous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Triceratops horridus",
+      "Late Cretaceous",
+      "three-horned ceratopsian herbivore with a bony neck frill",
+      "Triceratops"
+    ]
+  },
+  {
+    "filename": "herbivores/triceratops-frilled-ceratopsian-portrait.png",
+    "title": "Triceratops",
     "width": 1792,
     "height": 2688,
     "type": "image",
-    "category": "flora_arthropods"
+    "category": "herbivores",
+    "scientific_name": "Triceratops horridus",
+    "era": "Late Cretaceous",
+    "alt": "Scientifically accurate paleoart of Triceratops horridus, a three-horned ceratopsian herbivore with a bony neck frill from the Late Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Triceratops — fine-art paleoart print depicting Triceratops horridus, three-horned ceratopsian herbivore with a bony neck frill, native to the Late Cretaceous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Triceratops horridus",
+      "Late Cretaceous",
+      "three-horned ceratopsian herbivore with a bony neck frill",
+      "Triceratops"
+    ]
   },
   {
-    "filename": "liopleurodon.png",
-    "title": "Liopleurodon Short-necked Pliosaur",
-    "image": "/assets/website_dino_images/liopleurodon.png",
+    "filename": "herbivores/stegosaurus-plated-jurassic-herbivore.png",
+    "title": "Stegosaurus",
     "width": 2688,
     "height": 1792,
     "type": "image",
-    "category": "marine"
+    "category": "herbivores",
+    "scientific_name": "Stegosaurus stenops",
+    "era": "Late Jurassic",
+    "alt": "Scientifically accurate paleoart of Stegosaurus stenops, a plated herbivore with dorsal plates and a thagomizer tail from the Late Jurassic, rendered in cinematic prehistoric detail.",
+    "description": "Stegosaurus — fine-art paleoart print depicting Stegosaurus stenops, plated herbivore with dorsal plates and a thagomizer tail, native to the Late Jurassic. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Stegosaurus stenops",
+      "Late Jurassic",
+      "plated herbivore with dorsal plates and a thagomizer tail",
+      "Stegosaurus"
+    ]
   },
   {
-    "filename": "dino_eye.png",
-    "title": "Herbivorous Dinosaur Eye",
-    "image": "/assets/website_dino_images/dino_eye.png",
+    "filename": "herbivores/herbivorous-dinosaur-eye-macro.png",
+    "title": "Herbivorous",
     "width": 1792,
     "height": 2688,
     "type": "image",
-    "category": "terrestrial"
+    "category": "herbivores",
+    "scientific_name": "Dinosauria",
+    "era": "Mesozoic",
+    "alt": "Scientifically accurate paleoart of Dinosauria, a plant-eating ornithischian from the Mesozoic, rendered in cinematic prehistoric detail.",
+    "description": "Herbivorous — fine-art paleoart print depicting Dinosauria, plant-eating ornithischian, native to the Mesozoic. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Dinosauria",
+      "Mesozoic",
+      "plant-eating ornithischian",
+      "Herbivorous"
+    ]
   },
   {
-    "filename": "ammonite.png",
-    "title": "Ammonite Spiral-shelled Cephalopod",
-    "image": "/assets/website_dino_images/ammonite.png",
-    "width": 2688,
-    "height": 1792,
+    "filename": "flora_arthropods/prehistoric-forest-mushrooms-paleobotanical.png",
+    "title": "Mushroom",
+    "width": 1792,
+    "height": 2688,
     "type": "image",
-    "category": "marine"
+    "category": "flora_arthropods",
+    "scientific_name": "Fungi",
+    "era": "Devonian to Recent",
+    "alt": "Scientifically accurate paleoart of Fungi, a fruiting body of fungi from the Devonian to Recent, rendered in cinematic prehistoric detail.",
+    "description": "Mushroom — fine-art paleoart print depicting Fungi, fruiting body of fungi, native to the Devonian to Recent. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Fungi",
+      "Devonian to Recent",
+      "fruiting body of fungi",
+      "Mushroom"
+    ]
   },
   {
-    "filename": "Gemini_Generated_Image_bamkbebamkbebamk.png",
-    "title": "Cretaceous Bloom",
-    "image": "/assets/website_dino_images/Gemini_Generated_Image_bamkbebamkbebamk.png",
+    "filename": "flora_arthropods/lepidodendron-carboniferous-lycopsid-tree.png",
+    "title": "Lepidodendron",
+    "width": 1792,
+    "height": 2688,
+    "type": "image",
+    "category": "flora_arthropods",
+    "scientific_name": "Lepidodendron",
+    "era": "Carboniferous",
+    "alt": "Scientifically accurate paleoart of Lepidodendron, a towering scale tree lycopsid from the Carboniferous, rendered in cinematic prehistoric detail.",
+    "description": "Lepidodendron — fine-art paleoart print depicting Lepidodendron, towering scale tree lycopsid, native to the Carboniferous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Lepidodendron",
+      "Carboniferous",
+      "towering scale tree lycopsid"
+    ]
+  },
+  {
+    "filename": "flora_arthropods/cretaceous-blooming-magnolia-paleobotanical.png",
+    "title": "Magnolia",
     "width": 2528,
     "height": 1696,
     "type": "image",
-    "category": "flora_arthropods"
+    "category": "flora_arthropods",
+    "scientific_name": "Magnoliaceae",
+    "era": "Cretaceous to Recent",
+    "alt": "Scientifically accurate paleoart of Magnoliaceae, an early flowering angiosperm from the Cretaceous to Recent, rendered in cinematic prehistoric detail.",
+    "description": "Magnolia — fine-art paleoart print depicting Magnoliaceae, early flowering angiosperm, native to the Cretaceous to Recent. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Magnoliaceae",
+      "Cretaceous to Recent",
+      "early flowering angiosperm",
+      "Magnolia"
+    ]
   },
   {
-    "filename": "spootscupertino_epic_aerial_photograph_from_200m_altitude_vas_910a01dd-1fc4-470b-9eaa-1a186fc1e2a1_1.mp4",
-    "title": "Epic Aerial Photograph",
-    "image": "/assets/website_dino_images/spootscupertino_epic_aerial_photograph_from_200m_altitude_vas_910a01dd-1fc4-470b-9eaa-1a186fc1e2a1_1.mp4",
-    "width": 1920,
-    "height": 1080,
-    "type": "video",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "spootscupertino_amera_on_ground_looking_up_at_animal_from_below_8723e9e4-d5ad-416d-9207-3bf1e6bb8e6e.png",
-    "title": "Amera Ground Looking",
-    "image": "/assets/website_dino_images/spootscupertino_amera_on_ground_looking_up_at_animal_from_below_8723e9e4-d5ad-416d-9207-3bf1e6bb8e6e.png",
-    "width": 2688,
-    "height": 1792,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "spootscupertino_large_Elasmosaurus_Extremely_long-necked_plesio_1859b49e-8ca3-424e-b81f-80c43b26e4f4.png",
-    "title": "Elasmosaurus",
-    "image": "/assets/website_dino_images/spootscupertino_large_Elasmosaurus_Extremely_long-necked_plesio_1859b49e-8ca3-424e-b81f-80c43b26e4f4.png",
-    "width": 1792,
-    "height": 2688,
-    "type": "image",
-    "category": "marine"
-  },
-  {
-    "filename": "spootscupertino_large_Kronosaurus_Giant_pliosaur_massive_jaws_s_06b0b181-466d-4e34-8c8f-af126b7bbff4.png",
-    "title": "Kronosaurus",
-    "image": "/assets/website_dino_images/spootscupertino_large_Kronosaurus_Giant_pliosaur_massive_jaws_s_06b0b181-466d-4e34-8c8f-af126b7bbff4.png",
-    "width": 2688,
-    "height": 1792,
-    "type": "image",
-    "category": "marine"
-  },
-  {
-    "filename": "spootscupertino_massive_Quetzalcoatlus_Largest_known_flying_a_be6c8014-e445-459c-8e50-36302aebd730_1.png",
-    "title": "Quetzalcoatlus",
-    "image": "/assets/website_dino_images/spootscupertino_massive_Quetzalcoatlus_Largest_known_flying_a_be6c8014-e445-459c-8e50-36302aebd730_1.png",
-    "width": 1344,
-    "height": 896,
-    "type": "image",
-    "category": "aerial"
-  },
-  {
-    "filename": "spootscupertino_large_Elasmosaurus_Extremely_long-necked_ples_0e3c2abe-3abc-41c3-b0ac-5df4d7914609_3.png",
-    "title": "Elasmosaurus 2",
-    "image": "/assets/website_dino_images/spootscupertino_large_Elasmosaurus_Extremely_long-necked_ples_0e3c2abe-3abc-41c3-b0ac-5df4d7914609_3.png",
-    "width": 1344,
-    "height": 896,
-    "type": "image",
-    "category": "marine"
-  },
-  {
-    "filename": "spootscupertino_large_Glossopteris_large_seed_fern_with_disti_67501304-18bc-41aa-8fbc-0791b38b5b73_3.png",
-    "title": "Fern",
-    "image": "/assets/website_dino_images/spootscupertino_large_Glossopteris_large_seed_fern_with_disti_67501304-18bc-41aa-8fbc-0791b38b5b73_3.png",
-    "width": 1344,
-    "height": 896,
-    "type": "image",
-    "category": "flora_arthropods"
-  },
-  {
-    "filename": "spootscupertino_large_Calamites_giant_horsetail_tree_up_to_20m__8c98b77f-776c-4242-a320-296f26e2d233.png",
-    "title": "Tree",
-    "image": "/assets/website_dino_images/spootscupertino_large_Calamites_giant_horsetail_tree_up_to_20m__8c98b77f-776c-4242-a320-296f26e2d233.png",
-    "width": 1792,
-    "height": 2688,
-    "type": "image",
-    "category": "flora_arthropods"
-  },
-  {
-    "filename": "spootscupertino_small_Ichthyosaurus_communis_Dolphin-shaped_Jur_7a1c3c07-ddfa-42cc-b839-62744563e37a.png",
-    "title": "Ichthyosaurus",
-    "image": "/assets/website_dino_images/spootscupertino_small_Ichthyosaurus_communis_Dolphin-shaped_Jur_7a1c3c07-ddfa-42cc-b839-62744563e37a.png",
-    "width": 2688,
-    "height": 1792,
-    "type": "image",
-    "category": "marine"
-  },
-  {
-    "filename": "spootscupertino_extreme_macro_of_forest_mushrooms_with_rich_tex_0f01c279-7f09-4590-ba00-5771650bbae3.png",
-    "title": "Mushroom",
-    "image": "/assets/website_dino_images/spootscupertino_extreme_macro_of_forest_mushrooms_with_rich_tex_0f01c279-7f09-4590-ba00-5771650bbae3.png",
-    "width": 1792,
-    "height": 2688,
-    "type": "image",
-    "category": "flora_arthropods"
-  },
-  {
-    "filename": "spootscupertino_extreme_macro_close-up_of_velociraptor_face_fea_ef989ff2-64e1-4dea-97f0-d29ad751a80a.png",
-    "title": "Velociraptor",
-    "image": "/assets/website_dino_images/spootscupertino_extreme_macro_close-up_of_velociraptor_face_fea_ef989ff2-64e1-4dea-97f0-d29ad751a80a.png",
-    "width": 1792,
-    "height": 2688,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "spootscupertino_hyper_detailed_leathery_wings_fine_texture_subt_87e7fcf8-9ed1-4f62-9e36-860211a2ba8f.png",
-    "title": "Hyper Detailed Leathery 2",
-    "image": "/assets/website_dino_images/spootscupertino_hyper_detailed_leathery_wings_fine_texture_subt_87e7fcf8-9ed1-4f62-9e36-860211a2ba8f.png",
-    "width": 2400,
-    "height": 1920,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "spootscupertino_high_micro_detail_scratches_cracks_uneven_ena_80fb0b68-8f21-4d32-a9ab-dec7bd5a5576_3.png",
-    "title": "High Micro Detail",
-    "image": "/assets/website_dino_images/spootscupertino_high_micro_detail_scratches_cracks_uneven_ena_80fb0b68-8f21-4d32-a9ab-dec7bd5a5576_3.png",
-    "width": 1200,
-    "height": 960,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "spootscupertino_subtle_fresh_blood_detail_naturalistic_not_exce_df0ff9f0-42ca-4284-bfb5-f045e96ca840.png",
-    "title": "Subtle Fresh Blood",
-    "image": "/assets/website_dino_images/spootscupertino_subtle_fresh_blood_detail_naturalistic_not_exce_df0ff9f0-42ca-4284-bfb5-f045e96ca840.png",
-    "width": 2400,
-    "height": 1920,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "spootscupertino_hyper_detailed_iris_with_layered_reflections_gl_e06ad04a-5a99-4c59-8709-6a4f4accbad2.png",
-    "title": "Hyper Detailed Iris",
-    "image": "/assets/website_dino_images/spootscupertino_hyper_detailed_iris_with_layered_reflections_gl_e06ad04a-5a99-4c59-8709-6a4f4accbad2.png",
-    "width": 2400,
-    "height": 1920,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "spootscupertino_single_pterosaur_pteranodon_gliding_over_the_oc_9eddd288-674a-489c-8950-19d8f87e98a2.png",
+    "filename": "aerial/pteranodon-cretaceous-pterosaur-flight.png",
     "title": "Pteranodon",
-    "image": "/assets/website_dino_images/spootscupertino_single_pterosaur_pteranodon_gliding_over_the_oc_9eddd288-674a-489c-8950-19d8f87e98a2.png",
-    "width": 3808,
-    "height": 1280,
+    "width": 1024,
+    "height": 1024,
     "type": "image",
-    "category": "aerial"
-  },
-  {
-    "filename": "spootscupertino_hyper_detailed_leathery_wings_fine_texture_subt_60b08522-fdcb-4c75-9ad5-777fa2c21be1.png",
-    "title": "Hyper Detailed Leathery",
-    "image": "/assets/website_dino_images/spootscupertino_hyper_detailed_leathery_wings_fine_texture_subt_60b08522-fdcb-4c75-9ad5-777fa2c21be1.png",
-    "width": 3808,
-    "height": 1280,
-    "type": "image",
-    "category": "terrestrial"
-  },
-  {
-    "filename": "t rex pnw_2x3.png",
-    "title": "T. rex",
-    "image": "/assets/website_dino_images/t rex pnw_2x3.png",
-    "width": 2,
-    "height": 3,
-    "type": "image",
-    "category": "terrestrial"
+    "category": "aerial",
+    "scientific_name": "Pteranodon longiceps",
+    "era": "Late Cretaceous",
+    "alt": "Scientifically accurate paleoart of Pteranodon longiceps, a toothless crested pterosaur from the Late Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Pteranodon — fine-art paleoart print depicting Pteranodon longiceps, toothless crested pterosaur, native to the Late Cretaceous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Pteranodon longiceps",
+      "Late Cretaceous",
+      "toothless crested pterosaur",
+      "Pteranodon"
+    ]
   }
 ]

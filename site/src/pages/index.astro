@@ -10,6 +10,35 @@ import Gallery from '../components/Gallery.astro';
   <title>Jurassinkart — Prehistoric Art That Feels Alive</title>
   <meta name="description" content="Cinematic dinosaur artwork inspired by ancient jungles, deep oceans, and primeval skies. Shop prints at Jurassinkart." />
 
+  <link rel="canonical" href="https://jurassinkart.com/" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Jurassinkart — Prehistoric Art That Feels Alive" />
+  <meta property="og:description" content="Cinematic, scientifically accurate dinosaur paleoart prints. Step into a lost world." />
+  <meta property="og:url" content="https://jurassinkart.com/" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://jurassinkart.com/#org',
+        name: 'Jurassinkart',
+        url: 'https://jurassinkart.com/',
+        sameAs: ['https://www.etsy.com/shop/Jurassinkart'],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': 'https://jurassinkart.com/#website',
+        url: 'https://jurassinkart.com/',
+        name: 'Jurassinkart',
+        description: 'Cinematic, scientifically accurate dinosaur paleoart prints.',
+        publisher: { '@id': 'https://jurassinkart.com/#org' },
+      },
+    ],
+  })} />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" />

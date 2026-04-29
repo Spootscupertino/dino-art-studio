@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Install the launchd agent that watches site/public/assets/website_dino_images/
+# Install the launchd agent that watches site/src/assets/gallery/<category>/
 # and runs sync_and_deploy.sh whenever a file is added, removed, or changed.
+#
+# launchd's WatchPaths does NOT recurse, so each category subfolder must be
+# registered individually.
 #
 # Run once:  tools/install_watcher.sh
 # Uninstall: tools/install_watcher.sh --uninstall
@@ -11,7 +14,8 @@ LABEL="com.jurassinkart.sync-gallery"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-WATCH_DIR="$ROOT/site/public/assets/website_dino_images"
+GALLERY_ROOT="$ROOT/site/src/assets/gallery"
+CATEGORIES=(predators herbivores marine aerial flora_arthropods)
 SCRIPT="$ROOT/tools/sync_and_deploy.sh"
 LOG_DIR="$ROOT/tools/logs"
 
@@ -26,16 +30,27 @@ if [ "${1:-}" = "--uninstall" ]; then
   exit 0
 fi
 
-if [ ! -d "$WATCH_DIR" ]; then
-  echo "ERROR: watch dir $WATCH_DIR not found." >&2
+if [ ! -d "$GALLERY_ROOT" ]; then
+  echo "ERROR: gallery root $GALLERY_ROOT not found." >&2
   exit 1
 fi
+
+# Make sure every category subfolder exists so launchd can attach a watch.
+for cat in "${CATEGORIES[@]}"; do
+  mkdir -p "$GALLERY_ROOT/$cat"
+done
 
 mkdir -p "$LOG_DIR" "$(dirname "$PLIST")"
 chmod +x "$SCRIPT" "$ROOT/tools/sync_gallery.py"
 
 # Stop any previous version before rewriting the plist.
 launchctl unload "$PLIST" 2>/dev/null || true
+
+# Build the WatchPaths XML block.
+WATCH_PATHS_XML=""
+for cat in "${CATEGORIES[@]}"; do
+  WATCH_PATHS_XML+="    <string>$GALLERY_ROOT/$cat</string>"$'\n'
+done
 
 cat > "$PLIST" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -53,8 +68,7 @@ cat > "$PLIST" <<EOF
 
   <key>WatchPaths</key>
   <array>
-    <string>$WATCH_DIR</string>
-  </array>
+${WATCH_PATHS_XML}  </array>
 
   <key>RunAtLoad</key>
   <false/>
@@ -82,8 +96,11 @@ EOF
 launchctl load "$PLIST"
 
 echo "Installed: $LABEL"
-echo "Watching:  $WATCH_DIR"
+echo "Watching:"
+for cat in "${CATEGORIES[@]}"; do
+  echo "  $GALLERY_ROOT/$cat"
+done
 echo "Logs:      $LOG_DIR/sync.log"
 echo
-echo "Drop a file into $WATCH_DIR and the gallery will auto-update + deploy."
+echo "Drop a file into any category subfolder and the gallery will auto-update + deploy."
 echo "Uninstall later with: $0 --uninstall"

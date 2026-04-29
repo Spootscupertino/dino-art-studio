@@ -23,7 +23,7 @@ LOG="$LOG_DIR/sync.log"
     exit 1
   fi
 
-  WATCH_DIR="site/public/assets/website_dino_images"
+  WATCH_DIR="site/src/assets/gallery"
   PRODUCTS="site/src/data/products.json"
 
   if [ -z "$(git status --porcelain "$PRODUCTS" "$WATCH_DIR")" ]; then
