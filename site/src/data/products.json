@@ -216,11 +216,47 @@
     "category": "marine"
   },
   {
+    "filename": "spootscupertino_hyper_detailed_leathery_wings_fine_texture_subt_87e7fcf8-9ed1-4f62-9e36-860211a2ba8f.png",
+    "title": "Hyper Detailed Leathery 2",
+    "image": "/assets/website_dino_images/spootscupertino_hyper_detailed_leathery_wings_fine_texture_subt_87e7fcf8-9ed1-4f62-9e36-860211a2ba8f.png",
+    "width": 2400,
+    "height": 1920,
+    "type": "image",
+    "category": "terrestrial"
+  },
+  {
     "filename": "spootscupertino_high_micro_detail_scratches_cracks_uneven_ena_80fb0b68-8f21-4d32-a9ab-dec7bd5a5576_3.png",
     "title": "High Micro Detail",
     "image": "/assets/website_dino_images/spootscupertino_high_micro_detail_scratches_cracks_uneven_ena_80fb0b68-8f21-4d32-a9ab-dec7bd5a5576_3.png",
     "width": 1200,
     "height": 960,
+    "type": "image",
+    "category": "terrestrial"
+  },
+  {
+    "filename": "spootscupertino_hyper_detailed_iris_with_layered_reflections_gl_e06ad04a-5a99-4c59-8709-6a4f4accbad2.png",
+    "title": "Hyper Detailed Iris",
+    "image": "/assets/website_dino_images/spootscupertino_hyper_detailed_iris_with_layered_reflections_gl_e06ad04a-5a99-4c59-8709-6a4f4accbad2.png",
+    "width": 2400,
+    "height": 1920,
+    "type": "image",
+    "category": "terrestrial"
+  },
+  {
+    "filename": "spootscupertino_single_pterosaur_pteranodon_gliding_over_the_oc_9eddd288-674a-489c-8950-19d8f87e98a2.png",
+    "title": "Pteranodon",
+    "image": "/assets/website_dino_images/spootscupertino_single_pterosaur_pteranodon_gliding_over_the_oc_9eddd288-674a-489c-8950-19d8f87e98a2.png",
+    "width": 3808,
+    "height": 1280,
+    "type": "image",
+    "category": "aerial"
+  },
+  {
+    "filename": "spootscupertino_hyper_detailed_leathery_wings_fine_texture_subt_60b08522-fdcb-4c75-9ad5-777fa2c21be1.png",
+    "title": "Hyper Detailed Leathery",
+    "image": "/assets/website_dino_images/spootscupertino_hyper_detailed_leathery_wings_fine_texture_subt_60b08522-fdcb-4c75-9ad5-777fa2c21be1.png",
+    "width": 3808,
+    "height": 1280,
     "type": "image",
     "category": "terrestrial"
   }
