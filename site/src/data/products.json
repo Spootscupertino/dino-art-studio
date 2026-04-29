@@ -162,6 +162,33 @@
     "category": "marine"
   },
   {
+    "filename": "spootscupertino_large_Kronosaurus_Giant_pliosaur_massive_jaws_s_06b0b181-466d-4e34-8c8f-af126b7bbff4.png",
+    "title": "Kronosaurus",
+    "image": "/assets/website_dino_images/spootscupertino_large_Kronosaurus_Giant_pliosaur_massive_jaws_s_06b0b181-466d-4e34-8c8f-af126b7bbff4.png",
+    "width": 2688,
+    "height": 1792,
+    "type": "image",
+    "category": "marine"
+  },
+  {
+    "filename": "spootscupertino_massive_Quetzalcoatlus_Largest_known_flying_a_be6c8014-e445-459c-8e50-36302aebd730_1.png",
+    "title": "Quetzalcoatlus",
+    "image": "/assets/website_dino_images/spootscupertino_massive_Quetzalcoatlus_Largest_known_flying_a_be6c8014-e445-459c-8e50-36302aebd730_1.png",
+    "width": 1344,
+    "height": 896,
+    "type": "image",
+    "category": "aerial"
+  },
+  {
+    "filename": "spootscupertino_large_Elasmosaurus_Extremely_long-necked_ples_0e3c2abe-3abc-41c3-b0ac-5df4d7914609_3.png",
+    "title": "Elasmosaurus 2",
+    "image": "/assets/website_dino_images/spootscupertino_large_Elasmosaurus_Extremely_long-necked_ples_0e3c2abe-3abc-41c3-b0ac-5df4d7914609_3.png",
+    "width": 1344,
+    "height": 896,
+    "type": "image",
+    "category": "marine"
+  },
+  {
     "filename": "spootscupertino_large_Glossopteris_large_seed_fern_with_disti_67501304-18bc-41aa-8fbc-0791b38b5b73_3.png",
     "title": "Fern",
     "image": "/assets/website_dino_images/spootscupertino_large_Glossopteris_large_seed_fern_with_disti_67501304-18bc-41aa-8fbc-0791b38b5b73_3.png",
@@ -178,5 +205,14 @@
     "height": 2688,
     "type": "image",
     "category": "flora_arthropods"
+  },
+  {
+    "filename": "spootscupertino_small_Ichthyosaurus_communis_Dolphin-shaped_Jur_7a1c3c07-ddfa-42cc-b839-62744563e37a.png",
+    "title": "Ichthyosaurus",
+    "image": "/assets/website_dino_images/spootscupertino_small_Ichthyosaurus_communis_Dolphin-shaped_Jur_7a1c3c07-ddfa-42cc-b839-62744563e37a.png",
+    "width": 2688,
+    "height": 1792,
+    "type": "image",
+    "category": "marine"
   }
 ]
