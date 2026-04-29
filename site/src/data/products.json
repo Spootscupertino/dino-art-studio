@@ -142,5 +142,14 @@
     "height": 1792,
     "type": "image",
     "category": "terrestrial"
+  },
+  {
+    "filename": "spootscupertino_large_Elasmosaurus_Extremely_long-necked_plesio_1859b49e-8ca3-424e-b81f-80c43b26e4f4.png",
+    "title": "Elasmosaurus",
+    "image": "/assets/website_dino_images/spootscupertino_large_Elasmosaurus_Extremely_long-necked_plesio_1859b49e-8ca3-424e-b81f-80c43b26e4f4.png",
+    "width": 1792,
+    "height": 2688,
+    "type": "image",
+    "category": "marine"
   }
 ]
