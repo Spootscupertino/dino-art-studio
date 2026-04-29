@@ -216,6 +216,24 @@
     "category": "marine"
   },
   {
+    "filename": "spootscupertino_extreme_macro_of_forest_mushrooms_with_rich_tex_0f01c279-7f09-4590-ba00-5771650bbae3.png",
+    "title": "Mushroom",
+    "image": "/assets/website_dino_images/spootscupertino_extreme_macro_of_forest_mushrooms_with_rich_tex_0f01c279-7f09-4590-ba00-5771650bbae3.png",
+    "width": 1792,
+    "height": 2688,
+    "type": "image",
+    "category": "flora_arthropods"
+  },
+  {
+    "filename": "spootscupertino_extreme_macro_close-up_of_velociraptor_face_fea_ef989ff2-64e1-4dea-97f0-d29ad751a80a.png",
+    "title": "Velociraptor",
+    "image": "/assets/website_dino_images/spootscupertino_extreme_macro_close-up_of_velociraptor_face_fea_ef989ff2-64e1-4dea-97f0-d29ad751a80a.png",
+    "width": 1792,
+    "height": 2688,
+    "type": "image",
+    "category": "terrestrial"
+  },
+  {
     "filename": "spootscupertino_hyper_detailed_leathery_wings_fine_texture_subt_87e7fcf8-9ed1-4f62-9e36-860211a2ba8f.png",
     "title": "Hyper Detailed Leathery 2",
     "image": "/assets/website_dino_images/spootscupertino_hyper_detailed_leathery_wings_fine_texture_subt_87e7fcf8-9ed1-4f62-9e36-860211a2ba8f.png",
@@ -230,6 +248,15 @@
     "image": "/assets/website_dino_images/spootscupertino_high_micro_detail_scratches_cracks_uneven_ena_80fb0b68-8f21-4d32-a9ab-dec7bd5a5576_3.png",
     "width": 1200,
     "height": 960,
+    "type": "image",
+    "category": "terrestrial"
+  },
+  {
+    "filename": "spootscupertino_subtle_fresh_blood_detail_naturalistic_not_exce_df0ff9f0-42ca-4284-bfb5-f045e96ca840.png",
+    "title": "Subtle Fresh Blood",
+    "image": "/assets/website_dino_images/spootscupertino_subtle_fresh_blood_detail_naturalistic_not_exce_df0ff9f0-42ca-4284-bfb5-f045e96ca840.png",
+    "width": 2400,
+    "height": 1920,
     "type": "image",
     "category": "terrestrial"
   },
@@ -257,6 +284,15 @@
     "image": "/assets/website_dino_images/spootscupertino_hyper_detailed_leathery_wings_fine_texture_subt_60b08522-fdcb-4c75-9ad5-777fa2c21be1.png",
     "width": 3808,
     "height": 1280,
+    "type": "image",
+    "category": "terrestrial"
+  },
+  {
+    "filename": "t rex pnw_2x3.png",
+    "title": "T. rex",
+    "image": "/assets/website_dino_images/t rex pnw_2x3.png",
+    "width": 2,
+    "height": 3,
     "type": "image",
     "category": "terrestrial"
   }
