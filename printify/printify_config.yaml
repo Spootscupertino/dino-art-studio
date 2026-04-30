@@ -1,0 +1,28 @@
+# Printify publisher config — SOURCE OF TRUTH derived from existing Etsy shop.
+# Regenerate via: python3 printify/printify_publisher.py --bootstrap-config
+# Generated: 2026-04-30T15:01:11.140494+00:00
+
+shop_id: 26693677
+products:
+  poster:
+    blueprint_id: 282
+    print_provider_id: 99
+    variants:
+      - { id: 43138, size: 12x18, retail_cents: 2500, shipping_cents: 0, source_product_id: 69c981ce78254a67bf0a03c5 }
+      - { id: 43144, size: 18x24, retail_cents: 2205, shipping_cents: 0, source_product_id: 69c981ce78254a67bf0a03c5 }
+      - { id: 43150, size: 24x36, retail_cents: 4000, shipping_cents: 0, source_product_id: 69c981ce78254a67bf0a03c5 }
+  wrapped_canvas:
+    blueprint_id: 937
+    print_provider_id: 105
+    variants:
+      - { id: 82231, size: 16x20, retail_cents: 4713, shipping_cents: 0, source_product_id: 69c98f4a4c5d410b1f0fd10f }
+      - { id: 82232, size: 18x24, retail_cents: 4472, shipping_cents: 0, source_product_id: 69c98f4a4c5d410b1f0fd10f }
+      - { id: 82235, size: 24x36, retail_cents: 8192, shipping_cents: 0, source_product_id: 69c98f4a4c5d410b1f0fd10f }
+pricing:
+  fallback_multiplier: 2.2
+  round_to: 0.99
+shipping:
+  free_shipping_override: true
+image_fit:
+  pad_threshold: 0.15
+  background_sample: edge_median

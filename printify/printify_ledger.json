@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "entries": {
+    "predators/tyrannosaurus-rex-apex-predator-roar.png": {
+      "published_at": "2026-04-30T15:07:15.167295+00:00",
+      "image_id": "69f370181ee12be3d6e2bcea",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f3701bd3c57effe10df42d",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2205,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ]
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f3701efa7b591f2b05e633",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4713,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4472,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8192,
+              "is_enabled": true
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
