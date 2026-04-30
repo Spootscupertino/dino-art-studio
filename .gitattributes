@@ -6,3 +6,4 @@
 *.gif filter=lfs diff=lfs merge=lfs -text
 
 site/public/** -filter -diff -merge text=auto
+site/src/assets/gallery/** -filter -diff -merge text=auto
