@@ -1387,3 +1387,70 @@ The Printify integration is the next pipeline tier — same "drop image → it a
 - Confirm Printify API token is in `.env` (or document where to put it).
 - Decide: do we want Etsy as the primary buy channel and Printify-managed-Etsy listings, OR direct-from-Printify-storefront? Affects URL structure and CTA copy.
 - Decide: poster + canvas only, or also t-shirts / mugs / etc.? More SKUs = more API calls per drop, more inventory to manage.
+
+---
+
+## Session 2026-05-01 — Printify Pipeline Build-Out + Gallery Horizontal/Vertical
+
+### What shipped
+
+**1. Printify publishing pipeline (end-to-end)**
+- `printify/printify_publisher.py` — full orchestrator with `--dry-run` / `--live` / `--image` / `--bootstrap-config` / `--list-shipping` / `--publish-existing` CLI
+- `printify/printify_api.py` — stdlib-only HTTP wrapper; `upload_image`, `create_product`, `publish_product`, `get_etsy_shipping_profiles` (reads shipping IDs off existing products — Printify has no standalone shipping endpoint)
+- `printify/printify_config.yaml` — bootstrapped from live shop; blueprint IDs, variant IDs, round-dollar retail prices, `etsy_shipping_profile_id: 302615935773`
+- `printify/printify_ledger.json` — 15 images published, 30 Printify products created and pushed to Etsy
+- `printify/image_fit.py` — upscale (Replicate → local binary → PIL LANCZOS 2×), smart crop/pad to portrait, DPI gate (150 floor), JPEG output at 150 DPI target to stay under Printify's base64 upload limit
+
+**2. Gallery horizontal/vertical + refs feedback loop**
+- Two new watched categories: `site/src/assets/gallery/horizontal/` (landscape 3:2) and `vertical/` (portrait)
+- `tools/sync_gallery.py` mirrors images from those two folders → `refs/gallery_best/<category>/` on every sync — seeds future MJ `--sref` pool automatically
+- `tools/install_watcher.sh` updated to watch all 7 categories (re-run to activate)
+- `refs/CLAUDE.md` scaffold for Phase 3 ref-curator domain
+
+**3. sync_and_deploy.sh** — now runs `printify --dry-run` after every gallery drop (preview before any live publish)
+
+**4. Pricing** — all retail prices rounded to nearest dollar; no cents anywhere in the pipeline
+
+### Issues found during batch run (fix next session)
+
+1. **Image fit is wrong** — `pad_crop` mode creates solid color bars above/below the image (landscape letterboxed into portrait canvas). Every product must scale-to-fill + center-crop. Remove padding mode entirely or set `pad_threshold: 1.0` to always crop.
+2. **Titles are generic** — `"Magnolia — Poster"` is not Etsy-optimized. Need format: `"Velociraptor Feathered Raptor | Dinosaur Wall Art | Fine Art Print"`.
+3. **Free shipping not toggling** — `free_shipping_override` isn't activating in Printify. Needs investigation.
+4. **4 images below DPI floor** — pteranodon, lepidodendron, mushroom, triceratops-portrait hit 149 DPI after 2× PIL upscale (just under 150 floor). Were published at original resolution. Set `REPLICATE_API_TOKEN` in `.env` for real 4× upscaling, or regenerate those images in MJ.
+
+### All 30 products need to be deleted and republished after above fixes
+
+---
+
+## Next Session — Pick Up Here
+
+### Priority order
+
+**1. Delete all 30 current Printify products** — manually in Printify dashboard, then clear the ledger (`printify/printify_ledger.json` → `{"version": 1, "entries": {}}`)
+
+**2. Fix image fit — always fill canvas**
+- In `image_fit.py`: change `pad_threshold` default to `1.0` OR always use center-crop (scale-to-fill). Never letterbox.
+- The print area must be 100% covered by the image — no color bars.
+
+**3. Fix Etsy titles**
+- Format: `"Velociraptor Feathered Raptor | Dinosaur Wall Art | Fine Art Print"`
+- Use species common name + key visual trait + product type + brand anchor
+
+**4. Fix free shipping**
+- Investigate why `free_shipping_override` isn't toggling in Printify
+- May need to be set as a shop-level default in Printify settings
+
+**5. New drop workflow — the target UX**
+- Rename images to SEO slugs before dropping: `{species}-{key-visual}-{descriptor}.png`
+  - Use hyphens not underscores (Google word separation)
+  - 4–6 words, e.g. `velociraptor-brown-feathers-rocky-terrain.png`
+- Drop into `horizontal/` or `vertical/` → watcher fires → syncs to website + Printify + `refs/gallery_best/`
+- Goal: one folder drop publishes everywhere, zero manual steps
+
+**6. Set `REPLICATE_API_TOKEN` in `.env`**
+- Enables real Real-ESRGAN 4× upscaling for small source images
+- Prevents the PIL 2× fallback that produces soft 24×36 prints
+
+**7. Google Search Console** (from previous next-session notes — still pending)
+- Verify domain ownership via TXT record
+- Submit `sitemap-index.xml` and `sitemap-images.xml`
