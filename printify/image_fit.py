@@ -312,9 +312,10 @@ def prepare_for_print(
         )
 
     print_w_in, print_h_in = PRINT_SIZES[print_size_str]
-    # Target pixel dimensions at DPI_PREFERRED resolution for the canvas.
-    target_w_px = int(print_w_in * DPI_PREFERRED)
-    target_h_px = int(print_h_in * DPI_PREFERRED)
+    # Target pixel dimensions at DPI_FLOOR (150) — keeps base64 upload under ~15 MB.
+    # 300 DPI would produce 7200×10800 px PNGs that exceed Printify's POST limit.
+    target_w_px = int(print_w_in * DPI_FLOOR)
+    target_h_px = int(print_h_in * DPI_FLOOR)
 
     img = Image.open(src_path)
     src_w, src_h = img.size
@@ -367,9 +368,10 @@ def prepare_for_print(
     meta["decision"] = decision
     meta["output_size"] = f"{fitted.width}x{fitted.height}"
 
-    # Save to a temp file.
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
-    fitted.save(tmp.name, format="PNG")
+    # Save as JPEG (much smaller than PNG for base64 upload; 95% quality is
+    # indistinguishable from lossless at print viewing distances).
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
+    fitted.convert("RGB").save(tmp.name, format="JPEG", quality=95, optimize=True)
     tmp.close()
 
     print(

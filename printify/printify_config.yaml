@@ -23,7 +23,7 @@ pricing:
   round_to: dollar
 shipping:
   free_shipping_override: true
-  etsy_shipping_profile_id: null
+  etsy_shipping_profile_id: 302615935773
 image_fit:
   pad_threshold: 0.15
   background_sample: edge_median

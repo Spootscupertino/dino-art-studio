@@ -197,20 +197,25 @@ def create_product(shop_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def get_etsy_shipping_profiles(shop_id: int) -> Any:
-    """Return the list of Etsy shipping profiles/templates for this shop.
+    """Return Etsy shipping template info by reading it off existing products.
 
-    Printify exposes this via two possible endpoints — we try the newer one
-    first and fall back to the legacy path so the caller doesn't need to care.
-    The raw response is returned unchanged so the user can inspect it with
-    ``--list-shipping``.
+    Printify does not expose a standalone shipping-profiles endpoint.
+    Instead we fetch a few existing products and extract their
+    external.shipping_template_id (set by Etsy when the listing was created).
     """
-    try:
-        return _request("GET", f"/shops/{shop_id}/shipping_profiles.json")
-    except PrintifyError as e:
-        if e.status == 404:
-            # Fall back to legacy endpoint.
-            return _request("GET", f"/shops/{shop_id}/shipping.json")
-        raise
+    products = list_products(shop_id, limit=10)
+    results = []
+    for prod in products[:5]:
+        detail = get_product(shop_id, prod["id"])
+        ext = detail.get("external") or {}
+        results.append({
+            "product_id": prod["id"],
+            "title": detail.get("title"),
+            "external_id": ext.get("id"),
+            "shipping_template_id": ext.get("shipping_template_id"),
+            "handle": ext.get("handle"),
+        })
+    return results
 
 
 def publish_product(
@@ -235,10 +240,9 @@ def publish_product(
         "keyFeatures": keyFeatures,
         "shipping_template": shipping_template,
     }
-    if shipping_profile_id is not None:
-        # Printify uses "shipping_template" as the key for the Etsy profile ID
-        # when a numeric ID is supplied (overrides the boolean flag above).
-        payload["shipping_template"] = shipping_profile_id
+    # shipping_profile_id is informational only — the publish endpoint only
+    # accepts booleans; the actual Etsy shipping template must be set on the
+    # product inside Printify before publishing.
     return _request(
         "POST",
         f"/shops/{shop_id}/products/{product_id}/publish.json",

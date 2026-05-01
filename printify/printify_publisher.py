@@ -451,17 +451,21 @@ def _upload_with_fit(abs_path: Path, print_size_str: str) -> tuple:
 
 
 def cmd_list_shipping(_args) -> int:
-    """Print Etsy shipping profiles/templates for the configured shop."""
+    """Print Etsy shipping template IDs by reading existing published products."""
     cfg = load_config()
     shop_id = cfg.get("shop_id") or api.get_shop_id()
-    print(f"[shipping] querying shop_id={shop_id}")
-    result = api.get_etsy_shipping_profiles(int(shop_id))
-    print(json.dumps(result, indent=2))
-    print(
-        "\nSet the 'id' of your desired profile as "
-        "'shipping.etsy_shipping_profile_id' in printify_config.yaml, "
-        "then re-run --publish-existing or --live."
-    )
+    print(f"[shipping] reading shipping info from existing products in shop {shop_id}...")
+    results = api.get_etsy_shipping_profiles(int(shop_id))
+    print(json.dumps(results, indent=2))
+    ids = {r["shipping_template_id"] for r in results if r.get("shipping_template_id")}
+    if ids:
+        print(f"\nFound shipping_template_id(s): {ids}")
+        print("Set one as 'shipping.etsy_shipping_profile_id' in printify_config.yaml")
+    else:
+        print("\nNo shipping_template_id found on existing products.")
+        print("These products may not have been published to Etsy yet,")
+        print("or the shipping template was set manually inside Etsy.")
+        print("Check your Etsy shop's Shipping settings for the template ID.")
     return 0
 
 
@@ -589,6 +593,8 @@ def cmd_publish(args) -> int:
                     }],
                 }],
             }
+            if shipping_profile_id:
+                payload["shipping_template"] = str(shipping_profile_id)
             created = api.create_product(cfg["shop_id"], payload)
             api.publish_product(
                 cfg["shop_id"],

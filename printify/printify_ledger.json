@@ -1,13 +1,12 @@
 {
   "version": 1,
   "entries": {
-    "predators/tyrannosaurus-rex-apex-predator-roar.png": {
-      "published_at": "2026-04-30T15:07:15.167295+00:00",
-      "image_id": "69f370181ee12be3d6e2bcea",
+    "aerial/pteranodon-cretaceous-pterosaur-flight.png": {
+      "published_at": "2026-05-01T14:35:34.500171+00:00",
       "products": [
         {
           "kind": "poster",
-          "product_id": "69f3701bd3c57effe10df42d",
+          "product_id": "69f4ba30f18e6ff51e03691c",
           "external_url": null,
           "variants": [
             {
@@ -17,7 +16,7 @@
             },
             {
               "id": 43144,
-              "price": 2205,
+              "price": 2200,
               "is_enabled": true
             },
             {
@@ -25,31 +24,1027 @@
               "price": 4000,
               "is_enabled": true
             }
-          ]
+          ],
+          "image_id": "69f4ba2f1fcf4c3c691b26c5"
         },
         {
           "kind": "wrapped_canvas",
-          "product_id": "69f3701efa7b591f2b05e633",
+          "product_id": "69f4ba3486b2999c2c054bc4",
           "external_url": null,
           "variants": [
             {
               "id": 82231,
-              "price": 4713,
+              "price": 4700,
               "is_enabled": true
             },
             {
               "id": 82232,
-              "price": 4472,
+              "price": 4500,
               "is_enabled": true
             },
             {
               "id": 82235,
-              "price": 8192,
+              "price": 8200,
               "is_enabled": true
             }
-          ]
+          ],
+          "image_id": "69f4ba2f1fcf4c3c691b26c5"
         }
-      ]
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pteranodon-cretaceous-pterosaur-flight.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pteranodon-cretaceous-pterosaur-flight.png @ 24x36"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pteranodon-cretaceous-pterosaur-flight.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pteranodon-cretaceous-pterosaur-flight.png @ 24x36"
+        }
+      }
+    },
+    "flora_arthropods/cretaceous-blooming-magnolia-paleobotanical.png": {
+      "published_at": "2026-05-01T14:40:21.818709+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bb49005bc962f702d387",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb48b81926b802539c8f"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bb5350e99c888b0b6db6",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb48b81926b802539c8f"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/cretaceous-blooming-magnolia-paleobotanical.png",
+          "print_size": "24x36",
+          "source_size": "2528x1696",
+          "effective_dpi_before": 105.3,
+          "effective_dpi_after": 210.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/cretaceous-blooming-magnolia-paleobotanical.png",
+          "print_size": "24x36",
+          "source_size": "2528x1696",
+          "effective_dpi_before": 105.3,
+          "effective_dpi_after": 210.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        }
+      }
+    },
+    "flora_arthropods/lepidodendron-carboniferous-lycopsid-tree.png": {
+      "published_at": "2026-05-01T14:40:40.215184+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bb5d1cc4ed38fb0aaf24",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb5b9c429293b63a66d4"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bb6586b2999c2c054c77",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb5b9c429293b63a66d4"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/lepidodendron-carboniferous-lycopsid-tree.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/lepidodendron-carboniferous-lycopsid-tree.png @ 24x36"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/lepidodendron-carboniferous-lycopsid-tree.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/lepidodendron-carboniferous-lycopsid-tree.png @ 24x36"
+        }
+      }
+    },
+    "flora_arthropods/prehistoric-forest-mushrooms-paleobotanical.png": {
+      "published_at": "2026-05-01T14:40:56.941347+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bb6fe27149c0590ad24d",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb6c2e9590257e26a79e"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bb7686b2999c2c054c8e",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb6c2e9590257e26a79e"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/prehistoric-forest-mushrooms-paleobotanical.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/prehistoric-forest-mushrooms-paleobotanical.png @ 24x36"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/prehistoric-forest-mushrooms-paleobotanical.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/prehistoric-forest-mushrooms-paleobotanical.png @ 24x36"
+        }
+      }
+    },
+    "herbivores/herbivorous-dinosaur-eye-macro.png": {
+      "published_at": "2026-05-01T14:41:11.945280+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bb80e27149c0590ad25a",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb7dddaa8eb1c5009065"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bb86a0f68d865f00f66f",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb7dddaa8eb1c5009065"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/herbivorous-dinosaur-eye-macro.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/herbivorous-dinosaur-eye-macro.png @ 24x36"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/herbivorous-dinosaur-eye-macro.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/herbivorous-dinosaur-eye-macro.png @ 24x36"
+        }
+      }
+    },
+    "herbivores/stegosaurus-plated-jurassic-herbivore.png": {
+      "published_at": "2026-05-01T14:41:26.842540+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bb8d1cc4ed38fb0aaf4a",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb8ca225b736917e69c9"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bb94ef66d02ffe01d92a",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb8ca225b736917e69c9"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/stegosaurus-plated-jurassic-herbivore.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/stegosaurus-plated-jurassic-herbivore.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        }
+      }
+    },
+    "herbivores/triceratops-frilled-ceratopsian-portrait.png": {
+      "published_at": "2026-05-01T14:41:44.726535+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bba0c5dce11a420eb9aa",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb9b010970f1c02b58f2"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bba6005bc962f702d3da",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bb9b010970f1c02b58f2"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-frilled-ceratopsian-portrait.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-frilled-ceratopsian-portrait.png @ 24x36"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-frilled-ceratopsian-portrait.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-frilled-ceratopsian-portrait.png @ 24x36"
+        }
+      }
+    },
+    "herbivores/triceratops-three-horned-late-cretaceous.png": {
+      "published_at": "2026-05-01T14:41:58.550029+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bbaec5dce11a420eb9c0",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbad010970f1c02b58f3"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bbb5e27149c0590ad27f",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbad010970f1c02b58f3"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-three-horned-late-cretaceous.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-three-horned-late-cretaceous.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        }
+      }
+    },
+    "marine/ammonite-mesozoic-spiral-cephalopod.png": {
+      "published_at": "2026-05-01T14:42:11.627586+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bbbb50e99c888b0b6e0d",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbbaaa14b0e0ac3ebb08"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bbc24d4f472f290ec398",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbbaaa14b0e0ac3ebb08"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/ammonite-mesozoic-spiral-cephalopod.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/ammonite-mesozoic-spiral-cephalopod.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        }
+      }
+    },
+    "marine/liopleurodon-jurassic-pliosaur.png": {
+      "published_at": "2026-05-01T14:42:26.095367+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bbc9f18e6ff51e036a04",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbc87a7394879bdafec8"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bbd0f18e6ff51e036a07",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbc87a7394879bdafec8"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/liopleurodon-jurassic-pliosaur.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/liopleurodon-jurassic-pliosaur.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        }
+      }
+    },
+    "predators/carnotaurus-horned-theropod-macro.png": {
+      "published_at": "2026-05-01T14:42:43.094331+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bbd8005bc962f702d3ef",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbd7f55b7942563f792a"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bbe1e27149c0590ad29b",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbd7f55b7942563f792a"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/carnotaurus-horned-theropod-macro.png",
+          "print_size": "24x36",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 100.0,
+          "effective_dpi_after": 200.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/carnotaurus-horned-theropod-macro.png",
+          "print_size": "24x36",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 100.0,
+          "effective_dpi_after": 200.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        }
+      }
+    },
+    "predators/dilophosaurus-crested-jurassic-theropod.png": {
+      "published_at": "2026-05-01T14:42:58.884707+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bbe8005bc962f702d3f6",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbe72e9590257e26a7ab"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bbf0632e5c92270cfbc8",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbe72e9590257e26a7ab"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/dilophosaurus-crested-jurassic-theropod.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/dilophosaurus-crested-jurassic-theropod.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        }
+      }
+    },
+    "predators/tyrannosaurus-rex-apex-predator-roar.png": {
+      "published_at": "2026-05-01T14:43:12.522919+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bbf8005bc962f702d3fa",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbf78665460ad4deb710"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bbfe56569083ae0bb766",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bbf78665460ad4deb710"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-apex-predator-roar.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-apex-predator-roar.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        }
+      }
+    },
+    "predators/tyrannosaurus-rex-apex-predator-stalking.png": {
+      "published_at": "2026-05-01T14:43:26.102986+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bc05005bc962f702d3ff",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bc042e9590257e26a7ac"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bc0cf18e6ff51e036a17",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bc042e9590257e26a7ac"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-apex-predator-stalking.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-apex-predator-stalking.png",
+          "print_size": "24x36",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        }
+      }
+    },
+    "predators/velociraptor-feathered-cretaceous-raptor.png": {
+      "published_at": "2026-05-01T14:43:34.239246+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "69f4bc10632e5c92270cfbcf",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bc0ff360afd181ba7f42"
+        },
+        {
+          "kind": "wrapped_canvas",
+          "product_id": "69f4bc13db88631ee308f9e1",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 82231,
+              "price": 4700,
+              "is_enabled": true
+            },
+            {
+              "id": 82232,
+              "price": 4500,
+              "is_enabled": true
+            },
+            {
+              "id": 82235,
+              "price": 8200,
+              "is_enabled": true
+            }
+          ],
+          "image_id": "69f4bc0ff360afd181ba7f42"
+        }
+      ],
+      "image_fit": {
+        "poster": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/velociraptor-feathered-cretaceous-raptor.png",
+          "print_size": "24x36",
+          "source_size": "4352x1088",
+          "effective_dpi_before": 181.3,
+          "effective_dpi_after": 181.3,
+          "upscale_method": "none",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        },
+        "wrapped_canvas": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/velociraptor-feathered-cretaceous-raptor.png",
+          "print_size": "24x36",
+          "source_size": "4352x1088",
+          "effective_dpi_before": 181.3,
+          "effective_dpi_after": 181.3,
+          "upscale_method": "none",
+          "decision": "pad_crop",
+          "output_size": "3600x5400"
+        }
+      }
     }
   }
 }
