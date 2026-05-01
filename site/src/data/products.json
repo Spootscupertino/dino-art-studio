@@ -344,6 +344,29 @@
     ]
   },
   {
+    "filename": "herbivores/herbivores-group-dinosaur.png",
+    "title": "Dinosaur",
+    "width": 2688,
+    "height": 1792,
+    "type": "image",
+    "category": "herbivores",
+    "scientific_name": "Dinosauria",
+    "era": "Mesozoic",
+    "alt": "Scientifically accurate paleoart of Dinosauria, a prehistoric reptilian fauna from the Mesozoic, rendered in cinematic prehistoric detail.",
+    "description": "Dinosaur — fine-art paleoart print depicting Dinosauria, prehistoric reptilian fauna, native to the Mesozoic. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Dinosauria",
+      "Mesozoic",
+      "prehistoric reptilian fauna",
+      "Dinosaur"
+    ]
+  },
+  {
     "filename": "herbivores/triceratops-striding.png",
     "title": "Triceratops",
     "width": 1792,
