@@ -411,5 +411,28 @@
       "short-necked apex pliosaur",
       "Liopleurodon"
     ]
+  },
+  {
+    "filename": "marine/ammonite-Spiral-shelled-cephalopod.png",
+    "title": "Ammonite",
+    "width": 2688,
+    "height": 1792,
+    "type": "image",
+    "category": "marine",
+    "scientific_name": "Ammonoidea",
+    "era": "Devonian to Cretaceous",
+    "alt": "Scientifically accurate paleoart of Ammonoidea, a spiral-shelled cephalopod mollusk from the Devonian to Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Ammonite — fine-art paleoart print depicting Ammonoidea, spiral-shelled cephalopod mollusk, native to the Devonian to Cretaceous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Ammonoidea",
+      "Devonian to Cretaceous",
+      "spiral-shelled cephalopod mollusk",
+      "Ammonite"
+    ]
   }
 ]
