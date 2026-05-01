@@ -15,7 +15,7 @@ PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GALLERY_ROOT="$ROOT/site/src/assets/gallery"
-CATEGORIES=(predators herbivores marine aerial flora_arthropods)
+CATEGORIES=(predators herbivores marine aerial flora_arthropods horizontal vertical)
 SCRIPT="$ROOT/tools/sync_and_deploy.sh"
 LOG_DIR="$ROOT/tools/logs"
 

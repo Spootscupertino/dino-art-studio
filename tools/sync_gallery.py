@@ -7,6 +7,7 @@
 
 import json
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -14,13 +15,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS_DIR = ROOT / "site" / "src" / "assets" / "gallery"
 PRODUCTS_JSON = ROOT / "site" / "src" / "data" / "products.json"
+REFS_BEST_DIR = ROOT / "refs" / "gallery_best"
 
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 VIDEO_EXTS = {".mp4", ".webm", ".mov"}
 
-# Categories are now derived from the subfolder under site/src/assets/gallery/.
-# Drop a file into predators/, herbivores/, marine/, aerial/, or flora_arthropods/.
-CATEGORIES = {"predators", "herbivores", "marine", "aerial", "flora_arthropods"}
+# Categories are derived from the subfolder under site/src/assets/gallery/.
+# horizontal/ and vertical/ are "best-of" website display folders — images dropped
+# there are also mirrored into refs/gallery_best/ to seed future MJ --sref pools.
+CATEGORIES = {"predators", "herbivores", "marine", "aerial", "flora_arthropods",
+               "horizontal", "vertical"}
+
+# Categories whose images feed back into refs/gallery_best/ for --sref reuse.
+REFS_MIRROR_CATEGORIES = {"horizontal", "vertical"}
 
 # Species metadata supplies scientific_name / era / traits per species.
 # Category is no longer set here — it comes from the file's subfolder.
@@ -118,6 +125,8 @@ CATEGORY_LABELS = {
     "aerial": "Aerial Paleoart",
     "marine": "Marine Paleoart",
     "flora_arthropods": "Prehistoric Flora and Arthropods",
+    "horizontal": "Best Of — Landscape",
+    "vertical": "Best Of — Portrait",
 }
 
 
@@ -297,6 +306,22 @@ def main() -> int:
     added = len(set(by_fname) - set(existing_by_fname))
     removed = len(set(existing_by_fname) - set(by_fname))
     print(f"sync_gallery: wrote {len(products)} pieces (+{added} new, -{removed} removed).")
+
+    # Mirror horizontal/ and vertical/ images into refs/gallery_best/ so they
+    # become available as --sref candidates for future Midjourney generations.
+    refs_mirrored = 0
+    for category, path in found:
+        if category not in REFS_MIRROR_CATEGORIES:
+            continue
+        dest_dir = REFS_BEST_DIR / category
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest = dest_dir / path.name
+        if not dest.exists() or dest.stat().st_mtime < path.stat().st_mtime:
+            shutil.copy2(str(path), str(dest))
+            refs_mirrored += 1
+    if refs_mirrored:
+        print(f"sync_gallery: mirrored {refs_mirrored} image(s) → refs/gallery_best/")
+
     return 0
 
 

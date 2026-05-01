@@ -196,6 +196,23 @@ def create_product(shop_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
     return _request("POST", f"/shops/{shop_id}/products.json", json_body=payload)
 
 
+def get_etsy_shipping_profiles(shop_id: int) -> Any:
+    """Return the list of Etsy shipping profiles/templates for this shop.
+
+    Printify exposes this via two possible endpoints — we try the newer one
+    first and fall back to the legacy path so the caller doesn't need to care.
+    The raw response is returned unchanged so the user can inspect it with
+    ``--list-shipping``.
+    """
+    try:
+        return _request("GET", f"/shops/{shop_id}/shipping_profiles.json")
+    except PrintifyError as e:
+        if e.status == 404:
+            # Fall back to legacy endpoint.
+            return _request("GET", f"/shops/{shop_id}/shipping.json")
+        raise
+
+
 def publish_product(
     shop_id: int,
     product_id: str,
@@ -207,8 +224,9 @@ def publish_product(
     tags: bool = True,
     keyFeatures: bool = True,
     shipping_template: bool = True,
+    shipping_profile_id: Optional[int] = None,
 ) -> Dict[str, Any]:
-    payload = {
+    payload: Dict[str, Any] = {
         "title": title,
         "description": description,
         "images": images,
@@ -217,6 +235,10 @@ def publish_product(
         "keyFeatures": keyFeatures,
         "shipping_template": shipping_template,
     }
+    if shipping_profile_id is not None:
+        # Printify uses "shipping_template" as the key for the Etsy profile ID
+        # when a numeric ID is supplied (overrides the boolean flag above).
+        payload["shipping_template"] = shipping_profile_id
     return _request(
         "POST",
         f"/shops/{shop_id}/products/{product_id}/publish.json",

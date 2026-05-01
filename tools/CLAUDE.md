@@ -19,22 +19,24 @@ tools/
 
 ## The contract
 
-**Input:** any change inside one of the 5 watched gallery subfolders:
+**Input:** any change inside one of the 7 watched gallery subfolders:
 - `site/src/assets/gallery/predators/`
 - `site/src/assets/gallery/herbivores/`
 - `site/src/assets/gallery/marine/`
 - `site/src/assets/gallery/aerial/`
 - `site/src/assets/gallery/flora_arthropods/`
+- `site/src/assets/gallery/horizontal/` ← landscape best-of (native MJ 3:2)
+- `site/src/assets/gallery/vertical/` ← portrait best-of (Printify-ready)
 
 **Output:**
-1. `site/src/data/products.json` regenerated with full SEO metadata (alt, description, keywords, scientific_name, era, category)
+1. `site/src/data/products.json` regenerated with full SEO metadata
 2. Auto-commit on `main` with message `Auto-sync gallery: +N added`
-3. Auto-push to `origin` (which dual-pushes to both GitHub remotes)
-4. Vercel rebuilds → live in ~2 min
+3. Auto-push to `origin` (dual-pushes to both GitHub remotes) → Vercel rebuilds in ~2 min
+4. **Refs feedback loop:** images from `horizontal/` and `vertical/` are also copied to `refs/gallery_best/<category>/` to seed future MJ `--sref` pools
 
 ## Critical gotchas
 
-- **launchd `WatchPaths` does not recurse.** Each of the 5 category subfolders is registered separately in `install_watcher.sh`. If you add a new category, register it explicitly.
+- **launchd `WatchPaths` does not recurse.** Each category subfolder is registered separately in `install_watcher.sh`. Adding a new category requires updating `CATEGORIES` in both `install_watcher.sh` and `sync_gallery.py`, then re-running `install_watcher.sh`.
 - **Throttle:** 10s `ThrottleInterval` debounces multiple-file drops. Don't lower it — Vercel build budget.
 - **Category is derived from the subfolder**, not from the filename. `SPECIES_META` in `sync_gallery.py` provides scientific_name / era / traits keyed by basename.
 - **Manual title overrides stick** — `sync_gallery.py` preserves any `title` already in `products.json`. Re-running won't clobber human edits.
@@ -53,9 +55,9 @@ launchctl bootout gui/$UID/com.jurassinkart.sync-gallery 2>/dev/null
 bash tools/install_watcher.sh
 ```
 
-## Future hook for Printify
+## Printify hook (wired in this session)
 
-When `printify/printify_publisher.py` is ready, `sync_and_deploy.sh` will call it (in `--dry-run` mode by default) **after** `sync_gallery.py` and **before** the git commit. Live publishing will remain manual — gated by user running `--live` flag explicitly.
+`sync_and_deploy.sh` calls `printify/printify_publisher.py --dry-run` after `sync_gallery.py` and before the git commit. Live publishing remains manual — user runs `--live` explicitly after reviewing the plan.
 
 ## What this directory does NOT do
 

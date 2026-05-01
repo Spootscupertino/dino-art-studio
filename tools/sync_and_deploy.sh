@@ -23,6 +23,11 @@ LOG="$LOG_DIR/sync.log"
     exit 1
   fi
 
+  # Preview-only: show what Printify products WOULD be created for any new images.
+  # Uses --dry-run so no API writes occur. Failures here do not abort the deploy.
+  echo "--- Printify dry-run preview ---"
+  python3 printify/printify_publisher.py --dry-run 2>&1 || true
+
   WATCH_DIR="site/src/assets/gallery"
   PRODUCTS="site/src/data/products.json"
 

@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import os
 import sys
 from dataclasses import dataclass, field, asdict
@@ -38,6 +37,13 @@ from typing import Any, Dict, List, Optional, Tuple
 # Local
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import printify_api as api  # noqa: E402
+
+# image_fit is a soft dependency — only needed for --live uploads.
+try:
+    import image_fit  # noqa: E402
+    _IMAGE_FIT_AVAILABLE = True
+except ImportError:
+    _IMAGE_FIT_AVAILABLE = False
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 GALLERY_DIR = REPO_ROOT / "site" / "src" / "assets" / "gallery"
@@ -228,24 +234,16 @@ def ledger_key(image_rel: str) -> str:
 
 # ---------- pricing ----------
 
-def round_to_99(price_cents: int) -> int:
-    """Round retail to nearest .99 floor.
-    24.37 -> 24.99   (next .99 ceiling? user said 'rounded to .99 floor' meaning
-    the cents land on .99). Interpret: round UP to the next X.99 if not already
-    on a .99 boundary."""
-    dollars = price_cents / 100.0
-    floor_dollars = math.floor(dollars)
-    candidate = floor_dollars + 0.99
-    if candidate < dollars:
-        candidate = floor_dollars + 1 + 0.99 - 1  # = floor + 0.99 still less -> bump
-        candidate = math.floor(dollars) + 0.99
-        if candidate < dollars:
-            candidate = math.floor(dollars) + 1.99
-    return int(round(candidate * 100))
+def round_to_dollar(price_cents: int) -> int:
+    """Round retail price to the nearest whole dollar (nearest 100 cents).
+
+    Examples: 2237 -> 2200, 2250 -> 2300 (standard .5-up), 4713 -> 4700.
+    """
+    return int(round(price_cents / 100.0)) * 100
 
 
 def fallback_retail_cents(cost_cents: int, multiplier: float = 2.2) -> int:
-    return round_to_99(int(cost_cents * multiplier))
+    return round_to_dollar(int(cost_cents * multiplier))
 
 
 # ---------- bootstrap from existing shop ----------
@@ -332,8 +330,8 @@ def bootstrap_config_from_shop() -> Dict[str, Any]:
                 "variants": [asdict(canvas_variants[s]) for s in CANVAS_SIZES if s in canvas_variants],
             },
         },
-        "pricing": {"fallback_multiplier": 2.2, "round_to": 0.99},
-        "shipping": {"free_shipping_override": True},
+        "pricing": {"fallback_multiplier": 2.2, "round_to": "dollar"},
+        "shipping": {"free_shipping_override": True, "etsy_shipping_profile_id": None},
         "image_fit": {"pad_threshold": 0.15, "background_sample": "edge_median"},
     }
     return cfg
@@ -423,6 +421,91 @@ def cmd_bootstrap_config(_args) -> int:
     return 0
 
 
+def _upload_with_fit(abs_path: Path, print_size_str: str) -> tuple:
+    """Prepare image for a specific print size and upload it.
+
+    Returns (image_id, fit_info_dict).
+    fit_info_dict is logged to the ledger ``image_fit`` key.
+    """
+    upload_path = str(abs_path)
+    fit_info: Dict[str, Any] = {"original": str(abs_path), "print_size": print_size_str}
+
+    if _IMAGE_FIT_AVAILABLE:
+        try:
+            result = image_fit.prepare_for_print(str(abs_path), print_size_str)
+            if result is None:
+                raise RuntimeError(
+                    f"image_fit.prepare_for_print returned None for {abs_path} @ {print_size_str}"
+                )
+            tmp_path, fit_meta = result
+            upload_path = tmp_path
+            fit_info.update(fit_meta)
+        except Exception as exc:
+            print(f"[warn] image_fit failed for {abs_path} @ {print_size_str}: {exc} — using original")
+            fit_info["warning"] = str(exc)
+    else:
+        fit_info["warning"] = "image_fit module not available — uploading original without fit"
+
+    upload_resp = api.upload_image(upload_path)
+    return upload_resp["id"], fit_info
+
+
+def cmd_list_shipping(_args) -> int:
+    """Print Etsy shipping profiles/templates for the configured shop."""
+    cfg = load_config()
+    shop_id = cfg.get("shop_id") or api.get_shop_id()
+    print(f"[shipping] querying shop_id={shop_id}")
+    result = api.get_etsy_shipping_profiles(int(shop_id))
+    print(json.dumps(result, indent=2))
+    print(
+        "\nSet the 'id' of your desired profile as "
+        "'shipping.etsy_shipping_profile_id' in printify_config.yaml, "
+        "then re-run --publish-existing or --live."
+    )
+    return 0
+
+
+def cmd_publish_existing(args) -> int:
+    """Publish (push to Etsy) an already-created Printify product by ID.
+
+    Useful for retrying products that were created but failed to publish
+    (e.g. missing shipping template). Does NOT create a new product.
+    """
+    cfg = load_config()
+    shop_id = cfg.get("shop_id") or api.get_shop_id()
+    shipping_profile_id: Optional[int] = (
+        cfg.get("shipping", {}).get("etsy_shipping_profile_id") or None
+    )
+    if shipping_profile_id is not None:
+        try:
+            shipping_profile_id = int(shipping_profile_id)
+        except (ValueError, TypeError):
+            shipping_profile_id = None
+
+    product_id: str = args.publish_existing[0]
+    kind: str = args.publish_existing[1] if len(args.publish_existing) > 1 else "unknown"
+
+    print(f"[publish-existing] shop={shop_id} product_id={product_id} kind={kind}")
+    if shipping_profile_id:
+        print(f"[publish-existing] including shipping_profile_id={shipping_profile_id}")
+    else:
+        print("[publish-existing] WARNING: no etsy_shipping_profile_id in config — "
+              "publish may fail. Run --list-shipping to find the right ID.")
+
+    if not args.live:
+        print("[dry-run] Would call: POST /shops/{shop_id}/products/{product_id}/publish.json")
+        print(f"[dry-run] shipping_profile_id={shipping_profile_id}")
+        return 0
+
+    result = api.publish_product(
+        int(shop_id),
+        product_id,
+        shipping_profile_id=shipping_profile_id,
+    )
+    print(f"[publish-existing] result: {json.dumps(result, indent=2)}")
+    return 0
+
+
 def cmd_publish(args) -> int:
     cfg = load_config()
     if not cfg.get("products", {}).get("poster", {}).get("blueprint_id"):
@@ -443,6 +526,15 @@ def cmd_publish(args) -> int:
         print("Nothing to publish — ledger covers all gallery images.")
         return 0
 
+    shipping_profile_id: Optional[int] = (
+        cfg.get("shipping", {}).get("etsy_shipping_profile_id") or None
+    )
+    if shipping_profile_id is not None:
+        try:
+            shipping_profile_id = int(shipping_profile_id)
+        except (ValueError, TypeError):
+            shipping_profile_id = None
+
     for rel in targets:
         if ledger_key(rel) in ledger.get("entries", {}):
             print(f"[skip] {rel} already in ledger")
@@ -461,12 +553,24 @@ def cmd_publish(args) -> int:
 
         # ---------- LIVE PATH ----------
         abs_path = GALLERY_DIR / rel
-        upload_resp = api.upload_image(str(abs_path))
-        image_id = upload_resp["id"]
+
+        # Use the first print size across all product kinds for the shared upload.
+        # Each product kind may get a differently-fitted version; we upload once
+        # per kind's representative size to keep it simple.
         product_results = []
+        fit_log: Dict[str, Any] = {}
+
         for prod_plan in plan["products"]:
             if prod_plan.get("status", "").startswith("SKIPPED"):
                 continue
+            kind = prod_plan["kind"]
+            # Pick the largest variant size as the representative fit target.
+            sizes_for_kind = CANVAS_SIZES if kind == "wrapped_canvas" else POSTER_SIZES
+            rep_size = sizes_for_kind[-1]  # e.g. "24x36"
+
+            image_id, fit_info = _upload_with_fit(abs_path, rep_size)
+            fit_log[kind] = fit_info
+
             payload = {
                 "title": prod_plan["title"],
                 "description": prod_plan["description"],
@@ -486,18 +590,23 @@ def cmd_publish(args) -> int:
                 }],
             }
             created = api.create_product(cfg["shop_id"], payload)
-            api.publish_product(cfg["shop_id"], created["id"])
+            api.publish_product(
+                cfg["shop_id"],
+                created["id"],
+                shipping_profile_id=shipping_profile_id,
+            )
             product_results.append({
-                "kind": prod_plan["kind"],
+                "kind": kind,
                 "product_id": created["id"],
                 "external_url": (created.get("external") or {}).get("handle"),
                 "variants": prod_plan["variants"],
+                "image_id": image_id,
             })
 
         ledger.setdefault("entries", {})[ledger_key(rel)] = {
             "published_at": datetime.now(timezone.utc).isoformat(),
-            "image_id": image_id,
             "products": product_results,
+            "image_fit": fit_log,
         }
         write_ledger(ledger)
 
@@ -514,10 +623,26 @@ def main(argv: Optional[List[str]] = None) -> int:
                     help="Target a single image (absolute or gallery-relative path).")
     ap.add_argument("--bootstrap-config", action="store_true",
                     help="Inspect existing shop, derive config, write printify_config.yaml.")
+    ap.add_argument("--list-shipping", action="store_true",
+                    help="List Etsy shipping profiles for the configured shop and exit.")
+    ap.add_argument(
+        "--publish-existing",
+        nargs="+",
+        metavar=("PRODUCT_ID", "KIND"),
+        help=(
+            "Publish (push to Etsy) an already-created Printify product by ID. "
+            "Usage: --publish-existing <product_id> [kind]. "
+            "Requires --live to actually fire; dry-run by default."
+        ),
+    )
     args = ap.parse_args(argv)
 
     if args.bootstrap_config:
         return cmd_bootstrap_config(args)
+    if args.list_shipping:
+        return cmd_list_shipping(args)
+    if args.publish_existing:
+        return cmd_publish_existing(args)
     return cmd_publish(args)
 
 
