@@ -1,5 +1,28 @@
 [
   {
+    "filename": "predators/tyrannosaurus-teeth-detail2.png",
+    "title": "Tyrannosaurus",
+    "width": 2400,
+    "height": 1920,
+    "type": "image",
+    "category": "predators",
+    "scientific_name": "Tyrannosaurus rex",
+    "era": "Late Cretaceous",
+    "alt": "Scientifically accurate paleoart of Tyrannosaurus rex, an apex theropod predator with massive jaws and binocular vision from the Late Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Tyrannosaurus — fine-art paleoart print depicting Tyrannosaurus rex, apex theropod predator with massive jaws and binocular vision, native to the Late Cretaceous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Tyrannosaurus rex",
+      "Late Cretaceous",
+      "apex theropod predator with massive jaws and binocular vision",
+      "Tyrannosaurus"
+    ]
+  },
+  {
     "filename": "predators/dinosaur-eye-upclose-detail.png",
     "title": "Dinosaur",
     "width": 2400,
@@ -20,6 +43,29 @@
       "Mesozoic",
       "prehistoric reptilian fauna",
       "Dinosaur"
+    ]
+  },
+  {
+    "filename": "predators/tyrannosaurus-teeth-detail.png",
+    "title": "Tyrannosaurus",
+    "width": 1200,
+    "height": 960,
+    "type": "image",
+    "category": "predators",
+    "scientific_name": "Tyrannosaurus rex",
+    "era": "Late Cretaceous",
+    "alt": "Scientifically accurate paleoart of Tyrannosaurus rex, an apex theropod predator with massive jaws and binocular vision from the Late Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Tyrannosaurus — fine-art paleoart print depicting Tyrannosaurus rex, apex theropod predator with massive jaws and binocular vision, native to the Late Cretaceous. Museum-quality dinosaur wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Tyrannosaurus rex",
+      "Late Cretaceous",
+      "apex theropod predator with massive jaws and binocular vision",
+      "Tyrannosaurus"
     ]
   },
   {
