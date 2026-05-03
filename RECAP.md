@@ -15,7 +15,47 @@ Generate Midjourney images that look like **real wildlife photography** — benc
 - **42 species** — 8 terrestrial, 14 marine, 4 aerial, 8 arthropod, 8 plant (all with diet + habitat populated)
 - **308 parameters** — exactly 20 per habitat per category (behavior, camera, condition, lighting, mood, weather) + anatomy + style
 
-## Current Architecture
+## Session 22: Agent Decomposition (Current)
+
+Refactored monolithic codebase into **5 specialist agents**, each owning a domain and publishing to files/DB (never function calls across agents).
+
+### Agents Wired Up
+
+**✅ prompt-crafter** — Generate non-interactive Midjourney prompts
+- Entry point: `python -m mj.cli Triceratops portrait --mood aggressive --stylize 250`
+- Wraps: `generate_prompt.assemble_prompt()` via `mj/prompt_engine.py`
+- Reads: `refs/*.json` (paleoart/skeletal refs), `dino_art.db` (species/params)
+- Outputs: stdout (copy-paste to MJ) or `--json` (consumed by other agents)
+- Tests: `mj/tests/test_prompt_engine.py`, `mj/tests/test_refs.py`
+- Status: **Live** — generates valid prompts for all 42 species
+
+### Agent Specs
+
+Full job descriptions at [AGENT_SPECS.md](../AGENT_SPECS.md). Each agent has:
+- **Responsibilities** — what they own
+- **Inputs** — files/DB they read (read-only)
+- **Outputs** — files/DB they publish (exclusive write)
+- **Independence metrics** — can work standalone?
+- **Team contracts** — who talks to whom
+- **Success criteria** — how to measure if working
+
+### Architecture: Cross-Domain Contracts
+
+| From | To | Handoff | Format | Frequency |
+|---|---|---|---|---|
+| prompt-crafter | you | stdout | text | on-demand |
+| prompt-crafter | mj-logger | (log call) | DB row | per run |
+| ref-curator | prompt-crafter | refs/*.json | JSON | ad-hoc |
+| mj-logger | ref-curator | query result | JSON | weekly |
+| mj-logger | printify-publisher | query result | JSON | per publish |
+| printify-publisher | site-custodian | printify_ledger.json | JSON | per product |
+| site-custodian | (Vercel) | main branch | git | per push |
+
+**Key principle:** Handoffs are **files or DB rows**, never Python imports across agents.
+
+---
+
+## Current Architecture (Pre-Session 22)
 
 ### Interactive Flow
 1. **Habitat** — Terrestrial / Marine / Aerial / Arthropod / Plant (first choice, gates everything below)
@@ -1481,3 +1521,102 @@ Gallery is empty. Ready to receive new images.
 - `vertical/` — Best-of portrait picks (also mirrors to `refs/gallery_best/`)
 
 Drop a PNG → launchd fires → sync + deploy → live on site.
+
+---
+
+## Session 22 (2026-05-03) — Agent Decomposition: prompt-crafter Wired
+
+### What shipped
+
+**Specialist agent architecture for prompt-crafter — non-interactive CLI + modular tests**
+
+Created `/mj/` domain with:
+
+1. **`mj/prompt_engine.py`** — Wraps existing `generate_prompt.assemble_prompt()` with:
+   - `PromptResult` dataclass (main_prompt, feet_fix, environment_fix, tags, clip_estimate)
+   - Stateless `assemble_prompt()` function: species_data + anatomy + parameters + flags → PromptResult
+   - DB query helpers (_load_species, _get_parameter, _load_required_params, _load_global_rules)
+   - No interactive I/O, no file writes
+
+2. **`mj/cli.py`** — Non-interactive CLI entry point:
+   - `python -m mj.cli Triceratops portrait --mood aggressive --stylize 250 --chaos 20`
+   - Required: species name + output_mode
+   - Optional: --mood, --lighting, --behavior, --condition, --weather, --camera, --perspective, --style, --stylize, --chaos, --quality, --sref, --cref
+   - Output: stdout (copy-paste to MJ) or `--json` (for downstream agents)
+   - Output: `--variants` includes feet_fix + environment_fix
+
+3. **`mj/refs.py`** — Reference image management:
+   - `load_refs(refs_dir)` — Loads paleoart_refs.json + skeletal_refs.json
+   - `get_refs_for_species(species_name, refs)` — Returns sref/cref URLs for a species
+   - Validations: FileNotFoundError on missing files, JSONDecodeError on malformed JSON
+
+4. **`mj/tests/`** — Unit test structure (ready for pytest):
+   - `test_prompt_engine.py` — Smoke tests: PromptResult structure, species name inclusion, MJ flags, variants
+   - `test_refs.py` — Load refs, validate JSON, test species lookup
+
+5. **`refs/*.json`** — Moved from root to organized domain:
+   - `paleoart_refs.json` — Paleoart refs by species (23 KB, ~200 entries)
+   - `skeletal_refs.json` — Skeletal refs by species (21 KB, ~180 entries)
+   - `sref_sources.json` — Metadata about each ref URL (86 KB, curator-maintained)
+
+### Current state
+
+✅ **prompt-crafter is live and independent:**
+- Reads: refs/*.json, dino_art.db
+- Generates valid Midjourney prompts for all 42 species
+- No external API calls, no file writes
+- CLI contract is clean: species + parameters → prompt
+- JSON output format supports downstream agents (printify-publisher, mj-logger, etc.)
+
+**Example call:**
+```bash
+$ python -m mj.cli Triceratops portrait --mood neutral --variants --json
+```
+
+Output: main prompt + feet-fix + environment-fix variants + tags + CLIP token estimate.
+
+### Kept intact
+- `generate_prompt.py` — Interactive mode untouched, backward compatible
+- All 42 species anatomy modules (species/*.py)
+- Database schema (dino_art.db)
+- Variant prompt functions (make_feet_fix_prompt, make_environment_fix_prompt)
+
+### Next: MJ Feedback Loop
+
+To close the loop and improve prompt quality autonomously:
+
+1. **mj-logger** — Log every MJ run: prompt + image + rating (1-5 stars)
+   - Query: "best_prompt_for(species)" → top-rated prompt
+   - Query: "top_refs_by_win_rate(species)" → which --sref appeared in rated runs?
+
+2. **ref-curator** — Poll mj-logger quarterly
+   - Get: top-performing refs from A/B tests
+   - Update: refs/*.json with proven winners
+   - Mirror: high-rated images to refs/gallery_best/ for --sref reuse
+
+3. **prompt-crafter feedback** — Future: parameterize choices based on ratings
+   - "This --stylize range scored highest for this species" → auto-apply
+   - "This lighting + mood combo is 40% rated higher" → suggest it
+
+4. **Printify integration** — Publish top-rated images automatically
+   - mj-logger provides "top N images" → printify-publisher publishes → site-custodian renders
+
+### Files changed
+- ✅ Created: mj/__init__.py, mj/prompt_engine.py, mj/cli.py, mj/refs.py
+- ✅ Created: mj/tests/__init__.py, mj/tests/test_prompt_engine.py, mj/tests/test_refs.py
+- ✅ Moved: refs/paleoart_refs.json, refs/skeletal_refs.json, refs/sref_sources.json (from root)
+- ✅ Updated: AGENT_SPECS.md (full job descriptions for all 5 agents)
+
+---
+
+## Next Session: MJ Feedback Loop & Generator Tuning
+
+**Goal:** Wire up mj-logger + ref-curator feedback loop so quality improves autonomously from MJ ratings.
+
+**Tasks:**
+1. **mj-logger schema & logging** — Create `prompts`, `results`, `ratings` tables; implement "log this run" CLI
+2. **ref-curator polling** — Query mj-logger for top refs; update refs/*.json with winners
+3. **A/B testing framework** — Track prompt variants (--stylize range, --chaos, --sref choices); identify winning parameters
+4. **Generator tuning** — Use ratings to suggest/auto-apply best parameter combinations per species
+
+**Focus:** Close the loop. Drop 1 MJ image → log rating → generator learns → next prompt is better.
