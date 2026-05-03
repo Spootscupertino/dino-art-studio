@@ -1454,3 +1454,30 @@ The Printify integration is the next pipeline tier — same "drop image → it a
 **7. Google Search Console** (from previous next-session notes — still pending)
 - Verify domain ownership via TXT record
 - Submit `sitemap-index.xml` and `sitemap-images.xml`
+
+---
+
+## Session 2026-05-01 (later) — Gallery Clean Slate
+
+### What shipped
+
+**Gallery hard reset — start fresh with clean category structure**
+
+- Deleted entire `site/public/assets/website_dino_images/` folder. This was the legacy flat folder left over from the pre-Astro pipeline. It was dead weight — the Gallery component reads from `site/src/assets/gallery/`, not `public/`. Removing it eliminates confusion about where images live.
+- Cleared all image files from `site/src/assets/gallery/predators/`, `herbivores/`, `marine/`, `aerial/`, `flora_arthropods/`, `horizontal/`, `vertical/`. The seven category subfolders remain in place (watcher requires them).
+- Reset `site/src/data/products.json` to `[]` — fresh start, no stale entries.
+
+### Current state
+
+Gallery is empty. Ready to receive new images.
+
+**Drop target:** `site/src/assets/gallery/<category>/`
+- `predators/` — T-Rex, Velociraptor, Carnotaurus, Dilophosaurus, etc.
+- `herbivores/` — Triceratops, Stegosaurus, Brachiosaurus, etc.
+- `marine/` — Mosasaurus, Plesiosaurus, Ammonites, etc.
+- `aerial/` — Pteranodon, Quetzalcoatlus, etc.
+- `flora_arthropods/` — Plants, fungi, prehistoric flora
+- `horizontal/` — Best-of landscape picks (also mirrors to `refs/gallery_best/`)
+- `vertical/` — Best-of portrait picks (also mirrors to `refs/gallery_best/`)
+
+Drop a PNG → launchd fires → sync + deploy → live on site.
