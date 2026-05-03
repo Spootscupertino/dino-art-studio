@@ -15,7 +15,53 @@ Generate Midjourney images that look like **real wildlife photography** — benc
 - **42 species** — 8 terrestrial, 14 marine, 4 aerial, 8 arthropod, 8 plant (all with diet + habitat populated)
 - **308 parameters** — exactly 20 per habitat per category (behavior, camera, condition, lighting, mood, weather) + anatomy + style
 
-## Session 22: Agent Decomposition (Current)
+## Session 23: MJ Feedback Agent (Current)
+
+Built a local terminal-based feedback agent that interviews you after each Midjourney image drop, rates it 1–10, logs everything to SQLite, and self-trains parameter weights over time.
+
+### What was built
+
+**`feedback_agent.py`** — new file, run from anywhere as `feedback`
+- Drop an image path → structured interview across 4 dimensions (anatomy, species accuracy, realism, composition)
+- Scores below 7 on any dimension trigger a follow-up question ("what's wrong?")
+- Weighted final score: anatomy 35%, accuracy/realism 25% each, composition 15%
+- Only 8+ = usable; clearly marked ✓ / ✗
+- Teal/blue color theme throughout
+- `feedback --history` — ranked list of all past sessions
+- `feedback --winners` — only the 8+ images
+
+**New DB table: `feedback_sessions`**
+- Stores per-dimension scores, final score, issues/strengths as JSON, vision analysis text, MJ params (stylize/chaos/ar/sref)
+- `is_usable` flag auto-set from final score
+
+**Ollama + llama3.2-vision integration (optional)**
+- If Ollama is running: auto-analyzes the image before the interview starts
+- Identifies species, flags anatomical issues, comments on realism and composition
+- Falls back gracefully if Ollama not available
+
+**Self-training hook**
+- If score ≥ 8 and `--prompt-id` is passed: bumps weight of linked parameters +0.05 in `parameters` table
+- If score ≤ 4: decrements -0.05
+- Over many sessions, high-performing parameters rise in weight and get preferred by the generator
+
+**Shell alias**
+- Added `feedback()` function to `~/.bash_profile` — same pattern as existing `prompt` command
+- Usage: `feedback image.png`, `feedback image.png --species "Velociraptor"`, `feedback --history`, `feedback --winners`
+
+### Setup done this session
+- Installed Ollama (Mac app from ollama.com)
+- Pulled `llama3.2-vision` (~7GB)
+- `pip3 install ollama`
+
+### Next session priorities
+1. **Smarter follow-ups** — use the vision model's analysis to generate *targeted* follow-up questions instead of generic ones (e.g. if vision sees "bent wrists", ask specifically about that)
+2. **Trends view** — `feedback --trends trex` shows which parameters correlate with high scores for that species
+3. **Winner → generator loop** — when a session scores 8+, automatically suggest the prompt settings that produced it so you can reuse them
+4. **Link to prompt history** — auto-detect which prompt generated the image based on filename or metadata
+
+---
+
+## Session 22: Agent Decomposition
 
 Refactored monolithic codebase into **5 specialist agents**, each owning a domain and publishing to files/DB (never function calls across agents).
 
