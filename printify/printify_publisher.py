@@ -53,6 +53,20 @@ LEDGER_PATH = Path(__file__).resolve().parent / "printify_ledger.json"
 
 POSTER_SIZES = ["12x18", "18x24", "24x36"]
 CANVAS_SIZES = ["16x20", "18x24", "24x36"]
+MUG_SIZES = ["11oz_mug", "15oz_mug"]
+
+# Which product kinds to create per gallery category.
+CATEGORY_PRODUCTS: Dict[str, List[str]] = {
+    "horizontal": ["poster", "wrapped_canvas", "mug"],
+    "vertical": ["poster", "wrapped_canvas"],
+}
+DEFAULT_PRODUCTS: List[str] = ["poster", "wrapped_canvas"]
+
+KIND_CONTEXT = {
+    "poster": ("Dinosaur Wall Art", "Fine Art Print"),
+    "wrapped_canvas": ("Dinosaur Wall Art", "Wrapped Canvas"),
+    "mug": ("Dinosaur Mug", "Coffee Mug"),
+}
 
 
 # ---------- tiny YAML I/O (no PyYAML dependency) ----------
@@ -259,17 +273,24 @@ SIZE_TOKENS = {
 def normalize_size(s: str) -> Optional[str]:
     if not s:
         return None
-    t = s.lower().replace(" ", "").replace("\"", "").replace("″", "").replace("”", "").replace("“", "")
-    t = t.replace("×", "x")
+    t = "".join(c if c.isalnum() or c == "x" else "x" if ord(c) == 0xd7 else "" for c in s.lower())
     for size in ["12x18", "16x20", "18x24", "24x36"]:
         if size in t:
             return size
+    # Mug sizes: match "11oz", "11 oz", "11-oz" etc.
+    t_raw = s.lower()
+    if ("11" in t_raw) and ("oz" in t_raw or "mug" in t_raw):
+        return "11oz_mug"
+    if ("15" in t_raw) and ("oz" in t_raw or "mug" in t_raw):
+        return "15oz_mug"
     return None
 
 
 def classify_blueprint(title: str, blueprint_title: str = "") -> Optional[str]:
-    """Return 'poster' or 'wrapped_canvas' or None."""
+    """Return 'poster', 'wrapped_canvas', 'mug', or None."""
     haystack = f"{title} {blueprint_title}".lower()
+    if "mug" in haystack or "cup" in haystack:
+        return "mug"
     if "canvas" in haystack:
         return "wrapped_canvas"
     if "poster" in haystack or "print" in haystack and "canvas" not in haystack:
@@ -282,13 +303,11 @@ def bootstrap_config_from_shop() -> Dict[str, Any]:
     products = api.list_products(shop_id)
     print(f"[bootstrap] shop_id={shop_id}  existing_products={len(products)}")
 
-    poster_variants: Dict[str, Variant] = {}
-    canvas_variants: Dict[str, Variant] = {}
-    poster_meta: Dict[str, Any] = {}
-    canvas_meta: Dict[str, Any] = {}
+    buckets: Dict[str, Dict[str, Variant]] = {"poster": {}, "wrapped_canvas": {}, "mug": {}}
+    meta: Dict[str, Dict[str, Any]] = {"poster": {}, "wrapped_canvas": {}, "mug": {}}
+    kind_sizes = {"poster": POSTER_SIZES, "wrapped_canvas": CANVAS_SIZES, "mug": MUG_SIZES}
 
     for prod in products:
-        # Need full product detail for variant prices.
         detail = api.get_product(shop_id, prod["id"])
         bp_id = detail.get("blueprint_id")
         pp_id = detail.get("print_provider_id")
@@ -297,15 +316,13 @@ def bootstrap_config_from_shop() -> Dict[str, Any]:
         if kind is None:
             print(f"[bootstrap] skip product {prod['id']}: cannot classify ({title!r})")
             continue
-        target_meta = poster_meta if kind == "poster" else canvas_meta
-        target_meta.setdefault("blueprint_id", bp_id)
-        target_meta.setdefault("print_provider_id", pp_id)
-        bucket = poster_variants if kind == "poster" else canvas_variants
+        meta[kind].setdefault("blueprint_id", bp_id)
+        meta[kind].setdefault("print_provider_id", pp_id)
         for v in detail.get("variants", []):
             size = normalize_size(v.get("title", ""))
-            if not size:
+            if not size or size not in kind_sizes[kind]:
                 continue
-            bucket.setdefault(
+            buckets[kind].setdefault(
                 size,
                 Variant(
                     id=v["id"],
@@ -316,23 +333,22 @@ def bootstrap_config_from_shop() -> Dict[str, Any]:
                 ),
             )
 
+    def _product_section(kind: str, sizes: List[str]) -> Dict[str, Any]:
+        return {
+            "blueprint_id": meta[kind].get("blueprint_id"),
+            "print_provider_id": meta[kind].get("print_provider_id"),
+            "variants": [asdict(buckets[kind][s]) for s in sizes if s in buckets[kind]],
+        }
+
     cfg = {
         "shop_id": shop_id,
         "products": {
-            "poster": {
-                "blueprint_id": poster_meta.get("blueprint_id"),
-                "print_provider_id": poster_meta.get("print_provider_id"),
-                "variants": [asdict(poster_variants[s]) for s in POSTER_SIZES if s in poster_variants],
-            },
-            "wrapped_canvas": {
-                "blueprint_id": canvas_meta.get("blueprint_id"),
-                "print_provider_id": canvas_meta.get("print_provider_id"),
-                "variants": [asdict(canvas_variants[s]) for s in CANVAS_SIZES if s in canvas_variants],
-            },
+            "poster": _product_section("poster", POSTER_SIZES),
+            "wrapped_canvas": _product_section("wrapped_canvas", CANVAS_SIZES),
+            "mug": _product_section("mug", MUG_SIZES),
         },
         "pricing": {"fallback_multiplier": 2.2, "round_to": "dollar"},
         "shipping": {"free_shipping_override": True, "etsy_shipping_profile_id": None},
-        "image_fit": {"pad_threshold": 0.15, "background_sample": "edge_median"},
     }
     return cfg
 
@@ -354,8 +370,9 @@ def find_feed_entry(rel_path: str, feed: List[Dict[str, Any]]) -> Optional[Dict[
 
 def plan_publish(image_rel: str, feed_entry: Dict[str, Any], cfg: Dict[str, Any]) -> Dict[str, Any]:
     """Return the planned API calls (no network writes) for one image."""
-    poster_cfg = cfg.get("products", {}).get("poster", {})
-    canvas_cfg = cfg.get("products", {}).get("wrapped_canvas", {})
+    products_cfg = cfg.get("products", {})
+    category = feed_entry.get("category", "")
+    enabled_kinds = CATEGORY_PRODUCTS.get(category, DEFAULT_PRODUCTS)
 
     title = feed_entry.get("title") or Path(image_rel).stem
     description = feed_entry.get("description") or ""
@@ -363,17 +380,23 @@ def plan_publish(image_rel: str, feed_entry: Dict[str, Any], cfg: Dict[str, Any]
 
     plan = {
         "image": image_rel,
+        "category": category,
+        "enabled_kinds": enabled_kinds,
         "title": title,
         "uploads": [{"endpoint": "POST /uploads/images.json", "file": image_rel}],
         "products": [],
     }
 
-    for kind, kcfg, sizes in [
-        ("poster", poster_cfg, POSTER_SIZES),
-        ("wrapped_canvas", canvas_cfg, CANVAS_SIZES),
+    for kind, sizes in [
+        ("poster", POSTER_SIZES),
+        ("wrapped_canvas", CANVAS_SIZES),
+        ("mug", MUG_SIZES),
     ]:
+        if kind not in enabled_kinds:
+            continue
+        kcfg = products_cfg.get(kind, {})
         if not kcfg.get("blueprint_id"):
-            plan["products"].append({"kind": kind, "status": "SKIPPED — config missing"})
+            plan["products"].append({"kind": kind, "status": "SKIPPED — config missing (run --bootstrap-config)"})
             continue
         variants_payload = []
         for v in kcfg.get("variants", []):
@@ -384,12 +407,13 @@ def plan_publish(image_rel: str, feed_entry: Dict[str, Any], cfg: Dict[str, Any]
                 "price": v["retail_cents"],
                 "is_enabled": True,
             })
+        ctx, label = KIND_CONTEXT[kind]
         plan["products"].append({
             "kind": kind,
             "endpoint": f"POST /shops/{cfg.get('shop_id')}/products.json",
             "blueprint_id": kcfg["blueprint_id"],
             "print_provider_id": kcfg["print_provider_id"],
-            "title": f"{title} — {'Poster' if kind == 'poster' else 'Wrapped Canvas'}",
+            "title": f"{title} | {ctx} | {label}",
             "description": description,
             "tags": keywords[:13],
             "variants": variants_payload,
@@ -569,8 +593,8 @@ def cmd_publish(args) -> int:
                 continue
             kind = prod_plan["kind"]
             # Pick the largest variant size as the representative fit target.
-            sizes_for_kind = CANVAS_SIZES if kind == "wrapped_canvas" else POSTER_SIZES
-            rep_size = sizes_for_kind[-1]  # e.g. "24x36"
+            sizes_for_kind = {"wrapped_canvas": CANVAS_SIZES, "mug": MUG_SIZES}.get(kind, POSTER_SIZES)
+            rep_size = sizes_for_kind[-1]  # e.g. "24x36" or "15oz_mug"
 
             image_id, fit_info = _upload_with_fit(abs_path, rep_size)
             fit_log[kind] = fit_info
@@ -594,7 +618,7 @@ def cmd_publish(args) -> int:
                 }],
             }
             if shipping_profile_id:
-                payload["shipping_template"] = str(shipping_profile_id)
+                payload["shipping_template_id"] = shipping_profile_id
             created = api.create_product(cfg["shop_id"], payload)
             api.publish_product(
                 cfg["shop_id"],

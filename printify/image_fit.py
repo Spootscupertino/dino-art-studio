@@ -3,7 +3,7 @@
 Pipeline:
   A. DPI gate  — skip (return None) if effective DPI < 150 even after upscaling.
   B. Upscaling — try Replicate (real-esrgan 4×), then local binary, then PIL 2×.
-  C. Smart fit — center-crop if loss <= pad_threshold, else edge-median pad + crop.
+  C. Fit       — scale-to-fill + center-crop. Never pads with color bars.
 
 Hard dependency: Pillow (PIL).
 Soft dependencies: Replicate API (REPLICATE_API_TOKEN env), realesrgan-ncnn-vulkan binary.
@@ -39,15 +39,17 @@ except ImportError:
 
 DPI_FLOOR = 150          # minimum acceptable effective DPI
 DPI_PREFERRED = 300      # log a notice below this even if above floor
-PAD_THRESHOLD = 0.15     # from config default; caller may override
-EDGE_SAMPLE_FRACTION = 0.05  # fraction of width/height to sample for background
+EDGE_SAMPLE_FRACTION = 0.05  # retained for any future use
 
-# Map "WxH" print size strings to (width_inches, height_inches).
+# Map size keys to (width_inches, height_inches).
+# Portrait print sizes use width < height; mug wrap sizes are landscape.
 PRINT_SIZES: Dict[str, Tuple[float, float]] = {
     "12x18": (12.0, 18.0),
     "18x24": (18.0, 24.0),
     "24x36": (24.0, 36.0),
     "16x20": (16.0, 20.0),
+    "11oz_mug": (8.5, 3.6),   # landscape mug wrap
+    "15oz_mug": (8.5, 4.0),   # landscape mug wrap
 }
 
 
@@ -238,55 +240,29 @@ def _edge_median_color(img: Image.Image) -> Tuple[int, int, int]:
     )
 
 
-def fit_to_portrait(
+def fit_to_print(
     img: Image.Image,
     target_w_px: int,
     target_h_px: int,
-    pad_threshold: float = PAD_THRESHOLD,
 ) -> Tuple[Image.Image, str]:
-    """Fit a landscape image into a portrait canvas.
+    """Scale-to-fill then center-crop. Never pads — no color bars ever.
 
-    Returns (fitted_image, decision) where decision is 'center_crop' or 'pad_crop'.
+    Landscape into portrait = crop the sides and keep the center.
+    Returns (fitted_image, 'center_crop').
     """
     src_w, src_h = img.size
-    target_ar = target_w_px / target_h_px  # < 1 for portrait
 
-    # Scale so the image fills the target along one axis.
-    scale_by_width = target_w_px / src_w
-    scale_by_height = target_h_px / src_h
-    # Fill-scale: use the larger scale so neither dimension is smaller than target.
-    fill_scale = max(scale_by_width, scale_by_height)
+    # Fill-scale: use the larger scale factor so every pixel of the target is covered.
+    fill_scale = max(target_w_px / src_w, target_h_px / src_h)
 
     scaled_w = int(src_w * fill_scale)
     scaled_h = int(src_h * fill_scale)
+    scaled = img.convert("RGB").resize((scaled_w, scaled_h), Image.LANCZOS)
 
-    # Crop loss: fraction of image area that would be cut.
-    crop_area = target_w_px * target_h_px
-    scaled_area = scaled_w * scaled_h
-    loss = 1.0 - (crop_area / scaled_area) if scaled_area > 0 else 1.0
-
-    if loss <= pad_threshold:
-        # Center-crop: scale up and crop.
-        scaled = img.resize((scaled_w, scaled_h), Image.LANCZOS)
-        left = (scaled_w - target_w_px) // 2
-        top = (scaled_h - target_h_px) // 2
-        result = scaled.crop((left, top, left + target_w_px, top + target_h_px))
-        return result, "center_crop"
-    else:
-        # Pad path: place the image centered on a background-colored portrait canvas.
-        bg_color = _edge_median_color(img)
-        canvas = Image.new("RGB", (target_w_px, target_h_px), bg_color)
-
-        # Fit-contain: scale the image so it fits entirely inside the target.
-        contain_scale = min(target_w_px / src_w, target_h_px / src_h)
-        contain_w = int(src_w * contain_scale)
-        contain_h = int(src_h * contain_scale)
-        contained = img.convert("RGB").resize((contain_w, contain_h), Image.LANCZOS)
-
-        paste_x = (target_w_px - contain_w) // 2
-        paste_y = (target_h_px - contain_h) // 2
-        canvas.paste(contained, (paste_x, paste_y))
-        return canvas, "pad_crop"
+    left = (scaled_w - target_w_px) // 2
+    top = (scaled_h - target_h_px) // 2
+    result = scaled.crop((left, top, left + target_w_px, top + target_h_px))
+    return result, "center_crop"
 
 
 # ---------- Main entry point ----------
@@ -294,7 +270,6 @@ def fit_to_portrait(
 def prepare_for_print(
     src_path: str,
     print_size_str: str,
-    pad_threshold: float = PAD_THRESHOLD,
     dpi_floor: float = DPI_FLOOR,
 ) -> Optional[Tuple[str, Dict[str, Any]]]:
     """Prepare src_path for a given print size. Returns (temp_png_path, metadata) or None.
@@ -363,8 +338,8 @@ def prepare_for_print(
                 f"{DPI_PREFERRED} for {src_path} @ {print_size_str}"
             )
 
-    # Fit to portrait canvas.
-    fitted, decision = fit_to_portrait(img, target_w_px, target_h_px, pad_threshold)
+    # Scale-to-fill + center-crop.
+    fitted, decision = fit_to_print(img, target_w_px, target_h_px)
     meta["decision"] = decision
     meta["output_size"] = f"{fitted.width}x{fitted.height}"
 

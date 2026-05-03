@@ -1,6 +1,6 @@
 # Printify publisher config — SOURCE OF TRUTH derived from existing Etsy shop.
 # Regenerate via: python3 printify/printify_publisher.py --bootstrap-config
-# Generated: 2026-04-30T15:01:11.140494+00:00
+# Generated: 2026-05-03T16:12:56.648958+00:00
 
 shop_id: 26693677
 products:
@@ -8,22 +8,25 @@ products:
     blueprint_id: 282
     print_provider_id: 99
     variants:
-      - { id: 43138, size: 12x18, retail_cents: 2500, shipping_cents: 0, source_product_id: 69c981ce78254a67bf0a03c5 }
-      - { id: 43144, size: 18x24, retail_cents: 2200, shipping_cents: 0, source_product_id: 69c981ce78254a67bf0a03c5 }
-      - { id: 43150, size: 24x36, retail_cents: 4000, shipping_cents: 0, source_product_id: 69c981ce78254a67bf0a03c5 }
+      - { id: 43138, size: 12x18, retail_cents: 2500, shipping_cents: 0, source_product_id: 69f4bba0c5dce11a420eb9aa }
+      - { id: 43144, size: 18x24, retail_cents: 2200, shipping_cents: 0, source_product_id: 69f4bba0c5dce11a420eb9aa }
+      - { id: 43150, size: 24x36, retail_cents: 4000, shipping_cents: 0, source_product_id: 69f4bba0c5dce11a420eb9aa }
   wrapped_canvas:
     blueprint_id: 937
     print_provider_id: 105
     variants:
-      - { id: 82231, size: 16x20, retail_cents: 4700, shipping_cents: 0, source_product_id: 69c98f4a4c5d410b1f0fd10f }
-      - { id: 82232, size: 18x24, retail_cents: 4500, shipping_cents: 0, source_product_id: 69c98f4a4c5d410b1f0fd10f }
-      - { id: 82235, size: 24x36, retail_cents: 8200, shipping_cents: 0, source_product_id: 69c98f4a4c5d410b1f0fd10f }
+      - { id: 82231, size: 16x20, retail_cents: 4700, shipping_cents: 0, source_product_id: 69f4bba6005bc962f702d3da }
+      - { id: 82232, size: 18x24, retail_cents: 4500, shipping_cents: 0, source_product_id: 69f4bba6005bc962f702d3da }
+      - { id: 82235, size: 24x36, retail_cents: 8200, shipping_cents: 0, source_product_id: 69f4bba6005bc962f702d3da }
+  mug:
+    blueprint_id: 478
+    print_provider_id: 99
+    variants:
+      - { id: 65216, size: 11oz_mug, retail_cents: 2000, shipping_cents: 0, source_product_id: 69f378fc48e8aa043b0ae7bb }
+      - { id: 104692, size: 15oz_mug, retail_cents: 2200, shipping_cents: 0, source_product_id: 69f378fc48e8aa043b0ae7bb }
 pricing:
   fallback_multiplier: 2.2
   round_to: dollar
 shipping:
   free_shipping_override: true
-  etsy_shipping_profile_id: 302615935773
-image_fit:
-  pad_threshold: 0.15
-  background_sample: edge_median
+  etsy_shipping_profile_id: null

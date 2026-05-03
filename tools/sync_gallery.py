@@ -26,8 +26,8 @@ VIDEO_EXTS = {".mp4", ".webm", ".mov"}
 CATEGORIES = {"predators", "herbivores", "marine", "aerial", "flora_arthropods",
                "horizontal", "vertical"}
 
-# Categories whose images feed back into refs/gallery_best/ for --sref reuse.
-REFS_MIRROR_CATEGORIES = {"horizontal", "vertical"}
+# Every gallery image mirrors to refs/gallery_best/ as an --sref candidate.
+REFS_MIRROR_CATEGORIES = CATEGORIES
 
 # Species metadata supplies scientific_name / era / traits per species.
 # Category is no longer set here — it comes from the file's subfolder.
@@ -117,6 +117,9 @@ FILLER = {
     "gemini", "close", "up", "deta", "details", "photo", "render",
 }
 
+# A slug is all-lowercase with only hyphens, 3–60 chars.
+_SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{2,59}$")
+
 DEFAULT_META = {"scientific_name": "Dinosauria", "era": "Mesozoic", "traits": "prehistoric creature"}
 
 CATEGORY_LABELS = {
@@ -128,6 +131,59 @@ CATEGORY_LABELS = {
     "horizontal": "Best Of — Landscape",
     "vertical": "Best Of — Portrait",
 }
+
+
+def _make_seo_slug(path: Path) -> str:
+    """Build an SEO slug from species detection + descriptive words in the filename.
+
+    Result: lowercase, hyphen-separated, max 6 words, no UUIDs or filler.
+    Example: "velociraptor-feathered-raptor-hunting-pack"
+    """
+    stem = UUID_PATTERN.sub("", path.stem)
+    stem_lower = stem.lower()
+    raw_words = re.split(r"[_\-\s]+", stem_lower)
+    descriptive = [w for w in raw_words if w and w not in FILLER and not re.fullmatch(r"\d+", w)]
+
+    sp, _ = species_for(path.name)
+    if sp:
+        sp_words = re.split(r"[\s]+", sp)
+        extra = [w for w in descriptive if w not in sp_words]
+        slug_words = sp_words + extra[:3]
+    else:
+        slug_words = descriptive[:6]
+
+    slug = "-".join(slug_words[:6])
+    slug = re.sub(r"-+", "-", slug).strip("-")
+    return slug or "prehistoric-art"
+
+
+def _rename_to_seo_slugs(category_dir: Path) -> int:
+    """Rename non-slug image files in category_dir to SEO-friendly slugs.
+
+    Skips files whose stem already matches the slug pattern.
+    Returns the number of files renamed.
+    """
+    renamed = 0
+    for p in sorted(category_dir.iterdir()):
+        if not p.is_file() or p.name.startswith("."):
+            continue
+        if p.suffix.lower() not in IMAGE_EXTS:
+            continue
+        if _SLUG_RE.match(p.stem):
+            continue
+        slug = _make_seo_slug(p)
+        new_name = slug + p.suffix.lower()
+        new_path = category_dir / new_name
+        counter = 1
+        while new_path.exists() and new_path != p:
+            new_name = f"{slug}-{counter}{p.suffix.lower()}"
+            new_path = category_dir / new_name
+            counter += 1
+        if new_path != p:
+            p.rename(new_path)
+            print(f"sync_gallery: renamed {p.name} → {new_name}")
+            renamed += 1
+    return renamed
 
 
 def species_for(filename: str, title: str = ""):
@@ -252,6 +308,15 @@ def main() -> int:
                     existing_by_fname[fname] = entry
         except json.JSONDecodeError:
             print("WARNING: products.json was malformed; starting fresh.", file=sys.stderr)
+
+    # Rename any non-slug filenames to SEO-friendly slugs before syncing.
+    total_renamed = 0
+    for category_dir in sorted(ASSETS_DIR.iterdir()):
+        if category_dir.is_dir() and not category_dir.name.startswith(".") \
+                and category_dir.name in CATEGORIES:
+            total_renamed += _rename_to_seo_slugs(category_dir)
+    if total_renamed:
+        print(f"sync_gallery: auto-renamed {total_renamed} file(s) to SEO slugs")
 
     # Walk one level deep — files must live inside a category subfolder.
     found = []
