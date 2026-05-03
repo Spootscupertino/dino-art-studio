@@ -1,74 +1,87 @@
 #!/usr/bin/env bash
-# Install the launchd agent that watches site/src/assets/gallery/<category>/
-# and runs sync_and_deploy.sh whenever a file is added, removed, or changed.
+# Install two launchd agents:
+#   com.jurassinkart.web-sync      — category folders → Vercel
+#   com.jurassinkart.printify-sync — horizontal/vertical → Printify
 #
-# launchd's WatchPaths does NOT recurse, so each category subfolder must be
-# registered individually.
-#
-# Run once:  tools/install_watcher.sh
-# Uninstall: tools/install_watcher.sh --uninstall
+# Run once:    bash tools/install_watcher.sh
+# Uninstall:   bash tools/install_watcher.sh --uninstall
 
 set -euo pipefail
 
-LABEL="com.jurassinkart.sync-gallery"
-PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
-
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GALLERY_ROOT="$ROOT/site/src/assets/gallery"
-CATEGORIES=(predators herbivores marine aerial flora_arthropods horizontal vertical)
-SCRIPT="$ROOT/tools/sync_and_deploy.sh"
 LOG_DIR="$ROOT/tools/logs"
+AGENTS_DIR="$HOME/Library/LaunchAgents"
+
+WEB_LABEL="com.jurassinkart.web-sync"
+PRINTIFY_LABEL="com.jurassinkart.printify-sync"
+WEB_PLIST="$AGENTS_DIR/$WEB_LABEL.plist"
+PRINTIFY_PLIST="$AGENTS_DIR/$PRINTIFY_LABEL.plist"
+
+WEB_CATEGORIES=(predators herbivores marine aerial flora_arthropods)
+PRINTIFY_CATEGORIES=(horizontal vertical)
+ALL_CATEGORIES=("${WEB_CATEGORIES[@]}" "${PRINTIFY_CATEGORIES[@]}")
+
+# ---------- uninstall ----------
 
 if [ "${1:-}" = "--uninstall" ]; then
-  if [ -f "$PLIST" ]; then
-    launchctl unload "$PLIST" 2>/dev/null || true
-    rm "$PLIST"
-    echo "Uninstalled $LABEL"
-  else
-    echo "No agent installed at $PLIST"
-  fi
+  for plist in "$WEB_PLIST" "$PRINTIFY_PLIST"; do
+    if [ -f "$plist" ]; then
+      launchctl unload "$plist" 2>/dev/null || true
+      rm "$plist"
+      echo "Uninstalled: $(basename "$plist" .plist)"
+    fi
+  done
   exit 0
 fi
 
+# ---------- pre-flight ----------
+
 if [ ! -d "$GALLERY_ROOT" ]; then
-  echo "ERROR: gallery root $GALLERY_ROOT not found." >&2
+  echo "ERROR: $GALLERY_ROOT not found." >&2
   exit 1
 fi
 
-# Make sure every category subfolder exists so launchd can attach a watch.
-for cat in "${CATEGORIES[@]}"; do
+for cat in "${ALL_CATEGORIES[@]}"; do
   mkdir -p "$GALLERY_ROOT/$cat"
 done
 
-mkdir -p "$LOG_DIR" "$(dirname "$PLIST")"
-chmod +x "$SCRIPT" "$ROOT/tools/sync_gallery.py"
+mkdir -p "$LOG_DIR" "$AGENTS_DIR"
+chmod +x "$ROOT/tools/web_sync.sh" "$ROOT/tools/printify_sync.sh"
 
-# Stop any previous version before rewriting the plist.
-launchctl unload "$PLIST" 2>/dev/null || true
+# ---------- helper: write one plist ----------
 
-# Build the WatchPaths XML block.
-WATCH_PATHS_XML=""
-for cat in "${CATEGORIES[@]}"; do
-  WATCH_PATHS_XML+="    <string>$GALLERY_ROOT/$cat</string>"$'\n'
-done
+write_plist() {
+  local plist="$1"
+  local label="$2"
+  local script="$3"
+  shift 3
+  local watch_dirs=("$@")
 
-cat > "$PLIST" <<EOF
+  launchctl unload "$plist" 2>/dev/null || true
+
+  local watch_xml=""
+  for dir in "${watch_dirs[@]}"; do
+    watch_xml+="    <string>$dir</string>"$'\n'
+  done
+
+  cat > "$plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>$LABEL</string>
+  <string>$label</string>
 
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
-    <string>$SCRIPT</string>
+    <string>$script</string>
   </array>
 
   <key>WatchPaths</key>
   <array>
-${WATCH_PATHS_XML}  </array>
+${watch_xml}  </array>
 
   <key>RunAtLoad</key>
   <false/>
@@ -93,14 +106,42 @@ ${WATCH_PATHS_XML}  </array>
 </plist>
 EOF
 
-launchctl load "$PLIST"
+  launchctl load "$plist"
+}
 
-echo "Installed: $LABEL"
-echo "Watching:"
-for cat in "${CATEGORIES[@]}"; do
-  echo "  $GALLERY_ROOT/$cat"
+# ---------- install web-sync agent ----------
+
+WEB_WATCH_DIRS=()
+for cat in "${WEB_CATEGORIES[@]}"; do
+  WEB_WATCH_DIRS+=("$GALLERY_ROOT/$cat")
 done
-echo "Logs:      $LOG_DIR/sync.log"
+write_plist "$WEB_PLIST" "$WEB_LABEL" "$ROOT/tools/web_sync.sh" "${WEB_WATCH_DIRS[@]}"
+
+# ---------- install printify-sync agent ----------
+
+PRINTIFY_WATCH_DIRS=()
+for cat in "${PRINTIFY_CATEGORIES[@]}"; do
+  PRINTIFY_WATCH_DIRS+=("$GALLERY_ROOT/$cat")
+done
+write_plist "$PRINTIFY_PLIST" "$PRINTIFY_LABEL" "$ROOT/tools/printify_sync.sh" "${PRINTIFY_WATCH_DIRS[@]}"
+
+# ---------- summary ----------
+
 echo
-echo "Drop a file into any category subfolder and the gallery will auto-update + deploy."
-echo "Uninstall later with: $0 --uninstall"
+echo "Installed two watchers:"
+echo
+echo "  $WEB_LABEL"
+echo "  → Website pipeline (slug rename + products.json + Vercel push)"
+for cat in "${WEB_CATEGORIES[@]}"; do
+  echo "    $GALLERY_ROOT/$cat"
+done
+echo "  Log: $LOG_DIR/web_sync.log"
+echo
+echo "  $PRINTIFY_LABEL"
+echo "  → Printify pipeline (slug rename + dry-run plan)"
+for cat in "${PRINTIFY_CATEGORIES[@]}"; do
+  echo "    $GALLERY_ROOT/$cat"
+done
+echo "  Log: $LOG_DIR/printify_sync.log"
+echo
+echo "Uninstall: bash tools/install_watcher.sh --uninstall"

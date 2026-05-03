@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-# Sync site/src/data/products.json with files in site/src/assets/gallery/.
-# - Adds entries for new images and videos
-# - Removes entries for files that no longer exist
-# - Idempotent (safe to run repeatedly)
-# - Emits SEO-rich metadata: alt, description, keywords, scientific_name, era
+"""sync_gallery.py — Website sync pipeline.
+
+Rebuilds site/src/data/products.json from the five gallery category folders.
+Runs after slug_rename.py has already cleaned up filenames.
+
+Drop a sidecar .txt file alongside any image to add a custom sentence that
+appears on the product page and helps Google distinguish the listing:
+  predators/velociraptor-hunting-pack.png
+  predators/velociraptor-hunting-pack.txt   <- one sentence, plain text
+"""
 
 import json
 import re
@@ -20,13 +25,10 @@ REFS_BEST_DIR = ROOT / "refs" / "gallery_best"
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 VIDEO_EXTS = {".mp4", ".webm", ".mov"}
 
-# Categories are derived from the subfolder under site/src/assets/gallery/.
-# horizontal/ and vertical/ are "best-of" website display folders — images dropped
-# there are also mirrored into refs/gallery_best/ to seed future MJ --sref pools.
-CATEGORIES = {"predators", "herbivores", "marine", "aerial", "flora_arthropods",
-               "horizontal", "vertical"}
+# Website categories only. horizontal/ and vertical/ are Printify-only drops.
+CATEGORIES = {"predators", "herbivores", "marine", "aerial", "flora_arthropods"}
 
-# Every gallery image mirrors to refs/gallery_best/ as an --sref candidate.
+# All website images mirror to refs/gallery_best/ as --sref candidates.
 REFS_MIRROR_CATEGORIES = CATEGORIES
 
 # Species metadata supplies scientific_name / era / traits per species.
@@ -110,15 +112,6 @@ SPECIES_META = {
 }
 
 UUID_PATTERN = re.compile(r"_[a-f0-9]{8,}(-[a-f0-9-]+)?$")
-FILLER = {
-    "spootscupertino", "the", "of", "with", "and", "a", "an", "in", "on",
-    "at", "to", "from", "macro", "extreme", "massive", "large", "small",
-    "huge", "feathered", "scientifically", "accurate", "image", "generated",
-    "gemini", "close", "up", "deta", "details", "photo", "render",
-}
-
-# A slug is all-lowercase with only hyphens, 3–60 chars.
-_SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{2,59}$")
 
 DEFAULT_META = {"scientific_name": "Dinosauria", "era": "Mesozoic", "traits": "prehistoric creature"}
 
@@ -128,62 +121,7 @@ CATEGORY_LABELS = {
     "aerial": "Aerial Paleoart",
     "marine": "Marine Paleoart",
     "flora_arthropods": "Prehistoric Flora and Arthropods",
-    "horizontal": "Best Of — Landscape",
-    "vertical": "Best Of — Portrait",
 }
-
-
-def _make_seo_slug(path: Path) -> str:
-    """Build an SEO slug from species detection + descriptive words in the filename.
-
-    Result: lowercase, hyphen-separated, max 6 words, no UUIDs or filler.
-    Example: "velociraptor-feathered-raptor-hunting-pack"
-    """
-    stem = UUID_PATTERN.sub("", path.stem)
-    stem_lower = stem.lower()
-    raw_words = re.split(r"[_\-\s]+", stem_lower)
-    descriptive = [w for w in raw_words if w and w not in FILLER and not re.fullmatch(r"\d+", w)]
-
-    sp, _ = species_for(path.name)
-    if sp:
-        sp_words = re.split(r"[\s]+", sp)
-        extra = [w for w in descriptive if w not in sp_words]
-        slug_words = sp_words + extra[:3]
-    else:
-        slug_words = descriptive[:6]
-
-    slug = "-".join(slug_words[:6])
-    slug = re.sub(r"-+", "-", slug).strip("-")
-    return slug or "prehistoric-art"
-
-
-def _rename_to_seo_slugs(category_dir: Path) -> int:
-    """Rename non-slug image files in category_dir to SEO-friendly slugs.
-
-    Skips files whose stem already matches the slug pattern.
-    Returns the number of files renamed.
-    """
-    renamed = 0
-    for p in sorted(category_dir.iterdir()):
-        if not p.is_file() or p.name.startswith("."):
-            continue
-        if p.suffix.lower() not in IMAGE_EXTS:
-            continue
-        if _SLUG_RE.match(p.stem):
-            continue
-        slug = _make_seo_slug(p)
-        new_name = slug + p.suffix.lower()
-        new_path = category_dir / new_name
-        counter = 1
-        while new_path.exists() and new_path != p:
-            new_name = f"{slug}-{counter}{p.suffix.lower()}"
-            new_path = category_dir / new_name
-            counter += 1
-        if new_path != p:
-            p.rename(new_path)
-            print(f"sync_gallery: renamed {p.name} → {new_name}")
-            renamed += 1
-    return renamed
 
 
 def species_for(filename: str, title: str = ""):
@@ -276,10 +214,25 @@ def get_video_dims(path: Path):
         return 1920, 1080
 
 
+def _read_sidecar(image_path: Path) -> str:
+    """Return the content of a sidecar .txt file if one exists, else empty string.
+
+    Drop velociraptor-hunting-pack.txt alongside velociraptor-hunting-pack.png
+    to add a custom sentence to the product page.
+    """
+    txt = image_path.with_suffix(".txt")
+    if txt.exists():
+        return txt.read_text("utf-8").strip()
+    return ""
+
+
 def build_entry(rel_path: str, category: str, dims: tuple, entry_type: str, existing=None) -> dict:
     sp, meta = species_for(rel_path, (existing or {}).get("title", ""))
     title = (existing or {}).get("title") or derive_title(rel_path)
-    return {
+    custom_note = _read_sidecar(ASSETS_DIR / rel_path)
+    auto_desc = derive_description(title, meta)
+    description = f"{custom_note} {auto_desc}".strip() if custom_note else auto_desc
+    entry = {
         "filename": rel_path,
         "title": title,
         "width": dims[0],
@@ -289,9 +242,12 @@ def build_entry(rel_path: str, category: str, dims: tuple, entry_type: str, exis
         "scientific_name": meta["scientific_name"],
         "era": meta["era"],
         "alt": derive_alt(title, meta),
-        "description": derive_description(title, meta),
+        "description": description,
         "keywords": derive_keywords(title, meta),
     }
+    if custom_note:
+        entry["custom_note"] = custom_note
+    return entry
 
 
 def main() -> int:
@@ -308,15 +264,6 @@ def main() -> int:
                     existing_by_fname[fname] = entry
         except json.JSONDecodeError:
             print("WARNING: products.json was malformed; starting fresh.", file=sys.stderr)
-
-    # Rename any non-slug filenames to SEO-friendly slugs before syncing.
-    total_renamed = 0
-    for category_dir in sorted(ASSETS_DIR.iterdir()):
-        if category_dir.is_dir() and not category_dir.name.startswith(".") \
-                and category_dir.name in CATEGORIES:
-            total_renamed += _rename_to_seo_slugs(category_dir)
-    if total_renamed:
-        print(f"sync_gallery: auto-renamed {total_renamed} file(s) to SEO slugs")
 
     # Walk one level deep — files must live inside a category subfolder.
     found = []
