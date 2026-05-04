@@ -197,6 +197,44 @@ def analyze_with_vision(image_path: str, species: Optional[str]) -> Optional[str
         return None
 
 
+def generate_targeted_followup(dimension: str, score: int, vision_analysis: Optional[str]) -> str:
+    """Generate a context-aware follow-up question based on vision model's analysis."""
+    if not vision_analysis or score >= 7:
+        return FOLLOWUP_HINTS[dimension]
+
+    vision_lower = vision_analysis.lower()
+
+    if dimension == "anatomy":
+        keywords = ["wrist", "tail", "posture", "proportion", "limb", "joint", "spine", "neck", "posture", "bent", "twisted", "dragging", "drooping"]
+        for kw in keywords:
+            if kw in vision_lower:
+                return f"The vision model noted potential issues with {kw}. Is that what you see as the main anatomy problem?"
+        return f"What anatomical issue stands out most? {FOLLOWUP_HINTS[dimension]}"
+
+    if dimension == "accuracy":
+        keywords = ["skull", "feather", "spine", "teeth", "claw", "finger", "build", "wrong", "missing", "extra"]
+        for kw in keywords:
+            if kw in vision_lower:
+                return f"The vision model noticed something about {kw}. Is that the accuracy issue you're seeing?"
+        return f"What's inaccurate about the species depiction? {FOLLOWUP_HINTS[dimension]}"
+
+    if dimension == "realism":
+        keywords = ["texture", "plastic", "smear", "blur", "lighting", "shadow", "quality", "artifact", "noise", "mush"]
+        for kw in keywords:
+            if kw in vision_lower:
+                return f"The analysis mentioned {kw}. Is that the main realism issue?"
+        return f"What affects the realism? {FOLLOWUP_HINTS[dimension]}"
+
+    if dimension == "composition":
+        keywords = ["cut off", "crop", "frame", "centered", "angle", "awkward", "perspective", "placement"]
+        for kw in keywords:
+            if kw in vision_lower:
+                return f"The model noted a composition issue with {kw}. Do you agree?"
+        return f"What's off about the composition? {FOLLOWUP_HINTS[dimension]}"
+
+    return FOLLOWUP_HINTS[dimension]
+
+
 # ─── Scoring ───────────────────────────────────────────────────────────────────
 
 def compute_final_score(scores: Dict[str, int]) -> float:
@@ -282,7 +320,8 @@ def run_interview(image_path: str, species: Optional[str], prompt_id: Optional[i
 
     for key, label, description, _weight in DIMENSIONS:
         print(f"\n  {C.BOLD}{C.TEAL}[{label}]{C.RESET}  {C.dim(description)}")
-        score, notes = ask_score(label, FOLLOWUP_HINTS[key])
+        hint = generate_targeted_followup(key, 10, vision_analysis)  # 10 = always use targeted hints
+        score, notes = ask_score(label, hint)
         scores[key] = score
 
         if notes:
@@ -365,6 +404,11 @@ def run_interview(image_path: str, species: Optional[str], prompt_id: Optional[i
         elif final_score <= 4:
             update_parameter_weights(conn, prompt_id, -1)
 
+    # Display winner settings
+    if is_usable:
+        mj_str = json.dumps(mj_params) if mj_params else None
+        display_winner_settings(conn, prompt_id, final_score, mj_str)
+
     # Archive winners
     if is_usable and prompt_id:
         if ask_yes("Archive this as a winner in the results table?"):
@@ -438,6 +482,271 @@ def show_winners(db_path: Path):
     hr()
 
 
+def display_winner_settings(conn: sqlite3.Connection, prompt_id: Optional[int], final_score: float, mj_params: Optional[str]):
+    """Display the exact prompt settings that produced this winner."""
+    if not prompt_id:
+        # No prompt ID — show what we know about MJ params
+        if mj_params:
+            print(f"\n  {C.BLUE}MJ Generation Params (Logged):{C.RESET}")
+            params_dict = json.loads(mj_params)
+            for key, val in params_dict.items():
+                print(f"    {C.dim(key)}: {C.teal(str(val))}")
+        else:
+            print(f"\n  {C.dim('No prompt ID linked — cannot reconstruct settings.')}")
+        return
+
+    # Fetch prompt and linked parameters
+    prompt = conn.execute("SELECT * FROM prompts WHERE id = ?", (prompt_id,)).fetchone()
+    if not prompt:
+        print(f"\n  {C.dim('Prompt not found in database.')}")
+        return
+
+    parameters = conn.execute(
+        """
+        SELECT parameters.category, parameters.value
+        FROM prompt_parameters
+        JOIN parameters ON prompt_parameters.parameter_id = parameters.id
+        WHERE prompt_parameters.prompt_id = ?
+        ORDER BY parameters.category
+        """,
+        (prompt_id,),
+    ).fetchall()
+
+    # Parse MJ params if present
+    mj_dict = json.loads(mj_params) if mj_params else {}
+
+    print(f"\n  {C.BLUE}📋  Prompt Settings (Winner){C.RESET}")
+    print(f"  {C.DBLUE}{'─' * 50}{C.RESET}")
+
+    # Group parameters by category
+    by_cat: Dict[str, List[str]] = {}
+    for param in parameters:
+        cat = param["category"]
+        if cat not in by_cat:
+            by_cat[cat] = []
+        by_cat[cat].append(param["value"])
+
+    for cat in sorted(by_cat.keys()):
+        values = ", ".join(by_cat[cat])
+        print(f"    {C.blue(f'{cat:<15}')} {C.teal(values)}")
+
+    if mj_dict:
+        print(f"\n  {C.BLUE}MJ Flags:{C.RESET}")
+        for key, val in mj_dict.items():
+            print(f"    {C.dim(f'{key:<15}')} {C.teal(str(val))}")
+
+    # Suggest re-run command
+    print(f"\n  {C.BLUE}🔄  To re-run or iterate:{C.RESET}")
+    cmd_parts = ["python generate_prompt.py", f"--species {prompt['title'].lower()}"]
+    for cat, values in sorted(by_cat.items()):
+        val = values[0]  # Use first for simplicity
+        cmd_parts.append(f"--{cat.lower()} {val}")
+    if mj_dict.get("stylize"):
+        cmd_parts.append(f"--stylize {mj_dict['stylize']}")
+    if mj_dict.get("chaos") and mj_dict["chaos"] != "0":
+        cmd_parts.append(f"--chaos {mj_dict['chaos']}")
+
+    print(f"    {C.dim(' '.join(cmd_parts))}")
+    print()
+
+
+def auto_log_curated_image(conn: sqlite3.Connection, image_path: str, species: str, category: str, prompt_id: Optional[int] = None) -> Dict:
+    """Auto-log images from horizontal/vertical folders as high-quality (9.0)."""
+    ensure_table(conn)
+
+    # Insert feedback session with auto 9.0 score
+    conn.execute(
+        """
+        INSERT INTO feedback_sessions
+            (image_path, species, prompt_id, score_anatomy, score_accuracy,
+             score_realism, score_composition, final_score, is_usable, vision_analysis, mj_params)
+        VALUES (?, ?, ?, 9, 9, 9, 9, 9.0, 1, ?, ?)
+        """,
+        (image_path, species, prompt_id, f"Auto-curated from {category}/", None),
+    )
+    conn.commit()
+    session_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+    # Update parameter weights if prompt_id is known
+    if prompt_id:
+        update_parameter_weights(conn, prompt_id, +1)
+
+    # Archive to results table
+    conn.execute(
+        "INSERT OR IGNORE INTO results (prompt_id, image_path, rating) VALUES (?, ?, ?)",
+        (prompt_id, image_path, 4),  # rating = 4 (9.0 / 2, rounded)
+    )
+    conn.commit()
+
+    return {
+        "session_id": session_id,
+        "final_score": 9.0,
+        "species": species,
+        "image_path": image_path,
+        "prompt_id": prompt_id,
+    }
+
+
+def show_trends(db_path: Path, species: str, category_filter: Optional[str] = None, min_score: float = 8.0):
+    conn = get_db(db_path)
+    ensure_table(conn)
+
+    # Get winning prompts for species
+    prompts = conn.execute(
+        """
+        SELECT DISTINCT prompts.id, feedback_sessions.final_score
+        FROM feedback_sessions
+        JOIN prompts ON feedback_sessions.prompt_id = prompts.id
+        WHERE feedback_sessions.species LIKE ? AND feedback_sessions.final_score >= ?
+        ORDER BY feedback_sessions.final_score DESC
+        """,
+        (f"%{species}%", min_score),
+    ).fetchall()
+
+    if not prompts:
+        print(f"  {C.dim(f'No winning prompts found for "{species}" (score ≥ {min_score}).')}")
+        return
+
+    # Collect all parameters used in winning prompts
+    param_stats: Dict[str, Dict[str, any]] = {}
+    for prompt_row in prompts:
+        prompt_id = prompt_row["id"]
+        final_score = prompt_row["final_score"]
+
+        params = conn.execute(
+            """
+            SELECT parameters.category, parameters.value, parameters.id
+            FROM prompt_parameters
+            JOIN parameters ON prompt_parameters.parameter_id = parameters.id
+            WHERE prompt_parameters.prompt_id = ?
+            """,
+            (prompt_id,),
+        ).fetchall()
+
+        for param in params:
+            category = param["category"]
+            value = param["value"]
+            key = f"{category}:{value}"
+
+            if key not in param_stats:
+                param_stats[key] = {"category": category, "value": value, "wins": 0, "total_score": 0.0}
+
+            param_stats[key]["wins"] += 1
+            param_stats[key]["total_score"] += final_score
+
+    if not param_stats:
+        print(f"  {C.dim(f'No parameter data for winning prompts.')}")
+        return
+
+    # Group by category
+    by_category: Dict[str, list] = {}
+    for key, stats in param_stats.items():
+        cat = stats["category"]
+        if cat not in by_category:
+            by_category[cat] = []
+        stats["avg_score"] = round(stats["total_score"] / stats["wins"], 2)
+        by_category[cat].append(stats)
+
+    # Sort each category by wins (descending)
+    for cat in by_category:
+        by_category[cat].sort(key=lambda x: x["wins"], reverse=True)
+
+    # Render
+    banner([C.header(f"📊  TRENDS: {species}")
+            + f"  {C.dim(f'({len(prompts)} winning prompts)')}"
+            ])
+
+    for category in sorted(by_category.keys()):
+        if category_filter and category_filter.lower() != category.lower():
+            continue
+
+        print(f"\n  {C.BOLD}{C.BLUE}{category.title()}{C.RESET}")
+        print(f"  {C.DBLUE}{'─' * 50}{C.RESET}")
+
+        for stats in by_category[category][:10]:  # Top 10 per category
+            value = stats["value"]
+            wins = stats["wins"]
+            avg = stats["avg_score"]
+            bar_len = min(20, wins * 2)
+            bar = f"{C.TEAL}{'█' * bar_len}{C.RESET}"
+
+            print(f"    {C.teal(f'{value:<25}')} {wins:2d} wins (avg {avg:.1f})  {bar}")
+
+    hr()
+
+
+# ─── Auto-logging curated images ──────────────────────────────────────────────
+
+def extract_species_from_filename(filename: str) -> Optional[str]:
+    """Extract species name from a slug filename using pattern matching."""
+    # Species keys ordered longest-first (same as slug_rename.py)
+    species_keys = [
+        "tyrannosaurus rex", "tyrannosaurus", "t-rex", "t rex", "trex",
+        "triceratops", "stegosaurus", "velociraptor", "carnotaurus", "dilophosaurus",
+        "brachiosaurus", "allosaurus", "spinosaurus", "apatosaurus", "iguanodon",
+        "parasaurolophus", "ankylosaurus", "pachycephalosaurus", "deinonychus",
+        "utahraptor", "diplodocus", "gallimimus", "oviraptor", "therizinosaurus",
+        "compsognathus", "dimetrodon", "smilodon", "mammoth", "pteranodon",
+        "quetzalcoatlus", "archaeopteryx", "rhamphorhynchus", "pterodactyl",
+        "pterodactylus", "pterosaur", "dimorphodon", "liopleurodon", "ammonite",
+        "plesiosaurus", "mosasaurus", "ichthyosaurus", "megalodon", "elasmosaurus",
+        "kronosaurus", "pliosaurus", "dunkleosteus", "nautilus", "shark", "whale",
+        "lepidodendron", "trilobite", "anomalocaris", "meganeura", "arthropleura",
+        "pulmonoscorpius",
+    ]
+
+    haystack = filename.lower()
+    for species_key in species_keys:
+        if species_key in haystack:
+            return species_key.replace("-", " ").title()
+    return None
+
+
+def auto_log_folder(db_path: Path, folder_path: str):
+    """Auto-log all images in horizontal/ or vertical/ as 9.0 winners."""
+    folder = Path(folder_path)
+    if not folder.exists() or not folder.is_dir():
+        print(f"  {C.red('Error:')} folder not found: {folder}")
+        return
+
+    conn = get_db(db_path)
+    ensure_table(conn)
+
+    # Find all image files
+    image_exts = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+    images = [f for f in folder.iterdir() if f.suffix.lower() in image_exts]
+
+    if not images:
+        print(f"  {C.dim(f'No images found in {folder.name}/')}")
+        return
+
+    category = folder.name  # "horizontal" or "vertical"
+    logged = 0
+
+    print(f"\n  {C.blue(f'Auto-logging {len(images)} curated image(s) from {category}/')}\n")
+
+    for image_file in sorted(images):
+        species = extract_species_from_filename(image_file.stem)
+        if not species:
+            print(f"    {C.yellow('⚠')} {image_file.name}  {C.dim('(species not detected, skipping)')}")
+            continue
+
+        try:
+            result = auto_log_curated_image(conn, str(image_file), species, category, prompt_id=None)
+            print(f"    {C.green('✓')} {image_file.name}")
+            sp = result["species"]
+            sc = result["final_score"]
+            sid = result["session_id"]
+            print(f"      {C.dim(f'Species: {sp} | Score: {sc} | Session: #{sid}')}")
+            logged += 1
+        except Exception as e:
+            print(f"    {C.red('✗')} {image_file.name}  {C.dim(str(e))}")
+
+    if logged > 0:
+        print(f"\n  {C.green(f'✓  Logged {logged} curated image(s)')}")
+    print()
+
+
 # ─── Entry point ───────────────────────────────────────────────────────────────
 
 def main():
@@ -451,6 +760,8 @@ Examples:
   python feedback_agent.py --history
   python feedback_agent.py --history --species trex
   python feedback_agent.py --winners
+  python feedback_agent.py --trends velociraptor
+  python feedback_agent.py --trends trex --category lighting
         """,
     )
     parser.add_argument("image", nargs="?", help="Path to image file to review")
@@ -459,11 +770,18 @@ Examples:
     parser.add_argument("--db", default=str(DB_DEFAULT), help="Path to SQLite database")
     parser.add_argument("--history", action="store_true", help="Show past feedback sessions")
     parser.add_argument("--winners", action="store_true", help="Show winning images (score ≥ 8)")
+    parser.add_argument("--trends", metavar="SPECIES", help="Show parameter trends for a species (winners only)")
+    parser.add_argument("--category", help="Filter trends by parameter category (lighting, camera, mood, etc.)")
+    parser.add_argument("--auto-log", metavar="FOLDER", help="Auto-log curated images from horizontal/ or vertical/ folder (internal use)")
 
     args = parser.parse_args()
     db_path = Path(args.db)
 
-    if args.history:
+    if args.auto_log:
+        auto_log_folder(db_path, args.auto_log)
+    elif args.trends:
+        show_trends(db_path, args.trends, args.category)
+    elif args.history:
         show_history(db_path, args.species)
     elif args.winners:
         show_winners(db_path)

@@ -28,6 +28,10 @@ LOG="$LOG_DIR/printify_sync.log"
     site/src/assets/gallery/horizontal \
     site/src/assets/gallery/vertical
 
+  echo "--- Auto-logging curated images to feedback loop ---"
+  python3 feedback_agent.py --auto-log site/src/assets/gallery/horizontal
+  python3 feedback_agent.py --auto-log site/src/assets/gallery/vertical
+
   echo "--- Printify dry-run plan ---"
   python3 printify/printify_publisher.py --dry-run 2>&1 || true
 
