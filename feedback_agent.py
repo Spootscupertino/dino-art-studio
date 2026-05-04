@@ -535,8 +535,37 @@ def display_winner_settings(conn: sqlite3.Connection, prompt_id: Optional[int], 
         for key, val in mj_dict.items():
             print(f"    {C.dim(f'{key:<15}')} {C.teal(str(val))}")
 
+    # Display full prompt for copy-paste
+    if prompt["positive_prompt"]:
+        print(f"\n  {C.BLUE}📝  Full Prompt (copy-paste to MJ):{C.RESET}")
+        print(f"  {C.DBLUE}{'─' * 50}{C.RESET}")
+        for line in prompt["positive_prompt"].split("\n"):
+            if line.strip():
+                print(f"    {C.teal(line)}")
+        print()
+
+    # Display MJ command with all flags
+    print(f"  {C.BLUE}🚀  MJ Command (flags only):{C.RESET}")
+    mj_flags = []
+    if mj_dict.get("stylize"):
+        mj_flags.append(f"--stylize {mj_dict['stylize']}")
+    if mj_dict.get("chaos") and mj_dict["chaos"] != "0":
+        mj_flags.append(f"--chaos {mj_dict['chaos']}")
+    if mj_dict.get("aspect_ratio"):
+        mj_flags.append(f"--ar {mj_dict['aspect_ratio']}")
+    if mj_dict.get("quality"):
+        mj_flags.append(f"--quality {mj_dict['quality']}")
+    if mj_dict.get("sref"):
+        mj_flags.append(f"--sref {mj_dict['sref']}")
+
+    if mj_flags:
+        flags_str = " ".join(mj_flags)
+        print(f"    {C.teal(flags_str)}")
+    else:
+        print(f"    {C.dim('(no MJ flags logged)')}")
+
     # Suggest re-run command
-    print(f"\n  {C.BLUE}🔄  To re-run or iterate:{C.RESET}")
+    print(f"\n  {C.BLUE}🔄  To regenerate with same settings:{C.RESET}")
     cmd_parts = ["python generate_prompt.py", f"--species {prompt['title'].lower()}"]
     for cat, values in sorted(by_cat.items()):
         val = values[0]  # Use first for simplicity
