@@ -366,13 +366,61 @@ def run_interview(image_path: str, species: Optional[str], prompt_id: Optional[i
         print(f"  {C.dim('Discarded.')}\n")
         return
 
-    # Optional MJ params
+    # Optional MJ params — paste the command/prompt and we'll extract them
     mj_params: Dict[str, str] = {}
-    if ask_yes("Log MJ generation params? (stylize/chaos/ar/version)", default_yes=False):
-        for param in ["mj_version", "stylize", "chaos", "aspect_ratio", "sref"]:
-            val = input(f"    {C.dim(param)}: ").strip()
-            if val:
-                mj_params[param] = val
+    if ask_yes("Log MJ params? (paste the full command/prompt)", default_yes=False):
+        hint = "Paste the full MJ command or prompt (we'll extract stylize/chaos/ar/sref/version):"
+        print(f"  {C.dim(hint)}")
+        pasted = input(f"  {C.TEAL}›{C.RESET} ").strip()
+
+        if pasted:
+            # Extract MJ flags from pasted text
+            import re
+
+            # --stylize NUMBER
+            match = re.search(r'--stylize\s+(\d+)', pasted)
+            if match:
+                mj_params["stylize"] = match.group(1)
+
+            # --chaos NUMBER
+            match = re.search(r'--chaos\s+(\d+)', pasted)
+            if match:
+                mj_params["chaos"] = match.group(1)
+
+            # --ar RATIO (e.g. 16:9, 3:2)
+            match = re.search(r'--ar\s+([\d:]+)', pasted)
+            if match:
+                mj_params["aspect_ratio"] = match.group(1)
+
+            # --quality VALUE
+            match = re.search(r'--quality\s+([\d.]+)', pasted)
+            if match:
+                mj_params["quality"] = match.group(1)
+
+            # --sref URL
+            match = re.search(r'--sref\s+(\S+)', pasted)
+            if match:
+                mj_params["sref"] = match.group(1)
+
+            # --style raw/default
+            match = re.search(r'--style\s+(\w+)', pasted)
+            if match:
+                mj_params["style"] = match.group(1)
+
+            # MJ version (e.g. niji 6, 6.1, turbo)
+            match = re.search(r'--niji\s+(\d+)|--v\s+([\d.]+)|(niji\s+\d+|turbo)', pasted)
+            if match:
+                if match.group(1):
+                    mj_params["mj_version"] = f"niji {match.group(1)}"
+                elif match.group(2):
+                    mj_params["mj_version"] = match.group(2)
+                elif match.group(3):
+                    mj_params["mj_version"] = match.group(3)
+
+            if mj_params:
+                print(f"\n  {C.green('✓')} Extracted {len(mj_params)} MJ params:")
+                for key, val in mj_params.items():
+                    print(f"      {C.dim(key)}: {C.teal(val)}")
 
     # Write to DB
     conn.execute(
