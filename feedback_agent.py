@@ -633,7 +633,8 @@ def show_trends(db_path: Path, species: str, category_filter: Optional[str] = No
     ).fetchall()
 
     if not prompts:
-        print(f"  {C.dim(f'No winning prompts found for "{species}" (score ≥ {min_score}).')}")
+        msg = f'No winning prompts found for "{species}" (score ≥ {min_score}).'
+        print(f"  {C.dim(msg)}")
         return
 
     # Collect all parameters used in winning prompts
