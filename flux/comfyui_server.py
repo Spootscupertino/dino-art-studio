@@ -11,10 +11,14 @@ Usage:
 import argparse
 import json
 import asyncio
+import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
 import torch
+
+# Allow `python flux/comfyui_server.py` to resolve the `flux` package
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from fastapi import FastAPI, WebSocket, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse, HTMLResponse
