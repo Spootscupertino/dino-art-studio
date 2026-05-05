@@ -1,0 +1,15 @@
+{
+  "Tyrannosaurus": [
+    {
+      "prompt": "Test T-rex prompt",
+      "mj_flags": {
+        "stylize": 500,
+        "chaos": 25
+      },
+      "score": 9.2,
+      "session_id": 1,
+      "timestamp": "2026-05-05T12:00:00",
+      "anatomy_analysis": "Correct proportions: massive 2-fingered hands, powerful hindquarters, correct tooth structure, balanced skull, proper tail posture for locomotion."
+    }
+  ]
+}

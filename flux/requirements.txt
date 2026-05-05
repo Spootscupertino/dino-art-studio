@@ -1,0 +1,36 @@
+# M1 Mac mini (24GB unified memory) optimized dependencies
+# Install with: pip install -r flux/requirements.txt
+
+# Core image generation
+torch>=2.1.0  # Uses Metal acceleration on M1
+torchvision>=0.16.0
+transformers>=4.34.0
+diffusers>=0.21.0
+safetensors>=0.4.0
+pillow>=10.0.0
+
+# LoRA training
+peft>=0.4.0
+datasets>=2.14.0
+accelerate>=0.24.0
+
+# ComfyUI & server
+fastapi>=0.104.0
+uvicorn>=0.24.0
+python-multipart>=0.0.6
+
+# Utilities
+click>=8.1.7
+tqdm>=4.66.0
+numpy>=1.24.0
+opencv-python>=4.8.0
+Pillow>=10.0.0
+
+# Optional: Model optimization
+
+# Optional: Quantization (if needed for memory)
+# bitsandbytes>=0.41.0  # May not work well on M1
+
+# Development
+pytest>=7.4.0
+black>=23.10.0

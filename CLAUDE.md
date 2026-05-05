@@ -8,6 +8,7 @@ This is the *index file*. It points at five domains, each with its own CLAUDE.md
 
 | Path | Owner | What lives there |
 |---|---|---|
+| [`flux/`](./flux/CLAUDE.md) ⭐ **NEW** | `prompt-crafter` | **Local Flux-dev generation** — M1-optimized image generation with LoRA fine-tuning + branded ComfyUI. This is now the star: most realistic dinosaur images, completely under your control. |
 | [`mj/`](./mj/CLAUDE.md) *(coming Phase 4)* | `prompt-crafter` | Midjourney prompt assembly: `generate_prompt.py` (currently at root), `species/`, anatomy modules. |
 | [`refs/`](./refs/CLAUDE.md) *(coming Phase 3)* | `ref-curator` | Reference image library: paleoart / skeletal / wildlife `--sref` and `--cref` JSONs (currently at root). |
 | [`db/`](./db/CLAUDE.md) *(coming Phase 5)* | `mj-logger` | SQLite schema + A/B test logging (currently `setup_db.py` and `dino_art.db` at root). |
@@ -19,6 +20,13 @@ This is the *index file*. It points at five domains, each with its own CLAUDE.md
 
 Every handoff is a **file or DB row**, never a Python import across domains.
 
+**Generation pipeline (new):**
+- `unified_feedback.py` rates image (8+) → `winners.json` + LLaVA anatomy analysis
+- `flux/train_lora.py` reads `winners.json` → fine-tunes `flux/loras/dino_winners.safetensors`
+- `flux/generate_image.py` or `flux/comfyui_server.py` reads LoRA + `generate_prompt.py` output → generates image
+- Generated images → `assets/gallery/flux/` (same contract as MJ)
+
+**Original pipeline (unchanged):**
 - `refs/*.json` → `mj/generate_prompt.py` (read-only)
 - `mj/generate_prompt.py` → stdout (you paste into Midjourney)
 - (you drop image) → `site/src/assets/gallery/<category>/*.png`

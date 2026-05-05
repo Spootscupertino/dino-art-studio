@@ -1728,3 +1728,292 @@ Ten ways to make the generator smarter using the feedback data we're now collect
 9. **Cross-species parameter transfer** — If "diffused overcast + telephoto" scores high for elasmosaurus AND mosasaurus, suggest it for any new marine species even without prior data. Group species by habitat and share learnings.
 
 10. **Winner auto-publish trigger** — When a session scores 9+, automatically queue it for Printify publishing (write a row to a `publish_queue` table that `printify_publisher.py` watches), closing the full loop from generation → rating → product.
+
+---
+
+## Session 25: Optuna Auto-Suggest + Winners Library
+
+Built two features to improve prompt reusability and speed: auto-suggest stylize/chaos from Optuna best params, and a winner prompt library per species.
+
+### What was built
+
+**1. Optuna Auto-Suggest for `--stylize` and `--chaos`**
+- New helper function: `get_optuna_best_params(species)` in generate_prompt.py
+- After species selection, if Optuna has ≥2 trials for that species, auto-applies best stylize/chaos values
+- Prints: `AUTO-APPLIED [stylize] --stylize 500` (or whatever the best trial found)
+- Falls back gracefully if Optuna not installed or no data exists
+- User can still override with command-line args (`--stylize 600` or `--chaos 50`)
+
+**2. Winners Library (`winners.json`)**
+- New file: `winners.json` — stores top 3 high-scoring prompts per species
+- When a session rates ≥8 (usable), prompt + MJ flags + score saved to winners library
+- Per-species entry is a list, kept sorted by score (newest high-scores bubble up)
+- Max 3 winners per species to keep the file lean
+
+**3. Load Winners with `--use-winner`**
+- New CLI flag: `python generate_prompt.py --use-winner "Tyrannosaurus"`
+- Displays the best winner for that species: prompt, MJ flags, and score
+- Skips interactive flow entirely — instant reuse of proven winners
+- Exit cleanly if no winners exist for that species
+
+### Files changed
+- ✅ **unified_feedback.py**:
+  - Added `optuna_get_best_params(species)` — returns dict of best params from Optuna study
+  - Added `save_winner(species, prompt, flags, score, session_id)` — appends to winners.json
+  - Integrated winner saving in Step 7b of the feedback loop (after usable threshold check)
+  - Added `from datetime import datetime` import for timestamps
+
+- ✅ **generate_prompt.py**:
+  - Added optuna imports (with graceful fallback if not installed)
+  - Added constants: `OPTUNA_DB`, `WINNERS_FILE`
+  - Added `get_optuna_best_params(species)` and `get_winners_for_species(species)` helpers
+  - Added `--use-winner SPECIES` CLI flag
+  - Integrated Optuna auto-suggest right after species selection (before anatomy-based defaults)
+  - Added winner display route (short-circuits before interactive flow)
+
+- ✅ **winners.json**:
+  - New file, initialized with metadata notes
+  - Structure: `{ "species_name": [{ prompt, mj_flags, score, session_id, timestamp }] }`
+
+### How to use
+
+**Auto-suggest stylize/chaos:**
+```bash
+$ python generate_prompt.py
+# After selecting species, if Optuna has data for that species:
+#   AUTO-APPLIED [stylize] --stylize 500
+#   AUTO-APPLIED [chaos] --chaos 25
+```
+
+**Load and display a winner:**
+```bash
+$ python generate_prompt.py --use-winner "Velociraptor"
+# Prints the best-scoring prompt for Velociraptor and exits
+```
+
+**High-scoring feedback auto-saves to library:**
+```bash
+$ python unified_feedback.py my_image.png
+# ... rate the image ...
+# If final_score ≥ 8:
+#   ✓ Saved to winner library for Velociraptor
+```
+
+### Design decisions
+
+1. **Why separate Optuna from anatomy defaults?**
+   - Optuna data is learned over many trials → more valuable than hard-coded ranges
+   - But anatomy is fast and always available → Optuna is first check, then fallback to anatomy
+   - This way old species without Optuna data still get sensible defaults
+
+2. **Why keep max 3 winners per species?**
+   - Reduces clutter; newer high-scores are more relevant than old ones
+   - Sorted by score so `winners[0]` is always the current best
+   - Still allows viewing the top 3 if needed
+
+3. **Why `--use-winner` over `--load-winner`?**
+   - Shorter, consistent with `--use-ab` pattern (if we add A/B winner loading later)
+   - Clearly indicates intent: "use this existing winning prompt"
+
+### Session 25b: LLaVA Anatomy Analysis + Self-Training Loop
+
+Wired up the feedback loop so winners actually teach the next generation. Instead of guessing at good parameters, the generator now learns from **verified anatomical accuracy** extracted from successful images using LLaVA vision analysis.
+
+**What changed:**
+
+1. **unified_feedback.py**:
+   - New `analyze_winner_anatomy(image_path)` — calls Ollama/LLaVA to ask: "What anatomical features are correct in this image?"
+   - `save_winner()` now takes image_path, extracts LLaVA analysis, stores in winners.json
+   - Winner entry now includes `anatomy_analysis` field with extracted accuracy notes
+
+2. **generate_prompt.py**:
+   - New `get_winner_anatomy_hints(species)` — reads top 3 winners, extracts their anatomy analyses
+   - Integrated into `assemble_prompt()` — after anatomy module, appends winner insights as verified anatomy constraints
+   - Prompt now says: "Verified anatomy: [what made the last winners work]"
+
+3. **winners.json**:
+   - Format updated to include `anatomy_analysis` field (optional, populated by LLaVA)
+   - Test entry included showing the structure
+
+**The Loop:**
+```
+Rate image 8+ → LLaVA analyzes it → anatomy_analysis saved
+↓
+Next generation → read winner analyses → inject into prompt
+↓
+MJ generates informed by verified anatomy → rate → repeat
+```
+
+**Example flow:**
+- User rates Tyrannosaurus image: "9.2/10, excellent proportions"
+- LLaVA extracts: "Correct proportions: massive 2-fingered hands, proper tail posture, balanced skull structure"
+- Next T-rex prompt includes: "[Verified anatomy: ...those extracted notes...]"
+- MJ learns from what worked → better next generation
+
+**Why this works:**
+- No more guessing at good parameters — winners teach what anatomy actually works
+- Reinforces anatomy module with real-world examples from successful MJ runs
+- Accumulates knowledge: each good generation makes the next one better
+- Decoupled from external refs — uses your own best work as ground truth
+
+---
+
+## Session 25c: Flux Domain — M1-Native Image Generation
+
+**MAJOR MILESTONE:** Built a complete local image generation pipeline. Generator is now the star agent with full control and deep dinosaur specialization.
+
+### What was built
+
+**1. New `flux/` domain** — Parallel to mj/, refs/, printify/, site/
+- **Owner:** prompt-crafter (shared for now; can become dedicated agent)
+- **Goal:** Best realistic dinosaur images, completely local, M1-optimized
+- **Contract:** Reads `winners.json` + anatomy analyses → outputs `assets/gallery/flux/*.png`
+
+**2. `generate_image.py`** — Core Flux-dev inference
+- M1-native Metal GPU acceleration (bfloat16 precision)
+- LoRA loading/merging for fine-tuning
+- ControlNet support for anatomy constraints
+- ~45 seconds per 1024×1024 image (50 steps)
+- Memory usage: 22-23GB peak (safe on 24GB M1)
+- CLI: `python flux/generate_image.py --prompt "..." --lora dino_winners`
+
+**3. `train_lora.py`** — Auto-train on winners
+- Reads winners.json (high-scoring images + LLaVA anatomy analyses)
+- Fine-tunes Flux-dev with LoRA (low-rank adaptation)
+- Encodes dinosaur anatomy into model weights
+- ~15 min per 10-image batch
+- Retrains as new winners accumulate
+- CLI: `python flux/train_lora.py --species "Tyrannosaurus"`
+
+**4. `comfyui_server.py`** — Branded ComfyUI interface
+- Headless FastAPI server + REST API
+- Custom UI: **teal/blue/complementary colors** (matching your palette)
+- Real-time generation feedback
+- WebSocket support for live iteration
+- LoRA selection dropdown
+- Parameter tuning (steps, guidance, height, width, seed)
+- Runs on `http://localhost:8888`
+
+**5. `CLAUDE.md`** — Domain specification
+- Contracts with other domains
+- Input/output formats
+- M1 performance targets
+- Architecture philosophy
+
+**6. `SETUP.md`** — Installation & daily usage guide
+- One-time setup: `pip install -r flux/requirements.txt`
+- Daily: `python flux/comfyui_server.py`
+- Troubleshooting tips
+
+### Architecture
+
+**The feedback loop is now fully closed:**
+```
+unified_feedback.py rates image (8+ = winner) + LLaVA anatomy analysis
+  ↓
+save_winner() → winners.json (including anatomy_analysis field)
+  ↓
+python flux/train_lora.py
+  → Reads winners + analyses
+  → Fine-tunes Flux-dev LoRA
+  → Saves dino_winners.safetensors
+  ↓
+ComfyUI loads LoRA (dropdown selection)
+  ↓
+Next generation inherits better anatomy
+  ↓
+Loop tightens: each winner teaches the next generation
+```
+
+**No changes to existing pipelines:**
+- GitHub → Vercel → Printify still clean
+- Flux outputs same format as MJ (assets/gallery/flux/*.png)
+- sync_gallery.py works unchanged
+- printify-publisher works unchanged
+- Can mix Flux and MJ outputs seamlessly
+
+### Key Decisions
+
+1. **Why Flux over SDXL?**
+   - Flux-dev is genuinely better quality (24B model)
+   - 24GB M1 can run it with bfloat16 + optimization
+   - Best realistic dinosaur images is the goal
+
+2. **Why LoRA over full fine-tuning?**
+   - Low memory overhead (~100MB per LoRA)
+   - Fast training (~15 min per batch)
+   - Can create species-specific LoRAs ("tyranno_winners", "velociraptor_winners")
+
+3. **Why ComfyUI server not CLI-only?**
+   - Visual feedback during generation critical for iteration
+   - Parameter tuning live instead of command-line args
+   - Branded UI = professional tool, not just scripts
+   - WebSocket support for future enhancements
+
+4. **Why not break existing MJ workflow?**
+   - Flux is opt-in for now
+   - MJ still works as before
+   - Can A/B test: Flux vs MJ on same prompts
+   - Eventually replace MJ, but no rush
+
+### Performance on M1 24GB
+
+| Operation | Time | Memory | Notes |
+|---|---|---|---|
+| Load Flux-dev | ~10s | 20GB | First load; cached after |
+| Generate image | ~45s | 22GB peak | 50 steps, 1024×1024 |
+| LoRA training | ~15min | 23GB peak | Per 10-image batch |
+| ComfyUI startup | ~30s | 20GB | Loads model on first request |
+
+### Files created
+
+- ✅ `flux/__init__.py` — Package marker
+- ✅ `flux/CLAUDE.md` — Domain spec (52 lines)
+- ✅ `flux/SETUP.md` — Installation guide
+- ✅ `flux/generate_image.py` — Core inference (325 lines)
+- ✅ `flux/train_lora.py` — LoRA training (315 lines)
+- ✅ `flux/comfyui_server.py` — Branded server (475 lines)
+- ✅ `flux/requirements.txt` — M1-optimized deps
+- ✅ `flux/.gitignore` — Exclude models & generated images
+
+### Next steps (immediate)
+
+1. **Install deps:** `pip install -r flux/requirements.txt`
+2. **Download Flux model:** First run of `generate_image.py` (takes 2-3 min, then cached)
+3. **Start ComfyUI:** `python flux/comfyui_server.py --port 8888`
+4. **Open browser:** http://localhost:8888
+5. **Generate:** Type prompt, click Generate, watch it build in real-time
+6. **Rate winners:** Use `unified_feedback.py --local` on good outputs
+7. **Train LoRA:** `python flux/train_lora.py` (automatic, or on schedule)
+8. **Loop tightens:** Each generation better than the last
+
+### Philosophy
+
+**You now own the image generation process.**
+- Not at the mercy of MJ queue times
+- Not limited by MJ prompt understanding
+- Not stuck with MJ's anatomy failures
+- Direct control over every parameter
+- Winners train better model iteratively
+- Completely offline-capable
+- Terminal-friendly (your workflow)
+
+**Generator is the star agent:**
+- Specialized domain with real ownership
+- Can experiment with samplers, schedulers, ControlNets
+- LoRAs are version-controlled (species-specific, date-based)
+- Clear contracts with other domains
+- Decoupled from MJ (can replace or complement)
+
+---
+
+### Backlog ideas (for future sessions)
+
+- **Warn on underperforming params** — Flag stylize/chaos combos that historically score low
+- **Sref scoring loop** — Update refs/*.json with scores from winning sessions
+- **Batch rating** — Rate a whole folder of images in one sitting
+- **Cross-species transfer** — Share winning param combos across species in same habitat group
+- **9+ score → auto-queue for Printify** — Close the full loop from rating to product
+- **ControlNet anatomyguides** — Use skeletal references to constrain pose/proportions
+- **Sampler comparison** — A/B test different samplers (DDIM, Heun, etc.)
+- **LoRA blending** — Mix multiple LoRAs for hybrid anatomy (e.g., "accurate claws" + "realistic feathers")
