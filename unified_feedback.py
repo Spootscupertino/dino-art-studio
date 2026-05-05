@@ -263,20 +263,24 @@ def extract_mj_flags(text: str) -> Dict[str, str]:
 
 
 def paste_prompt() -> str:
-    """Read a multi-line prompt paste; end on blank line."""
-    print(f"\n  {C.BLUE}Paste the MJ prompt:{C.RESET} {C.DIM}(blank line to finish){C.RESET}")
-    lines = []
-    while True:
-        try:
-            line = input("  ")
-            if not line.strip():
-                if lines:
-                    break
-            else:
-                lines.append(line)
-        except EOFError:
-            break
-    return "\n".join(lines).strip()
+    """Read the MJ prompt (blocks until Enter), then clear the screen."""
+    print(f"\n  {C.BLUE}Paste the MJ prompt and press Enter:{C.RESET}")
+    try:
+        line = input("  ").strip()
+    except EOFError:
+        line = ""
+
+    # Flush any extra newlines that snuck in from the paste
+    try:
+        import termios
+        termios.tcflush(sys.stdin, termios.TCIFLUSH)
+    except Exception:
+        pass
+
+    # Clear screen so next prompts aren't buried under the paste wall
+    import os
+    os.system("clear")
+    return line
 
 
 # ─── Vision analysis ─────────────────────────────────────────────────────────────
@@ -472,15 +476,16 @@ def run_interview(image_path: str, db_path: Path):
     section("STEP 1 — MJ PROMPT")
     mj_prompt = paste_prompt()
 
+    print()  # clear visual break after paste
     if not mj_prompt:
         print(f"  {C.dim('No prompt entered — continuing without prompt analysis.')}\n")
         mj_flags  = {}
         species   = None
     else:
+        print(f"  {C.green('✓')} Prompt received ({len(mj_prompt)} chars)")
         mj_flags = extract_mj_flags(mj_prompt)
         species  = extract_species_from_prompt(mj_prompt, conn)
 
-        print()
         if species:
             print(f"  {C.green('✓')} Species detected: {C.teal(species)}")
         if mj_flags:
@@ -694,7 +699,7 @@ def show_trends(db_path: Path, species: str, category_filter: Optional[str]):
     banner([C.header(f"📊  TRENDS: {species}") + f"  {C.dim(f'({len(prompts)} winning prompts)')}"])
 
     if not prompts:
-        print(f"  {C.dim(f'No winning prompts in DB for \"{species}\".')}")
+        print(f"  {C.dim('No winning prompts in DB for ' + repr(species) + '.')}")
     else:
         param_stats: Dict[str, dict] = {}
         for p in prompts:

@@ -1666,3 +1666,65 @@ To close the loop and improve prompt quality autonomously:
 4. **Generator tuning** — Use ratings to suggest/auto-apply best parameter combinations per species
 
 **Focus:** Close the loop. Drop 1 MJ image → log rating → generator learns → next prompt is better.
+
+---
+
+## Session 24 (2026-05-04) — Unified Feedback Workflow
+
+### What we did
+
+The old setup had two separate commands: `analyze` (paste a prompt, see what species/flags were detected) and `feedback` (rate an image). They were disconnected — you had to run them separately and there was no learning between them.
+
+**We merged everything into one command: `feedback path/to/image.png`**
+
+Here's the new flow, start to finish:
+1. You paste the MJ prompt that generated the image → it auto-detects species, stylize, chaos, ar, sref, version
+2. Ollama vision analysis runs if available (optional — skips gracefully if not)
+3. You rate 4 dimensions (anatomy, accuracy, realism, composition) 1–10
+4. Scores below 7 trigger a follow-up: "what's wrong?"
+5. Final weighted score is saved to `dino_art.db`
+6. **Optuna logs the trial** — builds a per-species study tracking which MJ params score highest
+7. Insights auto-display: Optuna best params + top winning param combos from the DB
+
+### Files created
+- **`unified_feedback.py`** — the new single-command feedback workflow
+- **`dino-aliases.sh`** — updated aliases (`feedback`, `winners`, `history`, `trends`, `generate`)
+
+### Files updated
+- **`~/.bash_profile`** — `feedback` function now points to `unified_feedback.py`
+- **`~/.zshrc`** — sources the new `dino-aliases.sh` at project root (not worktree path)
+
+### What we removed
+- `analyze_prompt.py` is now obsolete (its logic lives inside `unified_feedback.py`)
+- Old `dino-aliases.sh` in the worktree path is no longer referenced
+
+### Bugs fixed along the way
+- Long pasted prompts were filling the terminal and making it look frozen → added `os.system("clear")` after paste
+- `~/.bash_profile` had a hardcoded `feedback_agent.py` function that overrode the new alias
+- Nested f-string backslash syntax error (Python < 3.12 doesn't allow `\"` inside f-strings)
+
+---
+
+## Next Session Ideas — Closing the Loop Between Feedback and Generator
+
+Ten ways to make the generator smarter using the feedback data we're now collecting:
+
+1. **Auto-suggest best stylize/chaos for the species** — After you type `generate --species mosasaurus`, look up Optuna's best params for that species and pre-fill `--stylize` and `--chaos` instead of using defaults.
+
+2. **Flag underperforming parameters** — If a lighting or mood combo consistently scores below 6 for a species, print a warning when it's selected: "⚠ 'harsh midday sun' averaged 5.2 for marine species — try 'diffused overcast' instead."
+
+3. **Species-specific winner prompt library** — After 3+ winners for a species, save a "best prompt template" to a JSON file. `generate --species trex --use-winner` loads it as the starting point instead of generating fresh.
+
+4. **Sref feedback loop** — Track which `--sref` URLs appear in winning sessions per species. `refs/paleoart_refs.json` gets a `score` field updated automatically from feedback data.
+
+5. **Negative prompt tuning** — Collect all the "what's wrong?" notes from low scores and auto-build a species-specific `--no` list. If "bent wrists" appears 4 times for T-rex, it gets added to the negative prompt automatically.
+
+6. **Score trend dashboard** — `feedback --dashboard` shows a per-species score history chart in the terminal (ASCII sparklines), so you can see if quality is trending up or down over time.
+
+7. **Generator dry-run mode** — `generate --species mosasaurus --preview` shows the prompt and flags it would use, alongside the Optuna-predicted score ("this combo averaged 8.1 in past sessions") before you commit to sending it to MJ.
+
+8. **Batch rating from a folder** — `feedback --batch ~/Downloads/session_folder/` walks every image in a folder and runs the interview for each. Good for rating a full MJ grid drop in one sitting.
+
+9. **Cross-species parameter transfer** — If "diffused overcast + telephoto" scores high for elasmosaurus AND mosasaurus, suggest it for any new marine species even without prior data. Group species by habitat and share learnings.
+
+10. **Winner auto-publish trigger** — When a session scores 9+, automatically queue it for Printify publishing (write a row to a `publish_queue` table that `printify_publisher.py` watches), closing the full loop from generation → rating → product.
