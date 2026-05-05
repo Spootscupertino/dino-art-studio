@@ -2017,3 +2017,125 @@ Loop tightens: each winner teaches the next generation
 - **ControlNet anatomyguides** — Use skeletal references to constrain pose/proportions
 - **Sampler comparison** — A/B test different samplers (DDIM, Heun, etc.)
 - **LoRA blending** — Mix multiple LoRAs for hybrid anatomy (e.g., "accurate claws" + "realistic feathers")
+
+---
+
+## Session 26 (2026-05-05) — Local Generator Productized + Independence Plan
+
+### What we shipped
+- **DinoGenerator.app** — proper macOS .app bundle on Desktop. Double-click → server starts, browser opens to `localhost:8888`, logs to `flux/server.log`, quit from Dock kills it. Uses generic system icon for now.
+- **Bug fixes that unblocked the UI:**
+  - `C.red` AttributeError in `flux/generate_image.py` (missing color method)
+  - `ModuleNotFoundError: flux` when running `python flux/comfyui_server.py` directly — added `sys.path` bootstrap
+  - Empty seed / "None (base model)" LoRA were posting as literal strings — fixed JS form-data construction
+  - Better HF auth error: detects 401 / GatedRepoError and prints the 3-step setup
+- **Mobile access:** server already binds `0.0.0.0`, so any device on local WiFi can hit `http://<mac-ip>:8888` (Add to Home Screen on iPhone for an icon). Native iOS app is not viable — wrong OS, wrong RAM/GPU profile.
+
+### Current pipeline state
+
+Three loops exist; they don't yet talk to each other:
+
+1. **Prompt generator** (`generate_prompt.py`) — assembles MJ prompts, reads `refs/*.json`, optionally reads Optuna best-params per species
+2. **Feedback loop** (`unified_feedback.py`) — paste prompt + image, rate 1–10 across 4 axes, log to `dino_art.db`, log Optuna trial
+3. **Local generator** (`flux/`) — Flux-dev on M1, branded UI, LoRA-ready
+
+What's missing: **the loops are separate processes**. The local generator outputs to `assets/gallery/flux/` but nothing rates those images. The feedback DB has no idea Flux exists. The prompt generator's auto-suggest only sees MJ trials.
+
+
+### The independence plan — leave Midjourney behind
+
+**Goal:** every dino we ship comes from our own model, trained on our own winners, rated by our own loop, regenerated automatically until it's a hero.
+
+#### Open-source stack we'll lean on (all M1-compatible)
+
+| Tool | Role | Why it matters |
+|---|---|---|
+| **FLUX.1-dev** (already wired) | Base text→image model | Highest open-weight quality available; M1-runnable in ~22GB |
+| **diffusers** (HF) | Pipeline orchestration | Already in `flux/requirements.txt`; standard interface for img2img, inpaint, controlnet |
+| **ai-toolkit** (ostris) | LoRA training on Flux | The de-facto Flux LoRA trainer; runs on M1 with patience |
+| **kohya_ss** | Alternative LoRA / DreamBooth | More features, larger community; M1 via mlx fork |
+| **ControlNet (Flux)** | Pose/depth/edge conditioning | Use our `refs/skeletal_refs/*.png` as anatomy guides — solves the bent-wrist/hyperextension problem MJ has |
+| **IP-Adapter / FLUX Redux** | Image-prompt conditioning | Our `--sref` equivalent — feed in a paleoart ref and the new image inherits its style |
+| **InstantID / PuLID** | Identity preservation | Lock a specific T-rex's "look" across a whole gallery |
+| **Real-ESRGAN / Topaz GigaPixel (paid)** | Upscaling for Printify | Hero images need 4–8K for canvas wraps |
+| **rembg / SAM 2** | Background isolation | Auto-cut subjects for compositing variants |
+| **CLIP / SigLIP** | Image-text similarity scoring | Auto-rate "does this image match the prompt?" — replaces a dimension of manual feedback |
+| **LLaVA / Qwen2-VL** (already used in feedback) | Vision-LLM critique | Already wired for anatomy analysis; expand its scope |
+| **DINOv2** | Image-image similarity | "Find the closest winner in the DB to this new image" — for sref auto-selection |
+| **InvokeAI / ComfyUI graph** | Node-based pipeline | If our Python orchestration outgrows itself, swap to a visual workflow |
+
+#### How the agents tie together (target architecture)
+
+```
+                 ┌──────────────────┐
+                 │  prompt-crafter  │  reads: refs/, species/, dino_art.db (Optuna)
+                 └────────┬─────────┘  writes: prompt text + flags
+                          │
+                          ▼
+                 ┌──────────────────┐
+                 │  flux-runner     │  reads: prompt, LoRAs, ControlNets
+                 │  (NEW agent)     │  writes: assets/gallery/flux/<species>/<uuid>.png
+                 └────────┬─────────┘            + sidecar JSON {prompt, params, model_hash}
+                          │
+                          ▼
+                 ┌──────────────────┐
+                 │  auto-rater      │  reads: image + sidecar
+                 │  (NEW agent)     │  uses: CLIP score, LLaVA anatomy critique, DINOv2 similarity
+                 └────────┬─────────┘  writes: dino_art.db row (no human in the loop yet)
+                          │
+                          ▼
+                 ┌──────────────────┐
+                 │  mj-logger       │  reads: DB row + Optuna trial
+                 │  (rename:        │  on score ≥ 8: copies image to refs/gallery_best/
+                 │  loop-logger)    │  on score ≥ 9: queues for printify-publisher
+                 └────────┬─────────┘
+                          │
+                          ▼ (feedback loop)
+                 prompt-crafter reads refreshed Optuna + refs on next run
+```
+
+Every arrow is a **file or DB row** — same contract as the existing CLAUDE.md domains. No Python imports across boundaries.
+
+#### Roadmap to drop MJ entirely
+
+**Phase A — wire the local loop (1–2 sessions)**
+1. `flux-runner` agent: small wrapper around `flux/generate_image.py` that writes a sidecar JSON next to every PNG (`{species, prompt, stylize_equivalent, lora, seed, model_sha}`)
+2. Extend `unified_feedback.py` so `feedback path/to/flux_image.png` reads the sidecar instead of asking you to paste the prompt
+3. Add a `source` column to the prompts table: `'midjourney' | 'flux'` — Optuna studies split by source so MJ wisdom doesn't pollute Flux tuning
+
+**Phase B — auto-rater (2–3 sessions)**
+4. Build `auto_rate.py`: CLIP prompt-match + LLaVA anatomy critique + DINOv2 nearest-neighbor distance to existing winners → composite 0–10 score
+5. Calibrate against the human ratings already in `dino_art.db` (we have ground truth for ~N images; tune the weights)
+6. Add `--auto` mode to feedback so a folder of 100 Flux outputs gets rated overnight, surfaces only the top 10 for human confirmation
+
+**Phase C — train our own LoRAs (3–4 sessions)**
+7. For each species with ≥10 winners in `refs/gallery_best/<species>/`, run ai-toolkit LoRA training (1500–3000 steps on M1 ≈ overnight)
+8. `flux/loras/<species>.safetensors` becomes the default for that species; prompt-crafter auto-passes `--lora <species>` to flux-runner
+9. Re-rate a baseline batch — verify LoRA-on outperforms LoRA-off at the same prompt
+
+**Phase D — ControlNet anatomy (2 sessions)**
+10. Process `refs/skeletal_refs/*.png` through a depth/pose extractor → `refs/skeletal_refs_processed/`
+11. flux-runner accepts `--anatomy-guide skeletal` and conditions generation on the matching skeleton — kills the bent-wrist problem at the source
+
+**Phase E — autonomy (1 session, but only after A–D)**
+12. Cron job (`com.jurassinkart.hero-drainer`) every N hours:
+    - Pick a species due for a hero refresh
+    - Generate 32 variants (sweep stylize-equivalent, sref refs, lora weight)
+    - Auto-rate, keep top 4
+    - Push top 1 to Printify queue, top 4 to gallery, archive rest
+13. The Mac mini becomes a self-driving art factory; you wake up to new heroes.
+
+#### What we drop / replace
+
+- **MJ Discord paste workflow** → direct Flux generation
+- **Manual `feedback` interview** → auto-rater pre-screens, you only confirm the top tier
+- **Hand-curated `--sref` URLs** → DINOv2 nearest-neighbor pulls best refs from `refs/gallery_best/` automatically
+- **Static `--stylize` ranges** → Optuna-trained per-species params, refreshed weekly
+
+### Immediate next steps (next session)
+
+1. Write `flux-runner` sidecar JSON spec and ship the wrapper (Phase A.1)
+2. Extend `unified_feedback.py` to read sidecars (Phase A.2)
+3. Add `source` column migration to `dino_art.db` (Phase A.3)
+4. Pick one species (suggest mosasaurus or T-rex — most existing winners) as the LoRA pilot
+
