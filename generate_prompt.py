@@ -2955,6 +2955,13 @@ def assemble_prompt(
         if anatomy_text:
             subject_parts.append(anatomy_text)
 
+        # ── Add LLaVA anatomy analysis from winning images ──────────────────
+        # This reinforces what the anatomy module said with real-world examples
+        # from successful generations
+        winner_hints = get_winner_anatomy_hints(species["name"])
+        if winner_hints and not wide_mode:
+            subject_parts.append(f"[Verified anatomy: {winner_hints}]")
+
         if not wide_mode:
             # Required species params (e.g. raptor sickle claw accuracy)
             for rp in required_params:
@@ -4266,6 +4273,22 @@ def get_winners_for_species(species: str):
         return winners.get(species, [])
     except Exception:
         return []
+
+
+def get_winner_anatomy_hints(species: str) -> str:
+    """Extract LLaVA anatomy analyses from top winners for this species."""
+    winners = get_winners_for_species(species)
+    if not winners:
+        return ""
+
+    hints = []
+    for w in winners[:3]:
+        if w.get("anatomy_analysis"):
+            hints.append(w["anatomy_analysis"])
+
+    if hints:
+        return "Reference anatomy from winning images:\n" + "\n—\n".join(hints)
+    return ""
 
 
 def main() -> None:

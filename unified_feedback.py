@@ -443,8 +443,25 @@ def optuna_show_best(species: str) -> bool:
         return False
 
 
-def save_winner(species: str, mj_prompt: str, mj_flags: Dict, final_score: float, session_id: int) -> bool:
-    """Save a high-scoring prompt to the winners library."""
+def analyze_winner_anatomy(image_path: str) -> str:
+    """Use LLaVA to extract anatomical accuracy notes from a winning image."""
+    if not OLLAMA_AVAILABLE:
+        return ""
+
+    try:
+        analysis = ollama.generate(
+            model="llava",
+            prompt="Analyze this dinosaur image for anatomical accuracy. List the specific anatomical features that are correct: skull shape, limbs, posture, proportions, stance, claws, digit count/structure, feet structure, tail carriage, muscle definition, etc. Be concise and specific.",
+            images=[str(image_path)],
+            stream=False,
+        )
+        return analysis.get("response", "").strip()
+    except Exception:
+        return ""
+
+
+def save_winner(species: str, mj_prompt: str, mj_flags: Dict, final_score: float, session_id: int, image_path: str = None) -> bool:
+    """Save a high-scoring prompt to the winners library with LLaVA anatomy analysis."""
     winners_file = Path(__file__).parent / "winners.json"
 
     try:
@@ -462,6 +479,11 @@ def save_winner(species: str, mj_prompt: str, mj_flags: Dict, final_score: float
         if species not in winners:
             winners[species] = []
 
+        # Analyze anatomy with LLaVA if image provided
+        anatomy_analysis = ""
+        if image_path:
+            anatomy_analysis = analyze_winner_anatomy(image_path)
+
         # Add new winner (keep as a list so we can have multiple winners per species)
         from datetime import datetime
         winner_entry = {
@@ -471,6 +493,9 @@ def save_winner(species: str, mj_prompt: str, mj_flags: Dict, final_score: float
             "session_id": session_id,
             "timestamp": datetime.now().isoformat(),
         }
+
+        if anatomy_analysis:
+            winner_entry["anatomy_analysis"] = anatomy_analysis
 
         # Keep only top 3 winners per species
         winners[species].append(winner_entry)
@@ -664,7 +689,7 @@ def run_interview(image_path: str, db_path: Path):
 
     # ── Step 7b: Save high-scoring prompt to winners library ─────────────────────
     if usable and mj_prompt and species:
-        saved = save_winner(species, mj_prompt, mj_flags or {}, final, session_id)
+        saved = save_winner(species, mj_prompt, mj_flags or {}, final, session_id, image_path)
         if saved:
             print(f"  {C.teal('✓')} Saved to winner library for {C.bold(species)}")
 
