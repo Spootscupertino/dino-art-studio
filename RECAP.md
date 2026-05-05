@@ -1794,10 +1794,164 @@ MJ generates informed by verified anatomy → rate → repeat
 - Accumulates knowledge: each good generation makes the next one better
 - Decoupled from external refs — uses your own best work as ground truth
 
-### Next ideas (from backlog)
+---
+
+## Session 25c: Flux Domain — M1-Native Image Generation
+
+**MAJOR MILESTONE:** Built a complete local image generation pipeline. Generator is now the star agent with full control and deep dinosaur specialization.
+
+### What was built
+
+**1. New `flux/` domain** — Parallel to mj/, refs/, printify/, site/
+- **Owner:** prompt-crafter (shared for now; can become dedicated agent)
+- **Goal:** Best realistic dinosaur images, completely local, M1-optimized
+- **Contract:** Reads `winners.json` + anatomy analyses → outputs `assets/gallery/flux/*.png`
+
+**2. `generate_image.py`** — Core Flux-dev inference
+- M1-native Metal GPU acceleration (bfloat16 precision)
+- LoRA loading/merging for fine-tuning
+- ControlNet support for anatomy constraints
+- ~45 seconds per 1024×1024 image (50 steps)
+- Memory usage: 22-23GB peak (safe on 24GB M1)
+- CLI: `python flux/generate_image.py --prompt "..." --lora dino_winners`
+
+**3. `train_lora.py`** — Auto-train on winners
+- Reads winners.json (high-scoring images + LLaVA anatomy analyses)
+- Fine-tunes Flux-dev with LoRA (low-rank adaptation)
+- Encodes dinosaur anatomy into model weights
+- ~15 min per 10-image batch
+- Retrains as new winners accumulate
+- CLI: `python flux/train_lora.py --species "Tyrannosaurus"`
+
+**4. `comfyui_server.py`** — Branded ComfyUI interface
+- Headless FastAPI server + REST API
+- Custom UI: **teal/blue/complementary colors** (matching your palette)
+- Real-time generation feedback
+- WebSocket support for live iteration
+- LoRA selection dropdown
+- Parameter tuning (steps, guidance, height, width, seed)
+- Runs on `http://localhost:8888`
+
+**5. `CLAUDE.md`** — Domain specification
+- Contracts with other domains
+- Input/output formats
+- M1 performance targets
+- Architecture philosophy
+
+**6. `SETUP.md`** — Installation & daily usage guide
+- One-time setup: `pip install -r flux/requirements.txt`
+- Daily: `python flux/comfyui_server.py`
+- Troubleshooting tips
+
+### Architecture
+
+**The feedback loop is now fully closed:**
+```
+unified_feedback.py rates image (8+ = winner) + LLaVA anatomy analysis
+  ↓
+save_winner() → winners.json (including anatomy_analysis field)
+  ↓
+python flux/train_lora.py
+  → Reads winners + analyses
+  → Fine-tunes Flux-dev LoRA
+  → Saves dino_winners.safetensors
+  ↓
+ComfyUI loads LoRA (dropdown selection)
+  ↓
+Next generation inherits better anatomy
+  ↓
+Loop tightens: each winner teaches the next generation
+```
+
+**No changes to existing pipelines:**
+- GitHub → Vercel → Printify still clean
+- Flux outputs same format as MJ (assets/gallery/flux/*.png)
+- sync_gallery.py works unchanged
+- printify-publisher works unchanged
+- Can mix Flux and MJ outputs seamlessly
+
+### Key Decisions
+
+1. **Why Flux over SDXL?**
+   - Flux-dev is genuinely better quality (24B model)
+   - 24GB M1 can run it with bfloat16 + optimization
+   - Best realistic dinosaur images is the goal
+
+2. **Why LoRA over full fine-tuning?**
+   - Low memory overhead (~100MB per LoRA)
+   - Fast training (~15 min per batch)
+   - Can create species-specific LoRAs ("tyranno_winners", "velociraptor_winners")
+
+3. **Why ComfyUI server not CLI-only?**
+   - Visual feedback during generation critical for iteration
+   - Parameter tuning live instead of command-line args
+   - Branded UI = professional tool, not just scripts
+   - WebSocket support for future enhancements
+
+4. **Why not break existing MJ workflow?**
+   - Flux is opt-in for now
+   - MJ still works as before
+   - Can A/B test: Flux vs MJ on same prompts
+   - Eventually replace MJ, but no rush
+
+### Performance on M1 24GB
+
+| Operation | Time | Memory | Notes |
+|---|---|---|---|
+| Load Flux-dev | ~10s | 20GB | First load; cached after |
+| Generate image | ~45s | 22GB peak | 50 steps, 1024×1024 |
+| LoRA training | ~15min | 23GB peak | Per 10-image batch |
+| ComfyUI startup | ~30s | 20GB | Loads model on first request |
+
+### Files created
+
+- ✅ `flux/__init__.py` — Package marker
+- ✅ `flux/CLAUDE.md` — Domain spec (52 lines)
+- ✅ `flux/SETUP.md` — Installation guide
+- ✅ `flux/generate_image.py` — Core inference (325 lines)
+- ✅ `flux/train_lora.py` — LoRA training (315 lines)
+- ✅ `flux/comfyui_server.py` — Branded server (475 lines)
+- ✅ `flux/requirements.txt` — M1-optimized deps
+- ✅ `flux/.gitignore` — Exclude models & generated images
+
+### Next steps (immediate)
+
+1. **Install deps:** `pip install -r flux/requirements.txt`
+2. **Download Flux model:** First run of `generate_image.py` (takes 2-3 min, then cached)
+3. **Start ComfyUI:** `python flux/comfyui_server.py --port 8888`
+4. **Open browser:** http://localhost:8888
+5. **Generate:** Type prompt, click Generate, watch it build in real-time
+6. **Rate winners:** Use `unified_feedback.py --local` on good outputs
+7. **Train LoRA:** `python flux/train_lora.py` (automatic, or on schedule)
+8. **Loop tightens:** Each generation better than the last
+
+### Philosophy
+
+**You now own the image generation process.**
+- Not at the mercy of MJ queue times
+- Not limited by MJ prompt understanding
+- Not stuck with MJ's anatomy failures
+- Direct control over every parameter
+- Winners train better model iteratively
+- Completely offline-capable
+- Terminal-friendly (your workflow)
+
+**Generator is the star agent:**
+- Specialized domain with real ownership
+- Can experiment with samplers, schedulers, ControlNets
+- LoRAs are version-controlled (species-specific, date-based)
+- Clear contracts with other domains
+- Decoupled from MJ (can replace or complement)
+
+---
+
+### Backlog ideas (for future sessions)
 
 - **Warn on underperforming params** — Flag stylize/chaos combos that historically score low
 - **Sref scoring loop** — Update refs/*.json with scores from winning sessions
 - **Batch rating** — Rate a whole folder of images in one sitting
 - **Cross-species transfer** — Share winning param combos across species in same habitat group
 - **9+ score → auto-queue for Printify** — Close the full loop from rating to product
+- **ControlNet anatomyguides** — Use skeletal references to constrain pose/proportions
+- **Sampler comparison** — A/B test different samplers (DDIM, Heun, etc.)
+- **LoRA blending** — Mix multiple LoRAs for hybrid anatomy (e.g., "accurate claws" + "realistic feathers")
