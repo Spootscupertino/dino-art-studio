@@ -50,6 +50,7 @@ class C:
     BLUE = "\033[94m"
     GREEN = "\033[92m"
     YELLOW = "\033[93m"
+    RED = "\033[91m"
     WHITE = "\033[97m"
 
     @staticmethod
@@ -71,6 +72,10 @@ class C:
     @staticmethod
     def green(s):
         return f"{C.GREEN}{s}{C.RESET}"
+
+    @staticmethod
+    def red(s):
+        return f"{C.RED}{s}{C.RESET}"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -117,7 +122,13 @@ class FluxGenerator:
             self._print_memory_usage()
 
         except Exception as e:
+            error_msg = str(e)
             print(f"  {C.red('✗')} Failed to load model: {e}")
+            if "401" in error_msg or "GatedRepoError" in error_msg or "Access to model" in error_msg:
+                print(f"\n  {C.yellow('⚠')} FLUX.1-dev requires HuggingFace authentication:")
+                print(f"    1. Get token: https://huggingface.co/settings/tokens")
+                print(f"    2. Run: hf auth login")
+                print(f"    3. Accept model: https://huggingface.co/black-forest-labs/FLUX.1-dev")
             sys.exit(1)
 
     def load_lora(self, lora_name: str):

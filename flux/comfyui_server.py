@@ -53,6 +53,7 @@ async def root():
     return HTMLResponse(get_branded_html())
 
 
+@app.get("/api/generate")
 @app.post("/api/generate")
 async def generate_image(
     prompt: str,
@@ -500,15 +501,16 @@ def get_branded_html() -> str:
                     return;
                 }
 
-                const params = new URLSearchParams({
-                    prompt: prompt,
-                    height: document.getElementById('height').value,
-                    width: document.getElementById('width').value,
-                    steps: document.getElementById('steps').value,
-                    guidance: document.getElementById('guidance').value,
-                    seed: document.getElementById('seed').value || undefined,
-                    lora: document.getElementById('lora').value || undefined,
-                });
+                const params = new URLSearchParams();
+                params.append('prompt', prompt);
+                params.append('height', document.getElementById('height').value);
+                params.append('width', document.getElementById('width').value);
+                params.append('steps', document.getElementById('steps').value);
+                params.append('guidance', document.getElementById('guidance').value);
+                const seed = document.getElementById('seed').value;
+                if (seed) params.append('seed', seed);
+                const lora = document.getElementById('lora').value;
+                if (lora && lora !== 'None (base model)') params.append('lora', lora);
 
                 const btn = document.querySelector('button');
                 btn.disabled = true;
