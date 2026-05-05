@@ -1753,6 +1753,47 @@ $ python unified_feedback.py my_image.png
    - Shorter, consistent with `--use-ab` pattern (if we add A/B winner loading later)
    - Clearly indicates intent: "use this existing winning prompt"
 
+### Session 25b: LLaVA Anatomy Analysis + Self-Training Loop
+
+Wired up the feedback loop so winners actually teach the next generation. Instead of guessing at good parameters, the generator now learns from **verified anatomical accuracy** extracted from successful images using LLaVA vision analysis.
+
+**What changed:**
+
+1. **unified_feedback.py**:
+   - New `analyze_winner_anatomy(image_path)` — calls Ollama/LLaVA to ask: "What anatomical features are correct in this image?"
+   - `save_winner()` now takes image_path, extracts LLaVA analysis, stores in winners.json
+   - Winner entry now includes `anatomy_analysis` field with extracted accuracy notes
+
+2. **generate_prompt.py**:
+   - New `get_winner_anatomy_hints(species)` — reads top 3 winners, extracts their anatomy analyses
+   - Integrated into `assemble_prompt()` — after anatomy module, appends winner insights as verified anatomy constraints
+   - Prompt now says: "Verified anatomy: [what made the last winners work]"
+
+3. **winners.json**:
+   - Format updated to include `anatomy_analysis` field (optional, populated by LLaVA)
+   - Test entry included showing the structure
+
+**The Loop:**
+```
+Rate image 8+ → LLaVA analyzes it → anatomy_analysis saved
+↓
+Next generation → read winner analyses → inject into prompt
+↓
+MJ generates informed by verified anatomy → rate → repeat
+```
+
+**Example flow:**
+- User rates Tyrannosaurus image: "9.2/10, excellent proportions"
+- LLaVA extracts: "Correct proportions: massive 2-fingered hands, proper tail posture, balanced skull structure"
+- Next T-rex prompt includes: "[Verified anatomy: ...those extracted notes...]"
+- MJ learns from what worked → better next generation
+
+**Why this works:**
+- No more guessing at good parameters — winners teach what anatomy actually works
+- Reinforces anatomy module with real-world examples from successful MJ runs
+- Accumulates knowledge: each good generation makes the next one better
+- Decoupled from external refs — uses your own best work as ground truth
+
 ### Next ideas (from backlog)
 
 - **Warn on underperforming params** — Flag stylize/chaos combos that historically score low
