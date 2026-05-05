@@ -1,0 +1,12 @@
+{
+  "_description": "Winning prompts per species. Keys are species names, values include the full prompt and MJ flags from high-scoring generations.",
+  "_format": {
+    "species_name": {
+      "prompt": "full MJ prompt text",
+      "mj_flags": { "stylize": 500, "chaos": 20 },
+      "score": 9.2,
+      "session_id": 123,
+      "timestamp": "2026-05-05T12:34:56"
+    }
+  }
+}

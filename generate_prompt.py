@@ -11,9 +11,16 @@ Usage:
 import argparse
 import json
 import random
+import re
 import sqlite3
 import sys
 from pathlib import Path
+
+try:
+    import optuna
+    OPTUNA_AVAILABLE = True
+except ImportError:
+    OPTUNA_AVAILABLE = False
 
 from species import get_anatomy, build_anatomy_prompt, build_anatomy_negative
 
@@ -113,6 +120,8 @@ def dim(text: str) -> str:
     return f"{C.DIM}{text}{C.RESET}"
 
 DB_DEFAULT = Path(__file__).parent / "dino_art.db"
+OPTUNA_DB = Path(__file__).parent / "optuna_studies.db"
+WINNERS_FILE = Path(__file__).parent / "winners.json"
 SPECIES_REF_DIR = Path(__file__).parent / "species_reference"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".webp", ".raw", ".cr2", ".cr3", ".arw", ".nef"}
 OUTDATED_THRESHOLD = 2020  # flag species whose last_scientific_update is before this year
@@ -4222,6 +4231,43 @@ def ab_test_main(args) -> None:
     print()
 
 
+# ---------------------------------------------------------------------------
+# Optuna & Winners Integration
+# ---------------------------------------------------------------------------
+
+def get_optuna_best_params(species: str):
+    """Return dict of best params from Optuna study, or None."""
+    if not OPTUNA_AVAILABLE:
+        return None
+
+    study_name = re.sub(r"[^a-z0-9]+", "_", species.lower()).strip("_")
+    storage = f"sqlite:///{OPTUNA_DB}"
+
+    try:
+        import optuna
+        study = optuna.load_study(study_name=study_name, storage=storage)
+        trials = [t for t in study.trials if t.value is not None]
+        if len(trials) < 2:
+            return None
+        best = study.best_trial
+        return best.params if best.params else None
+    except Exception:
+        return None
+
+
+def get_winners_for_species(species: str):
+    """Return list of winner entries for this species, or empty list."""
+    if not WINNERS_FILE.exists():
+        return []
+
+    try:
+        with open(WINNERS_FILE) as f:
+            winners = json.load(f)
+        return winners.get(species, [])
+    except Exception:
+        return []
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Interactively build a Midjourney dinosaur art prompt."
@@ -4239,11 +4285,31 @@ def main() -> None:
     parser.add_argument("--ab-test",    action="store_true", help="Enter A/B testing mode")
     parser.add_argument("--ab-score",   type=int,  default=None, metavar="ID", help="Score an existing A/B test by ID")
     parser.add_argument("--ab-history", action="store_true", help="Show A/B test history")
+    # Winners library
+    parser.add_argument("--use-winner", type=str, default=None, metavar="SPECIES", help="Load a previous high-scoring prompt for this species")
     args = parser.parse_args()
 
     # Route to A/B testing mode if any A/B flag is set
     if args.ab_test or args.ab_score or args.ab_history:
         ab_test_main(args)
+        return
+
+    # Route to winner loading if --use-winner is set
+    if args.use_winner:
+        winners = get_winners_for_species(args.use_winner)
+        if not winners:
+            print(f"\n{C.RED}✗ No winning prompts found for {C.BOLD}{args.use_winner}{C.RESET}")
+            return
+        best = winners[0]
+        print(f"\n{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
+        print(f"  {C.BOLD_CYAN}WINNER PROMPT — {args.use_winner}{C.RESET}")
+        print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
+        print(f"  {ok('Score')}: {C.BOLD}{best['score']:.1f}{C.RESET}/10")
+        if best.get('mj_flags'):
+            print(f"  {ok('Flags')}:")
+            for k, v in best['mj_flags'].items():
+                print(f"    {C.DIM}{k}:{C.RESET} {C.WHITE}{v}{C.RESET}")
+        print(f"\n{C.BRIGHT_WHITE}{best['prompt']}{C.RESET}\n")
         return
 
     conn = connect(args.db)
@@ -4273,6 +4339,17 @@ def main() -> None:
     science = fetch_species_science(conn, species["id"])
     notes   = fetch_research_notes(conn, species["id"])
     display_science_brief(species, science, notes)
+
+    # --- Optuna best params auto-suggest ─────────────────────────────────────
+    optuna_params = get_optuna_best_params(species["name"])
+    if optuna_params and (args.stylize is None or args.chaos == 0):
+        print(f"\n  {hdr('💡 OPTUNA BEST PARAMS')}")
+        if "stylize" in optuna_params and args.stylize is None:
+            args.stylize = int(optuna_params["stylize"])
+            print(f"  {ok('AUTO-APPLIED')} {dim('[stylize]')} {C.WHITE}--stylize {args.stylize}{C.RESET}")
+        if "chaos" in optuna_params and args.chaos == 0:
+            args.chaos = int(optuna_params["chaos"])
+            print(f"  {ok('AUTO-APPLIED')} {dim('[chaos]')} {C.WHITE}--chaos {args.chaos}{C.RESET}")
 
     # --- Per-species stylize recommendation (Session 17) ---
     anatomy = get_anatomy(species["name"])

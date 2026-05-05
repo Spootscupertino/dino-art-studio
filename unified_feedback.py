@@ -394,6 +394,25 @@ def optuna_log(species: str, mj_flags: Dict[str, str], final_score: float) -> bo
         return False
 
 
+def optuna_get_best_params(species: str) -> Optional[Dict]:
+    """Return best params dict from the Optuna study for this species, or None."""
+    if not OPTUNA_AVAILABLE:
+        return None
+
+    study_name = re.sub(r"[^a-z0-9]+", "_", species.lower()).strip("_")
+    storage    = f"sqlite:///{OPTUNA_DB}"
+
+    try:
+        study  = optuna.load_study(study_name=study_name, storage=storage)
+        trials = [t for t in study.trials if t.value is not None]
+        if len(trials) < 2:
+            return None
+        best = study.best_trial
+        return best.params if best.params else None
+    except Exception:
+        return None
+
+
 def optuna_show_best(species: str) -> bool:
     """Print best params from the Optuna study for this species."""
     if not OPTUNA_AVAILABLE:
@@ -419,6 +438,46 @@ def optuna_show_best(species: str) -> bool:
         for k, v in best.params.items():
             print(f"      {C.blue(f'{k:<16}')} {C.teal(str(v))}")
 
+        return True
+    except Exception:
+        return False
+
+
+def save_winner(species: str, mj_prompt: str, mj_flags: Dict, final_score: float, session_id: int) -> bool:
+    """Save a high-scoring prompt to the winners library."""
+    winners_file = Path(__file__).parent / "winners.json"
+
+    try:
+        if winners_file.exists():
+            with open(winners_file) as f:
+                winners = json.load(f)
+        else:
+            winners = {}
+
+        # Remove metadata keys if present
+        winners.pop("_description", None)
+        winners.pop("_format", None)
+
+        # Initialize species entry if needed
+        if species not in winners:
+            winners[species] = []
+
+        # Add new winner (keep as a list so we can have multiple winners per species)
+        from datetime import datetime
+        winner_entry = {
+            "prompt": mj_prompt,
+            "mj_flags": mj_flags,
+            "score": final_score,
+            "session_id": session_id,
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        # Keep only top 3 winners per species
+        winners[species].append(winner_entry)
+        winners[species] = sorted(winners[species], key=lambda x: x["score"], reverse=True)[:3]
+
+        with open(winners_file, "w") as f:
+            json.dump(winners, f, indent=2)
         return True
     except Exception:
         return False
@@ -602,6 +661,12 @@ def run_interview(image_path: str, db_path: Path):
             print(f"  {C.teal('✓')} Optuna trial logged for {C.bold(species)}")
         elif not OPTUNA_AVAILABLE:
             print(f"  {C.dim('ℹ  pip install optuna to enable study tracking')}")
+
+    # ── Step 7b: Save high-scoring prompt to winners library ─────────────────────
+    if usable and mj_prompt and species:
+        saved = save_winner(species, mj_prompt, mj_flags or {}, final, session_id)
+        if saved:
+            print(f"  {C.teal('✓')} Saved to winner library for {C.bold(species)}")
 
     # Archive winners
     if usable and ask_yes("Archive to results table?"):

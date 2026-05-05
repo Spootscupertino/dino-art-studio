@@ -1666,3 +1666,97 @@ To close the loop and improve prompt quality autonomously:
 4. **Generator tuning** — Use ratings to suggest/auto-apply best parameter combinations per species
 
 **Focus:** Close the loop. Drop 1 MJ image → log rating → generator learns → next prompt is better.
+
+---
+
+## Session 25: Optuna Auto-Suggest + Winners Library
+
+Built two features to improve prompt reusability and speed: auto-suggest stylize/chaos from Optuna best params, and a winner prompt library per species.
+
+### What was built
+
+**1. Optuna Auto-Suggest for `--stylize` and `--chaos`**
+- New helper function: `get_optuna_best_params(species)` in generate_prompt.py
+- After species selection, if Optuna has ≥2 trials for that species, auto-applies best stylize/chaos values
+- Prints: `AUTO-APPLIED [stylize] --stylize 500` (or whatever the best trial found)
+- Falls back gracefully if Optuna not installed or no data exists
+- User can still override with command-line args (`--stylize 600` or `--chaos 50`)
+
+**2. Winners Library (`winners.json`)**
+- New file: `winners.json` — stores top 3 high-scoring prompts per species
+- When a session rates ≥8 (usable), prompt + MJ flags + score saved to winners library
+- Per-species entry is a list, kept sorted by score (newest high-scores bubble up)
+- Max 3 winners per species to keep the file lean
+
+**3. Load Winners with `--use-winner`**
+- New CLI flag: `python generate_prompt.py --use-winner "Tyrannosaurus"`
+- Displays the best winner for that species: prompt, MJ flags, and score
+- Skips interactive flow entirely — instant reuse of proven winners
+- Exit cleanly if no winners exist for that species
+
+### Files changed
+- ✅ **unified_feedback.py**:
+  - Added `optuna_get_best_params(species)` — returns dict of best params from Optuna study
+  - Added `save_winner(species, prompt, flags, score, session_id)` — appends to winners.json
+  - Integrated winner saving in Step 7b of the feedback loop (after usable threshold check)
+  - Added `from datetime import datetime` import for timestamps
+
+- ✅ **generate_prompt.py**:
+  - Added optuna imports (with graceful fallback if not installed)
+  - Added constants: `OPTUNA_DB`, `WINNERS_FILE`
+  - Added `get_optuna_best_params(species)` and `get_winners_for_species(species)` helpers
+  - Added `--use-winner SPECIES` CLI flag
+  - Integrated Optuna auto-suggest right after species selection (before anatomy-based defaults)
+  - Added winner display route (short-circuits before interactive flow)
+
+- ✅ **winners.json**:
+  - New file, initialized with metadata notes
+  - Structure: `{ "species_name": [{ prompt, mj_flags, score, session_id, timestamp }] }`
+
+### How to use
+
+**Auto-suggest stylize/chaos:**
+```bash
+$ python generate_prompt.py
+# After selecting species, if Optuna has data for that species:
+#   AUTO-APPLIED [stylize] --stylize 500
+#   AUTO-APPLIED [chaos] --chaos 25
+```
+
+**Load and display a winner:**
+```bash
+$ python generate_prompt.py --use-winner "Velociraptor"
+# Prints the best-scoring prompt for Velociraptor and exits
+```
+
+**High-scoring feedback auto-saves to library:**
+```bash
+$ python unified_feedback.py my_image.png
+# ... rate the image ...
+# If final_score ≥ 8:
+#   ✓ Saved to winner library for Velociraptor
+```
+
+### Design decisions
+
+1. **Why separate Optuna from anatomy defaults?**
+   - Optuna data is learned over many trials → more valuable than hard-coded ranges
+   - But anatomy is fast and always available → Optuna is first check, then fallback to anatomy
+   - This way old species without Optuna data still get sensible defaults
+
+2. **Why keep max 3 winners per species?**
+   - Reduces clutter; newer high-scores are more relevant than old ones
+   - Sorted by score so `winners[0]` is always the current best
+   - Still allows viewing the top 3 if needed
+
+3. **Why `--use-winner` over `--load-winner`?**
+   - Shorter, consistent with `--use-ab` pattern (if we add A/B winner loading later)
+   - Clearly indicates intent: "use this existing winning prompt"
+
+### Next ideas (from backlog)
+
+- **Warn on underperforming params** — Flag stylize/chaos combos that historically score low
+- **Sref scoring loop** — Update refs/*.json with scores from winning sessions
+- **Batch rating** — Rate a whole folder of images in one sitting
+- **Cross-species transfer** — Share winning param combos across species in same habitat group
+- **9+ score → auto-queue for Printify** — Close the full loop from rating to product
