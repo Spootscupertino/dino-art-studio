@@ -10,10 +10,17 @@ Usage:
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
+
+# Flux-dev needs ~22GB; default MPS cap is ~20GB on a 24GB Mac.
+# Disable the upper limit so allocations spill to system RAM/swap instead
+# of OOMing. Must be set before importing torch.
+os.environ.setdefault("PYTORCH_MPS_HIGH_WATERMARK_RATIO", "0.0")
+
 import torch
 from diffusers import FluxPipeline
 import PIL.Image
@@ -160,7 +167,17 @@ class FluxGenerator:
                 print(f"    1. Get token: https://huggingface.co/settings/tokens")
                 print(f"    2. Run: hf auth login")
                 print(f"    3. Accept model: https://huggingface.co/black-forest-labs/FLUX.1-dev")
-            sys.exit(1)
+                raise RuntimeError(
+                    "FLUX.1-dev access denied. Run `hf auth login` and accept the "
+                    "model license at https://huggingface.co/black-forest-labs/FLUX.1-dev"
+                ) from e
+            if "out of memory" in error_msg.lower() or "MPS" in error_msg:
+                raise RuntimeError(
+                    f"MPS out of memory loading Flux-dev. Try: "
+                    f"export PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 before starting the server. "
+                    f"Original: {error_msg}"
+                ) from e
+            raise
 
     def _apply_lora(self, lora_name: Optional[str]) -> bool:
         """
@@ -277,15 +294,19 @@ def main():
 
     gen = FluxGenerator()
 
-    image = gen.generate(
-        prompt=args.prompt,
-        height=args.height,
-        width=args.width,
-        num_inference_steps=args.steps,
-        guidance_scale=args.guidance,
-        seed=args.seed,
-        lora=args.lora,
-    )
+    try:
+        image = gen.generate(
+            prompt=args.prompt,
+            height=args.height,
+            width=args.width,
+            num_inference_steps=args.steps,
+            guidance_scale=args.guidance,
+            seed=args.seed,
+            lora=args.lora,
+        )
+    except RuntimeError as e:
+        print(f"\n  {C.red('✗')} {e}\n")
+        sys.exit(1)
 
     if image is None:
         sys.exit(1)

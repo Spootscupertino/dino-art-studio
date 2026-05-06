@@ -10,11 +10,16 @@ Usage:
 
 import argparse
 import asyncio
+import os
 import re
 import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
+
+# Must be set before torch import; see flux/generate_image.py.
+os.environ.setdefault("PYTORCH_MPS_HIGH_WATERMARK_RATIO", "0.0")
+
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -584,7 +589,20 @@ def get_branded_html() -> str:
                     const response = await fetch('/api/generate?' + params);
                     const data = await response.json();
 
-                    if (!response.ok) throw new Error(data.detail);
+                    if (!response.ok) {
+                        // FastAPI returns detail as a string for HTTPException
+                        // and as an array of {loc,msg,type} for 422 validation.
+                        let msg = data.detail;
+                        if (Array.isArray(msg)) {
+                            msg = msg.map(e => {
+                                const field = Array.isArray(e.loc) ? e.loc.slice(1).join('.') : '';
+                                return field ? `${field}: ${e.msg}` : e.msg;
+                            }).join('; ');
+                        } else if (msg && typeof msg === 'object') {
+                            msg = JSON.stringify(msg);
+                        }
+                        throw new Error(msg || `HTTP ${response.status}`);
+                    }
 
                     showStatus('✓ Generation complete!', 'complete');
                     displayImage(data.image_path, data.prompt, data.params);
