@@ -146,17 +146,30 @@ class FluxGenerator:
             )
 
             # On a 24GB M1, .to("mps") on the full pipeline OOMs (Flux is
-            # ~22GB and MPS allocator caps below total RAM). Sequential CPU
-            # offload moves submodules onto MPS only while they're running,
-            # then back to CPU. Slower per generation, but it actually fits.
+            # ~22GB; MPS allocator caps below total RAM). enable_model_cpu_
+            # offload moves whole submodels (text encoder, transformer, VAE)
+            # to MPS only when they run, then back to CPU. Sequential offload
+            # would be safer memory-wise but is ~10x slower (per-layer swap),
+            # so we use model-level offload as the default and let users opt
+            # in to sequential via FLUX_SEQUENTIAL_OFFLOAD=1 if model offload
+            # still OOMs.
             offloaded = False
-            if DEVICE == "mps" and hasattr(self.pipe, "enable_sequential_cpu_offload"):
-                try:
-                    self.pipe.enable_sequential_cpu_offload(device=DEVICE)
-                    offloaded = True
-                    print(f"  {C.dim('Using sequential CPU offload (memory-safe on 24GB M1)')}")
-                except Exception as e:
-                    print(f"  {C.yellow('⚠')} Sequential offload unavailable ({e}); using full move")
+            if DEVICE == "mps":
+                use_seq = os.environ.get("FLUX_SEQUENTIAL_OFFLOAD") == "1"
+                if use_seq and hasattr(self.pipe, "enable_sequential_cpu_offload"):
+                    try:
+                        self.pipe.enable_sequential_cpu_offload(device=DEVICE)
+                        offloaded = True
+                        print(f"  {C.dim('Sequential CPU offload (slow but minimal memory)')}")
+                    except Exception as e:
+                        print(f"  {C.yellow('⚠')} Sequential offload failed ({e})")
+                if not offloaded and hasattr(self.pipe, "enable_model_cpu_offload"):
+                    try:
+                        self.pipe.enable_model_cpu_offload(device=DEVICE)
+                        offloaded = True
+                        print(f"  {C.dim('Model CPU offload (balanced for 24GB M1)')}")
+                    except Exception as e:
+                        print(f"  {C.yellow('⚠')} Model offload failed ({e}); falling back")
             if not offloaded:
                 self.pipe = self.pipe.to(DEVICE)
 
