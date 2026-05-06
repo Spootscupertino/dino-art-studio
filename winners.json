@@ -1,6 +1,7 @@
 {
   "Tyrannosaurus": [
     {
+      "source": "mj",
       "prompt": "Test T-rex prompt",
       "mj_flags": {
         "stylize": 500,
@@ -10,6 +11,40 @@
       "session_id": 1,
       "timestamp": "2026-05-05T12:00:00",
       "anatomy_analysis": "Correct proportions: massive 2-fingered hands, powerful hindquarters, correct tooth structure, balanced skull, proper tail posture for locomotion."
+    }
+  ],
+  "Velociraptor": [
+    {
+      "source": "flux",
+      "prompt": "a pack of three Velociraptors hunting, feathered, intelligent eyes, dynamic poses, forest setting",
+      "flux_params": {
+        "steps": 50,
+        "guidance_scale": 3.5,
+        "seed": 123,
+        "height": 1024,
+        "width": 1024
+      },
+      "score": 8.2,
+      "session_id": 2,
+      "timestamp": "2025-05-06T10:15:00Z",
+      "anatomy_analysis": "Good digit structure, feather distribution realistic, sickle claw detail correct"
+    }
+  ],
+  "Mosasaurus": [
+    {
+      "source": "flux",
+      "prompt": "a massive Mosasaurus swimming in clear ocean, sunlight filtering down, scale texture, dynamic pose",
+      "flux_params": {
+        "steps": 50,
+        "guidance_scale": 3.5,
+        "seed": 456,
+        "height": 1024,
+        "width": 1024
+      },
+      "score": 8.1,
+      "session_id": 3,
+      "timestamp": "2025-05-06T10:30:00Z",
+      "anatomy_analysis": "Serpentine body proportions correct, flipper angle realistic, jaw structure accurate"
     }
   ]
 }
