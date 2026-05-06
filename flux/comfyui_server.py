@@ -182,10 +182,9 @@ async def list_loras():
 @app.get("/api/models/flux")
 async def get_flux_status():
     return {
-        "model": "FLUX.1-dev (4-bit, mflux/MLX)",
+        "model": "SDXL 1.0 (bfloat16, diffusers, M1-optimized)",
         "device": "mps",
         "dtype": "bfloat16",
-        "quantize_bits": 4,
         "loaded": generator.model_loaded,
     }
 
@@ -494,7 +493,7 @@ def get_branded_html() -> str:
         <div class="container">
             <header>
                 <h1>🦖 Dinosaur Flux Generator</h1>
-                <p class="subtitle">Local Flux-dev with LoRA fine-tuning on winners</p>
+                <p class="subtitle">Local SDXL 1.0 on M1 (with LoRA fine-tuning coming Phase C)</p>
             </header>
 
             <div class="grid">
