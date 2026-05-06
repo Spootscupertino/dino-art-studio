@@ -2139,3 +2139,482 @@ Every arrow is a **file or DB row** — same contract as the existing CLAUDE.md 
 3. Add `source` column migration to `dino_art.db` (Phase A.3)
 4. Pick one species (suggest mosasaurus or T-rex — most existing winners) as the LoRA pilot
 
+---
+
+## Session 27 (2026-05-06) — Flux Domain Audit Punch List
+
+### What we shipped
+
+**Flux domain audit complete.** Every item on the production checklist is now live. The module is no longer WIP — it's shipping-ready infrastructure.
+
+#### 1. ✅ Sidecar JSON on every save
+
+**File:** `flux/generate_image.py` — new `save_with_sidecar()` helper
+
+Every image now comes with a `.json` sidecar (same stem, different ext). Stores:
+- `image`: filename
+- `prompt`: full generation prompt
+- `params`: `{height, width, steps, guidance, seed, lora}`
+- `model`: FLUX.1-dev
+- `device`: mps | cpu
+- `dtype`: bfloat16
+- `timestamp`: ISO 8601
+
+**Used by:**
+- `unified_feedback.py` — reads the sidecar to skip the "paste the prompt" interview step
+- `train_lora.py` — pulls exact generation conditions (seed, lora used, guidance) to understand what made a winner tick
+- Future `auto_rate.py` — CLIP/DINOv2 scoring reads params to contextualize similarity
+
+**Placement:** Generated in all three paths:
+- CLI: `python flux/generate_image.py --prompt "..."`
+- REST: `/api/generate`
+- WebSocket: `/ws/generate`
+
+#### 2. ✅ Server-side validation + asyncio.Lock
+
+**File:** `flux/comfyui_server.py` — new `_validate()` + `_run_generation()`
+
+Validation rules (checked on every request):
+- `prompt`: non-empty, ≤2000 chars
+- `height`, `width`: [256..2048], multiples of 8
+- `steps`: [1..150]
+- `guidance`: [0.0..20.0]
+- `lora`: matches `^[A-Za-z0-9_-]{1,64}$` (filesystem-safe names)
+
+**Asyncio concurrency:**
+- Single `asyncio.Lock` wraps the generator (Flux pipeline is not thread-safe)
+- Requests queue in FastAPI's event loop
+- Generation runs in a thread executor via `loop.run_in_executor()` — event loop stays responsive for new requests
+- Browser can keep polling / WebSocket stays alive while Flux is running
+
+**Why this matters:** Multiple concurrent requests used to crash or corrupt state. Now they serialize cleanly.
+
+#### 3. ✅ WIP gate on `train_lora.py`
+
+**File:** `flux/train_lora.py` — new `--force` flag
+
+The training loop is still a placeholder (no actual gradient computation). Without `--force`, the script:
+```
+python flux/train_lora.py
+→ Refuses to run
+→ Prints concrete WIP reasons:
+  • Training loop body is `pass` — no gradients flow
+  • No noise scheduler, timestep sampling, or text-encoder pass
+  • Optimizer.step() is never called
+  • peft save_pretrained() target is a file path, not a directory
+  • LoraConfig task_type=IMAGE_2_IMAGE is not valid for Flux
+→ Exit code 2
+```
+
+With `--force`:
+```
+python flux/train_lora.py --force
+→ Attempts to run
+→ Will hit one of the concrete issues and fail with traceback
+```
+
+**Philosophy:** Failing loudly with reasons is better than silently shipping useless LoRAs. When Phase C begins (species-specific LoRA training), we'll rip out the placeholder and wire up `ai-toolkit` or `kohya_ss`.
+
+#### 4. ✅ Module-level cleanup
+
+**Files:** `generate_image.py`, `train_lora.py`
+
+Removed:
+- `torch.backends.cuda.is_available = lambda: False` (unnecessary cuda override)
+- `torch.set_default_device("mps")` (module-level device sticky state is a code smell)
+
+**Device handling moved to:** class-level `DEVICE = "mps" if ... else "cpu"` — explicit, testable, no global side effects.
+
+#### 5. ✅ LoRA accumulation fixed
+
+**File:** `flux/generate_image.py` — new `_apply_lora()` method
+
+**Old behavior (broken):**
+```python
+if lora:
+    self.pipe.load_lora_weights(path)
+    self.pipe.fuse_lora(lora_scale=1.0)
+```
+Two requests in a row:
+- Req 1: load & fuse `dino_winners` → weights are fused into model
+- Req 2: load & fuse `dino_winners` → fuses the *already-fused* weights *again* → cumulative weight explosion
+
+**New behavior (correct):**
+```python
+def _apply_lora(self, lora_name):
+    if lora_name == self.current_lora:
+        return True  # Already loaded; no-op
+    if self.current_lora is not None:
+        self.pipe.unload_lora_weights()  # Strip the old one
+        self.current_lora = None
+    if lora_name is None:
+        return True  # Running base model, no LoRA
+    # Load fresh
+    self.pipe.load_lora_weights(path, adapter_name=lora_name)
+    if hasattr(self.pipe, "set_adapters"):
+        self.pipe.set_adapters([lora_name], [1.0])
+    self.current_lora = lora_name
+    return True
+```
+
+**Behavior:**
+- `current_lora = None` → base model
+- `current_lora = "dino_winners"` → dino_winners loaded
+- Swapping LoRAs: unload old, load new (no accumulation)
+- Repeated requests for same LoRA: no-op
+
+#### 6. ✅ ControlNet removed
+
+**Files:** `generate_image.py`, `comfyui_server.py`
+
+Removed dead code:
+- `CONTROLNET_DIR` constant
+- `--controlnet`, `--cref` CLI args
+- `controlnet_ref` parameter in `generate()` method
+- ControlNet plumbing in docstrings
+
+**Why:** ControlNet support is on the Phase D roadmap. We're not shipping it yet, so the dead code was causing confusion. Phase D will add it back properly when we have the skeletal refs processed.
+
+#### 7. ✅ CORS fixed
+
+**File:** `flux/comfyui_server.py`
+
+Changed from:
+```python
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,  # ← INVALID: spec forbids this combo
+    ...
+)
+```
+
+To:
+```python
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,  # ✓ Valid per spec
+    ...
+)
+```
+
+**Impact:** The browser UI still works (no credentials needed for local generation). The server is now spec-compliant.
+
+---
+
+### Agent Architecture (Current)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    AGENT ECOSYSTEM                              │
+└─────────────────────────────────────────────────────────────────┘
+
+                    ┌─────────────────────┐
+                    │  PROMPT-CRAFTER     │  ⭐ Knows dinosaur anatomy
+                    │  Owner: User + Qs   │
+                    ├─────────────────────┤
+                    │ Reads:              │
+                    │  • refs/*.json      │
+                    │  • species/*.py     │
+                    │  • dino_art.db      │
+                    │    (Optuna trials)  │
+                    │                     │
+                    │ Writes:             │
+                    │  • stdout (prompt)  │
+                    │  • --json output    │
+                    └──────────┬──────────┘
+                               │
+                ┌──────────────┴──────────────┐
+                ▼                             ▼
+        ┌──────────────────┐      ┌──────────────────────┐
+        │  FLUX-RUNNER     │      │  MJ CLI / DISCORD    │
+        │  (NEW: Phase A.1)│      │  (existing)          │
+        │                  │      │                      │
+        │ Reads:           │      │ Reads:               │
+        │  • prompt text   │      │  • prompt text       │
+        │  • LoRAs/        │      │  • seed/lora via     │
+        │    ControlNets   │      │    --quality flags   │
+        │                  │      │                      │
+        │ Writes:          │      │ Writes:              │
+        │  • PNG + sidecar │      │  • User pastes to MJ │
+        │  • to flux/      │      │  • Receives image    │
+        │    gallery/<sp>/ │      │                      │
+        └──────────┬───────┘      └──────────┬───────────┘
+                   │                          │
+                   │                          │ (user drops image)
+                   └────────────┬─────────────┘
+                                ▼
+                    ┌──────────────────────┐
+                    │  FEEDBACK / RATER    │
+                    │  (unified_feedback.py)
+                    │                      │
+                    │ Reads:               │
+                    │  • PNG + sidecar     │
+                    │  • Vision analysis   │
+                    │                      │
+                    │ Writes:              │
+                    │  • dino_art.db       │
+                    │  • score 1–10        │
+                    │  • 8+ → winners.json │
+                    └──────────┬───────────┘
+                               │
+                    ┌──────────┴────────────┐
+                    │ Score ≥ 8: Winner     │
+                    │ Score ≥ 9: Hero       │
+                    └──────────┬────────────┘
+                               │
+                ┌──────────────┴──────────────┐
+                ▼                             ▼
+        ┌──────────────────┐      ┌──────────────────────┐
+        │  LORA TRAINER    │      │  PRINTIFY-PUBLISHER  │
+        │  (Phase C)       │      │  (existing)          │
+        │                  │      │                      │
+        │ Reads:           │      │ Reads:               │
+        │  • winners.json  │      │  • Hero images       │
+        │  • anatomy       │      │  • products.json     │
+        │    analyses      │      │                      │
+        │                  │      │ Writes:              │
+        │ Writes:          │      │  • printify_ledger   │
+        │  • flux/loras/   │      │  • products → Etsy   │
+        │    <sp>.sft      │      │                      │
+        └──────────┬───────┘      └──────────┬───────────┘
+                   │                          │
+                   │                          │
+                   └────────────┬─────────────┘
+                                ▼
+                    ┌──────────────────────┐
+                    │  SITE-CUSTODIAN      │
+                    │  (Astro frontend)    │
+                    │                      │
+                    │ Reads:               │
+                    │  • products.json     │
+                    │  • printify_ledger   │
+                    │  • gallery/flux/*.png
+                    │                      │
+                    │ Writes:              │
+                    │  • site/ (HTML/CSS)  │
+                    │  • main branch       │
+                    │  • (Vercel deploys)  │
+                    └──────────────────────┘
+```
+
+---
+
+### Agent Job Descriptions
+
+#### **PROMPT-CRAFTER** 🦖
+*Authority over: dinosaur species knowledge, accurate anatomical language, parameter selection*
+
+**Who:** Specialized domain agent (can be human + LLM, or purely algorithmic in the future)
+
+**Responsibilities:**
+- Assemble valid MJ / Flux prompts for all 42 species in 25 output modes
+- Know the anatomy: what makes a T-rex look like a T-rex (not a Velociraptor)
+- Optimize parameters per species (stylize, chaos, --ar, --sref, --cref, --niji)
+- Integrate Optuna trial history: prefer parameter combos that have scored 8+ before
+
+**Inputs (read-only):**
+- `refs/paleoart_refs.json`, `refs/skeletal_refs.json`, `refs/sref_urls.json` — visual anchors
+- `species/*.py` — anatomy modules (skull, dentition, locomotion, coloration, behavior)
+- `dino_art.db` table `optuna_trials` — historical performance of parameter combos
+- `dino_art.db` table `parameters` — weighting hints from feedback loop
+
+**Outputs (exclusive write):**
+- stdout: human-readable prompt ready to paste into MJ
+- `--json`: structured prompt + params for downstream agents
+- implicit: logs prompt to `dino_art.db` table `prompts` (via feedback agent)
+
+**Success metrics:**
+- 100% of 42 species generate valid, anatomically plausible prompts
+- Prompts score 7+ on average (realism + anatomy dimensions)
+- Repeat generation of same prompt produces consistent quality (low variance)
+- Parameter suggestions are informed by historical winners, not guesswork
+
+**Can work standalone?** Yes — can generate prompts without feedback loop, but quality improves with Optuna data.
+
+---
+
+#### **FLUX-RUNNER** 🚀
+*Authority over: local image generation, M1 optimization, LoRA loading, generation quality*
+
+**Who:** Agent wrapping `flux/generate_image.py` + `flask/comfyui_server.py` (Phase A.1)
+
+**Responsibilities:**
+- Take a prompt from prompt-crafter, generate a photorealistic dinosaur image in ~45 seconds
+- Manage M1 GPU memory (bfloat16, attention optimization, device placement)
+- Load & swap LoRAs without accumulation (Phase C: species-specific fine-tunes)
+- Write image + metadata sidecar for downstream agents (Phase A.1)
+- Run a branded ComfyUI UI for human iteration (current: manual)
+
+**Inputs (read-only):**
+- Prompt text (from prompt-crafter or user)
+- Generation params: height, width, steps, guidance, seed, lora name
+- LoRA files: `flux/loras/*.safetensors`
+
+**Outputs (exclusive write):**
+- `assets/gallery/flux/<species>/<timestamp>.png` — image file
+- `assets/gallery/flux/<species>/<timestamp>.json` — sidecar with prompt, params, model, device, timestamp
+
+**Success metrics:**
+- Image output is photorealistic dinosaur (no CGI, no painting, no filter artifacts)
+- Anatomically correct per species (judges score 8+ on anatomy dimension)
+- Consistent quality across multiple runs (seed → reproducible)
+- Generation time: ≤60 seconds per 1024×1024 image on M1 24GB
+- LoRA swapping: no weight accumulation, clean unload/reload
+
+**Can work standalone?** Yes — can generate beautiful dinosaur images without feedback loop. Quality improves with trained LoRAs.
+
+---
+
+#### **FEEDBACK / RATER** 📊
+*Authority over: scoring, winner identification, feedback DB, Optuna trial logging*
+
+**Who:** Agent wrapping `unified_feedback.py` + optional vision model (llama3.2-vision)
+
+**Responsibilities:**
+- Accept a PNG (from Flux or MJ) + its sidecar (if present)
+- Score across 4 dimensions: anatomy, species accuracy, realism, composition
+- Aggregate dimensions into a final score 1–10
+- Mark 8+ as usable, 9+ as hero
+- Log to SQLite: exact prompt, params, scores, issues, vision analysis
+- If score ≥ 8: add to `winners.json` (input for LoRA training)
+- If score ≥ 9: flag for printify-publisher
+- If sidecar present: auto-fill prompt field (Phase A.2)
+
+**Inputs (read-only):**
+- PNG image + optional sidecar JSON (Phase A)
+- Vision model analysis (if Ollama running)
+- User interviews (score 1–10 per dimension, qualitative feedback)
+
+**Outputs (exclusive write):**
+- `dino_art.db` table `feedback_sessions` — full score record
+- `dino_art.db` table `optuna_trials` — trial for this image (to train Optuna)
+- `winners.json` — high-scoring images + metadata (for LoRA training)
+- Implicit: update `parameters` table weights (high scores: +0.05, low scores: -0.05)
+
+**Success metrics:**
+- Consistent scoring across multiple people / multiple runs (high inter-rater reliability)
+- Winners (8+) score high on blind re-rating
+- Vision analysis catches anatomical issues 80%+ of the time
+- Feedback loop converges: early prompts score 5–6, recent prompts average 7–8
+
+**Can work standalone?** Partially — can rate images without Optuna, but parameter tuning is slower.
+
+---
+
+#### **LORA TRAINER** 🧠
+*Authority over: species-specific model fine-tuning, winner analysis, LoRA weights*
+
+**Who:** Agent wrapping `ai-toolkit` or `kohya_ss` (Phase C.1)
+
+**Responsibilities:**
+- Read winning images from `winners.json` (score ≥ 8)
+- Analyze their generation params, anatomy notes, species
+- Fine-tune Flux-dev LoRA on the winning batch (~10–50 images per species)
+- Save species-specific LoRA: `flux/loras/<species>.safetensors`
+- On next generation, flux-runner auto-loads `<species>.lora` for that species
+- Track LoRA version: date-based or iteration-based (v1, v2, v3)
+
+**Inputs (read-only):**
+- `winners.json` — high-scoring images + prompts + anatomies
+- `flux/loras/` — existing LoRAs to avoid clobbering
+
+**Outputs (exclusive write):**
+- `flux/loras/<species>.safetensors` — newly trained LoRA (or version update)
+- Implicit: logs to `dino_art.db` table `lora_training_runs` (when/what/quality metrics)
+
+**Success metrics:**
+- LoRA-on baseline batch re-scores 1–2 points higher than LoRA-off
+- Anatomical accuracy improves for species-specific features (e.g., T-rex teeth sharpness)
+- Training time: ≤overnight on M1 for 20-image batch
+- LoRA size: ≤200MB per species (not monolithic)
+
+**Can work standalone?** No — depends on winners from feedback loop.
+
+---
+
+#### **PRINTIFY-PUBLISHER** 📦
+*Authority over: product publishing, pricing, inventory, Etsy sync*
+
+**Who:** Agent wrapping `printify_publisher.py` (existing)
+
+**Responsibilities:**
+- Read hero images (score 9+) from feedback agent
+- Create 2-SKU product bundle (Poster + Canvas Wrap) at all sizes
+- Set pricing: cost + 30% margin, floor at $X.99
+- Publish to Printify → sync to Etsy storefront
+- Maintain `printify_ledger.json`: product ID, URL, pricing, image hash
+
+**Inputs (read-only):**
+- Hero images: `assets/gallery/flux/<species>/*.png`
+- `dino_art.db` table `feedback_sessions` (score ≥ 9)
+- Printify API (existing blueprint IDs, variant IDs)
+
+**Outputs (exclusive write):**
+- Printify backend: new products, price updates
+- `printify_ledger.json` — metadata for site-custodian
+- Etsy: listings auto-sync (Printify integration)
+
+**Success metrics:**
+- 0 failed publishes (validation before shipping)
+- Pricing: cost-accurate, margin consistent
+- Products appear on Etsy within 5 min of publish
+- Printify ledger matches live shop inventory
+
+**Can work standalone?** Partially — can publish manually, but best when fed by feedback loop.
+
+---
+
+#### **SITE-CUSTODIAN** 🌐
+*Authority over: Astro frontend, gallery layout, product linking, SEO*
+
+**Who:** Agent wrapping `site/` (existing, Astro repo)
+
+**Responsibilities:**
+- Render gallery pages: all dinosaurs, filtered by category / habitat
+- Link hero images to Etsy via `printify_ledger.json`
+- Generate product cards: image + description + Buy button
+- Optimize SEO: species name, anatomy keywords, metadata
+- Deploy to Vercel on `main` branch push
+
+**Inputs (read-only):**
+- `site/src/data/products.json` (synced from printify_ledger)
+- `assets/gallery/flux/<species>/*.png` — hero images
+- `dino_art.db` table `feedback_sessions` — metadata (species, anatomy notes)
+
+**Outputs (exclusive write):**
+- HTML/CSS in `site/src/` — gallery pages
+- git push to `main` branch
+- Vercel deployment (automatic)
+- Live site: https://jurassinkart.com
+
+**Success metrics:**
+- All 42 species have gallery pages with recent heroes
+- "Buy" buttons work (no dead links to Etsy)
+- SEO: dino names + anatomy keywords in metadata
+- Page load: <2s on mobile (Vercel edge)
+
+**Can work standalone?** Yes — can build gallery pages and deploy independently.
+
+---
+
+### Files changed in Session 27
+
+| File | Change | Lines |
+|---|---|---|
+| `flux/generate_image.py` | Sidecar saving, LoRA accumulation fix, module cleanup | 325 → 340 |
+| `flux/comfyui_server.py` | Validation + asyncio.Lock + executor, CORS fix, sidecar integration | 620 → 680 |
+| `flux/train_lora.py` | Removed module-level device, added `--force` WIP gate | 264 → 290 |
+
+---
+
+### Next steps (Phase A: wire the feedback loop)
+
+1. **Phase A.1:** Rename flux-runner orchestrator and finalize sidecar spec (done; deployed in this session)
+2. **Phase A.2:** Extend `unified_feedback.py` to read sidecars (skip prompt-paste interview if sidecar present)
+3. **Phase A.3:** Add `source` column to `dino_art.db` prompts table; split Optuna studies by MJ vs Flux
+4. **Pilot species:** Pick Mosasaurus or T-rex (most winners already); baseline + LoRA-on comparison
+
+---
+

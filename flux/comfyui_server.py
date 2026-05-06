@@ -9,24 +9,22 @@ Usage:
 """
 
 import argparse
-import json
 import asyncio
+import re
 import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
 import torch
 
-# Allow `python flux/comfyui_server.py` to resolve the `flux` package
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from fastapi import FastAPI, WebSocket, HTTPException, UploadFile, File
-from fastapi.responses import FileResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, WebSocket, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from flux.generate_image import FluxGenerator
+from flux.generate_image import FluxGenerator, save_with_sidecar
 
 # ─────────────────────────────────────────────────────────────────────────────
 # App setup
@@ -34,17 +32,105 @@ from flux.generate_image import FluxGenerator
 
 app = FastAPI(title="Dinosaur Flux Generator", description="Local Flux-dev server")
 
-# Enable CORS
+# CORS: with allow_origins=["*"] the spec forbids credentials, so keep it off.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize generator
+OUTPUT_DIR = Path("assets/gallery/flux")
+LORA_DIR = Path("flux/loras")
+
+# The Flux pipeline is a single shared object. Two concurrent .generate() calls
+# would corrupt each other (LoRA swaps, RNG, MPS state). Serialize them.
 generator = FluxGenerator()
+_pipeline_lock = asyncio.Lock()
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Validation
+# ─────────────────────────────────────────────────────────────────────────────
+
+MAX_PROMPT_LEN = 2000
+DIM_MIN, DIM_MAX, DIM_STEP = 256, 2048, 8
+STEPS_MIN, STEPS_MAX = 1, 150
+GUIDANCE_MIN, GUIDANCE_MAX = 0.0, 20.0
+LORA_NAME_RE = re.compile(r"^[A-Za-z0-9_\-]{1,64}$")
+
+
+def _validate(
+    prompt: str,
+    height: int,
+    width: int,
+    steps: int,
+    guidance: float,
+    lora: Optional[str],
+) -> None:
+    if not prompt or not prompt.strip():
+        raise HTTPException(status_code=400, detail="prompt must be non-empty")
+    if len(prompt) > MAX_PROMPT_LEN:
+        raise HTTPException(status_code=400, detail=f"prompt exceeds {MAX_PROMPT_LEN} chars")
+    for name, val in (("height", height), ("width", width)):
+        if not (DIM_MIN <= val <= DIM_MAX) or val % DIM_STEP != 0:
+            raise HTTPException(
+                status_code=400,
+                detail=f"{name} must be in [{DIM_MIN},{DIM_MAX}] and a multiple of {DIM_STEP}",
+            )
+    if not (STEPS_MIN <= steps <= STEPS_MAX):
+        raise HTTPException(status_code=400, detail=f"steps must be in [{STEPS_MIN},{STEPS_MAX}]")
+    if not (GUIDANCE_MIN <= guidance <= GUIDANCE_MAX):
+        raise HTTPException(
+            status_code=400, detail=f"guidance must be in [{GUIDANCE_MIN},{GUIDANCE_MAX}]"
+        )
+    if lora is not None and not LORA_NAME_RE.match(lora):
+        raise HTTPException(status_code=400, detail="lora name must match [A-Za-z0-9_-]{1,64}")
+
+
+async def _run_generation(
+    prompt: str,
+    height: int,
+    width: int,
+    steps: int,
+    guidance: float,
+    seed: Optional[int],
+    lora: Optional[str],
+):
+    """
+    Run a generation under the singleton pipeline lock, off the event loop.
+    Returns (image, output_path, params).
+    """
+    async with _pipeline_lock:
+        loop = asyncio.get_running_loop()
+        image = await loop.run_in_executor(
+            None,
+            lambda: generator.generate(
+                prompt=prompt,
+                height=height,
+                width=width,
+                num_inference_steps=steps,
+                guidance_scale=guidance,
+                seed=seed,
+                lora=lora,
+            ),
+        )
+
+    if image is None:
+        return None, None, None
+
+    output_path = OUTPUT_DIR / f"flux_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+    params = {
+        "height": height,
+        "width": width,
+        "steps": steps,
+        "guidance": guidance,
+        "seed": seed,
+        "lora": lora,
+    }
+    save_with_sidecar(image, output_path, prompt, params)
+    return image, output_path, params
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Routes
@@ -53,7 +139,6 @@ generator = FluxGenerator()
 
 @app.get("/")
 async def root():
-    """Branded UI home page."""
     return HTMLResponse(get_branded_html())
 
 
@@ -68,60 +153,35 @@ async def generate_image(
     seed: Optional[int] = None,
     lora: Optional[str] = None,
 ):
-    """Generate a single image via REST API."""
+    _validate(prompt, height, width, steps, guidance, lora)
     try:
-        image = generator.generate(
-            prompt=prompt,
-            height=height,
-            width=width,
-            num_inference_steps=steps,
-            guidance_scale=guidance,
-            seed=seed,
-            lora=lora,
+        image, output_path, params = await _run_generation(
+            prompt, height, width, steps, guidance, seed, lora
         )
-
         if image is None:
             raise HTTPException(status_code=500, detail="Generation failed")
-
-        # Save image
-        output_dir = Path("assets/gallery/flux")
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = output_dir / f"flux_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-        image.save(output_path)
-
         return {
             "success": True,
             "image_path": str(output_path),
             "prompt": prompt,
-            "params": {
-                "height": height,
-                "width": width,
-                "steps": steps,
-                "guidance": guidance,
-                "seed": seed,
-                "lora": lora,
-            },
+            "params": params,
         }
-
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/models/loras")
 async def list_loras():
-    """List available LoRA models."""
-    lora_dir = Path("flux/loras")
-    if not lora_dir.exists():
+    if not LORA_DIR.exists():
         return {"loras": []}
-
-    loras = [f.stem for f in lora_dir.glob("*.safetensors")]
+    loras = [f.stem for f in LORA_DIR.glob("*.safetensors")]
     return {"loras": sorted(loras)}
 
 
 @app.get("/api/models/flux")
 async def get_flux_status():
-    """Get Flux model status."""
-    generator.load_model()
     return {
         "model": "FLUX.1-dev",
         "device": "mps" if torch.backends.mps.is_available() else "cpu",
@@ -132,50 +192,49 @@ async def get_flux_status():
 
 @app.websocket("/ws/generate")
 async def websocket_generate(websocket: WebSocket):
-    """WebSocket endpoint for real-time generation feedback."""
     await websocket.accept()
     try:
         while True:
             data = await websocket.receive_json()
-            prompt = data.get("prompt")
-            if not prompt:
-                await websocket.send_json({"error": "No prompt provided"})
+            prompt = data.get("prompt") or ""
+            height = int(data.get("height", 1024))
+            width = int(data.get("width", 1024))
+            steps = int(data.get("steps", 50))
+            guidance = float(data.get("guidance", 3.5))
+            seed = data.get("seed")
+            lora = data.get("lora")
+
+            try:
+                _validate(prompt, height, width, steps, guidance, lora)
+            except HTTPException as e:
+                await websocket.send_json({"error": e.detail})
                 continue
 
-            # Send status
             await websocket.send_json({"status": "generating", "prompt": prompt})
-
-            # Generate
-            image = generator.generate(
-                prompt=prompt,
-                height=data.get("height", 1024),
-                width=data.get("width", 1024),
-                num_inference_steps=data.get("steps", 50),
-                guidance_scale=data.get("guidance", 3.5),
-                seed=data.get("seed"),
-                lora=data.get("lora"),
-            )
-
-            if image:
-                output_dir = Path("assets/gallery/flux")
-                output_dir.mkdir(parents=True, exist_ok=True)
-                output_path = (
-                    output_dir / f"flux_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            try:
+                image, output_path, _ = await _run_generation(
+                    prompt, height, width, steps, guidance, seed, lora
                 )
-                image.save(output_path)
+            except Exception as e:
+                await websocket.send_json({"status": "failed", "error": str(e)})
+                continue
 
-                await websocket.send_json(
-                    {
-                        "status": "complete",
-                        "image_path": str(output_path),
-                        "prompt": prompt,
-                    }
-                )
-            else:
+            if image is None:
                 await websocket.send_json({"status": "failed", "error": "Generation failed"})
+                continue
 
+            await websocket.send_json(
+                {
+                    "status": "complete",
+                    "image_path": str(output_path),
+                    "prompt": prompt,
+                }
+            )
     except Exception as e:
-        await websocket.send_json({"error": str(e)})
+        try:
+            await websocket.send_json({"error": str(e)})
+        except Exception:
+            pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -470,7 +529,6 @@ def get_branded_html() -> str:
                         <label>LoRA Model</label>
                         <select id="lora">
                             <option value="">None (base model)</option>
-                            <option value="dino_winners">dino_winners</option>
                         </select>
                     </div>
 
@@ -514,7 +572,7 @@ def get_branded_html() -> str:
                 const seed = document.getElementById('seed').value;
                 if (seed) params.append('seed', seed);
                 const lora = document.getElementById('lora').value;
-                if (lora && lora !== 'None (base model)') params.append('lora', lora);
+                if (lora) params.append('lora', lora);
 
                 const btn = document.querySelector('button');
                 btn.disabled = true;
@@ -557,7 +615,6 @@ def get_branded_html() -> str:
                 status.className = 'status active ' + type;
             }
 
-            // Load available LoRAs on page load
             window.addEventListener('DOMContentLoaded', async () => {
                 try {
                     const response = await fetch('/api/models/loras');
@@ -574,7 +631,6 @@ def get_branded_html() -> str:
                 }
             });
 
-            // Allow Enter to generate
             document.getElementById('prompt').addEventListener('keydown', (e) => {
                 if (e.metaKey && e.key === 'Enter') generateImage();
             });

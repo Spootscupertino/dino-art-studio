@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
 Flux-dev image generation for photorealistic dinosaur images.
-M1 Mac optimized. Supports LoRA fine-tuning and ControlNet anatomy guidance.
+M1 Mac optimized. Supports LoRA fine-tuning.
 
 Usage:
     python flux/generate_image.py --prompt "a Tyrannosaurus in a river delta"
     python flux/generate_image.py --prompt "..." --lora dino_winners --seed 42
-    python flux/generate_image.py --prompt "..." --controlnet skeletal_anatomy --cref URL
 """
 
 import argparse
@@ -14,15 +13,10 @@ import json
 import sys
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 import torch
 from diffusers import FluxPipeline
-from diffusers.utils import load_image
 import PIL.Image
-
-# M1 Mac optimizations
-torch.backends.cuda.is_available = lambda: False  # Force Metal backend
-if hasattr(torch.backends, "mps"):
-    torch.set_default_device("mps")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Constants
@@ -30,11 +24,9 @@ if hasattr(torch.backends, "mps"):
 
 FLUX_MODEL = "black-forest-labs/FLUX.1-dev"
 LORA_DIR = Path(__file__).parent / "loras"
-CONTROLNET_DIR = Path(__file__).parent / "controlnets"
 OUTPUT_DIR = Path(__file__).parent.parent / "assets" / "gallery" / "flux"
 
-# M1 memory optimization constants
-DTYPE = torch.bfloat16  # bfloat16 saves memory while keeping quality
+DTYPE = torch.bfloat16
 DEVICE = "mps" if torch.backends.mps.is_available() else "cpu"
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -77,6 +69,46 @@ class C:
     def red(s):
         return f"{C.RED}{s}{C.RESET}"
 
+    @staticmethod
+    def yellow(s):
+        return f"{C.YELLOW}{s}{C.RESET}"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Sidecar saving
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def save_with_sidecar(
+    image: PIL.Image.Image,
+    output_path: Path,
+    prompt: str,
+    params: dict,
+) -> Path:
+    """
+    Save image and a JSON sidecar with the same stem.
+
+    The sidecar carries everything needed to rate, archive, or feed back into
+    LoRA training: prompt, params (dims/steps/guidance/seed/lora), model id,
+    timestamp. Without this, generated images are unattributable.
+    """
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    image.save(output_path)
+
+    sidecar_path = output_path.with_suffix(".json")
+    sidecar = {
+        "image": output_path.name,
+        "prompt": prompt,
+        "params": params,
+        "model": FLUX_MODEL,
+        "device": DEVICE,
+        "dtype": str(DTYPE).replace("torch.", ""),
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+    }
+    sidecar_path.write_text(json.dumps(sidecar, indent=2))
+    return sidecar_path
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Core generation
@@ -84,11 +116,12 @@ class C:
 
 
 class FluxGenerator:
-    """M1-optimized Flux-dev pipeline with LoRA + ControlNet support."""
+    """M1-optimized Flux-dev pipeline with LoRA support."""
 
     def __init__(self):
         self.pipe = None
         self.model_loaded = False
+        self.current_lora: Optional[str] = None
 
     def load_model(self):
         """Load Flux-dev model with M1 optimizations."""
@@ -105,17 +138,15 @@ class FluxGenerator:
                 local_files_only=False,
             )
 
-            # M1 optimizations
             self.pipe = self.pipe.to(DEVICE)
 
-            # Enable memory-efficient attention (native sdpa, xformers fallback)
             if hasattr(self.pipe, "enable_attention_slicing"):
                 self.pipe.enable_attention_slicing("auto")
             if hasattr(self.pipe, "enable_xformers_memory_efficient_attention"):
                 try:
                     self.pipe.enable_xformers_memory_efficient_attention()
                 except Exception:
-                    pass  # xformers not available on M1, use native sdpa
+                    pass
 
             self.model_loaded = True
             print(f"  {C.green('✓')} Flux-dev ready")
@@ -131,10 +162,26 @@ class FluxGenerator:
                 print(f"    3. Accept model: https://huggingface.co/black-forest-labs/FLUX.1-dev")
             sys.exit(1)
 
-    def load_lora(self, lora_name: str):
-        """Load and merge LoRA weights."""
-        if not self.pipe:
-            self.load_model()
+    def _apply_lora(self, lora_name: Optional[str]) -> bool:
+        """
+        Swap the active LoRA. Repeated calls used to fuse_lora() additively,
+        compounding weights across requests. We unload everything and then
+        load the requested LoRA fresh, tracking the current name so a no-op
+        request stays a no-op.
+        """
+        if lora_name == self.current_lora:
+            return True
+
+        # Unload anything currently attached.
+        if self.current_lora is not None:
+            try:
+                self.pipe.unload_lora_weights()
+            except Exception as e:
+                print(f"  {C.yellow('⚠')} Failed to unload prior LoRA: {e}")
+            self.current_lora = None
+
+        if lora_name is None:
+            return True
 
         lora_path = LORA_DIR / f"{lora_name}.safetensors"
         if not lora_path.exists():
@@ -143,9 +190,11 @@ class FluxGenerator:
 
         try:
             print(f"  {C.dim('Loading LoRA')}: {lora_name}")
-            self.pipe.load_lora_weights(str(lora_path))
-            self.pipe.fuse_lora(lora_scale=1.0)
-            print(f"  {C.green('✓')} LoRA merged")
+            self.pipe.load_lora_weights(str(lora_path), adapter_name=lora_name)
+            if hasattr(self.pipe, "set_adapters"):
+                self.pipe.set_adapters([lora_name], adapter_weights=[1.0])
+            self.current_lora = lora_name
+            print(f"  {C.green('✓')} LoRA active: {lora_name}")
             return True
         except Exception as e:
             print(f"  {C.yellow('⚠')} Failed to load LoRA: {e}")
@@ -158,18 +207,15 @@ class FluxGenerator:
         width: int = 1024,
         num_inference_steps: int = 50,
         guidance_scale: float = 3.5,
-        seed: int = None,
-        lora: str = None,
-        controlnet_ref: str = None,
-    ) -> PIL.Image.Image:
+        seed: Optional[int] = None,
+        lora: Optional[str] = None,
+    ) -> Optional[PIL.Image.Image]:
         """Generate a single image."""
         if not self.pipe:
             self.load_model()
 
-        if lora:
-            self.load_lora(lora)
+        self._apply_lora(lora)
 
-        # Set seed for reproducibility
         if seed is not None:
             generator = torch.Generator(device=DEVICE).manual_seed(seed)
         else:
@@ -203,7 +249,6 @@ class FluxGenerator:
             return None
 
     def _print_memory_usage(self):
-        """Print current memory usage for M1 optimization."""
         if torch.backends.mps.is_available():
             allocated = torch.mps.current_allocated_memory() / 1e9
             reserved = torch.mps.driver_allocated_memory() / 1e9
@@ -219,73 +264,19 @@ def main():
     parser = argparse.ArgumentParser(
         description="Generate photorealistic dinosaur images with Flux-dev + LoRA"
     )
-    parser.add_argument(
-        "--prompt",
-        type=str,
-        required=True,
-        help="Image generation prompt",
-    )
-    parser.add_argument(
-        "--height",
-        type=int,
-        default=1024,
-        help="Image height in pixels (default: 1024)",
-    )
-    parser.add_argument(
-        "--width",
-        type=int,
-        default=1024,
-        help="Image width in pixels (default: 1024)",
-    )
-    parser.add_argument(
-        "--steps",
-        type=int,
-        default=50,
-        help="Inference steps (more = higher quality, slower) (default: 50)",
-    )
-    parser.add_argument(
-        "--guidance",
-        type=float,
-        default=3.5,
-        help="Classifier-free guidance scale (default: 3.5)",
-    )
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=None,
-        help="Random seed for reproducibility",
-    )
-    parser.add_argument(
-        "--lora",
-        type=str,
-        default=None,
-        help="LoRA name to load (e.g., 'dino_winners')",
-    )
-    parser.add_argument(
-        "--controlnet",
-        type=str,
-        default=None,
-        help="ControlNet name for anatomy guidance",
-    )
-    parser.add_argument(
-        "--cref",
-        type=str,
-        default=None,
-        help="Character reference image URL or path",
-    )
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=None,
-        help="Output file path (default: assets/gallery/flux/timestamp.png)",
-    )
+    parser.add_argument("--prompt", type=str, required=True)
+    parser.add_argument("--height", type=int, default=1024)
+    parser.add_argument("--width", type=int, default=1024)
+    parser.add_argument("--steps", type=int, default=50)
+    parser.add_argument("--guidance", type=float, default=3.5)
+    parser.add_argument("--seed", type=int, default=None)
+    parser.add_argument("--lora", type=str, default=None)
+    parser.add_argument("--output", type=Path, default=None)
 
     args = parser.parse_args()
 
-    # Initialize generator
     gen = FluxGenerator()
 
-    # Generate image
     image = gen.generate(
         prompt=args.prompt,
         height=args.height,
@@ -294,20 +285,27 @@ def main():
         guidance_scale=args.guidance,
         seed=args.seed,
         lora=args.lora,
-        controlnet_ref=args.controlnet,
     )
 
     if image is None:
         sys.exit(1)
 
-    # Save image
     output_path = args.output or (
         OUTPUT_DIR / f"flux_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
     )
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    image.save(output_path)
 
-    print(f"\n  {C.green('✓')} Saved to: {C.teal(str(output_path))}\n")
+    params = {
+        "height": args.height,
+        "width": args.width,
+        "steps": args.steps,
+        "guidance": args.guidance,
+        "seed": args.seed,
+        "lora": args.lora,
+    }
+    sidecar_path = save_with_sidecar(image, output_path, args.prompt, params)
+
+    print(f"\n  {C.green('✓')} Saved to: {C.teal(str(output_path))}")
+    print(f"  {C.green('✓')} Sidecar:  {C.teal(str(sidecar_path))}\n")
 
 
 if __name__ == "__main__":

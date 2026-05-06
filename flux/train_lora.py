@@ -20,9 +20,6 @@ from diffusers import FluxPipeline
 from peft import get_peft_model, LoraConfig, TaskType
 import PIL.Image
 
-# M1 optimizations
-torch.set_default_device("mps" if torch.backends.mps.is_available() else "cpu")
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Constants
 # ─────────────────────────────────────────────────────────────────────────────
@@ -247,7 +244,26 @@ def main():
         help=f"Learning rate (default: {LEARNING_RATE})",
     )
 
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Required to actually attempt training. Without it, train_lora "
+             "exits with the WIP reasons (training loop is a placeholder).",
+    )
+
     args = parser.parse_args()
+
+    if not args.force:
+        print(f"\n{C.bold('train_lora.py is WORK-IN-PROGRESS — refusing to run.')}")
+        print(f"{C.dim('Reasons:')}")
+        print(f"  • Training loop body is a placeholder ({C.dim('pass')}); no gradients flow.")
+        print(f"  • No noise scheduler, timestep sampling, or text-encoder pass.")
+        print(f"  • Optimizer.step() is never called — saved weights would be untrained.")
+        print(f"  • peft save_pretrained() target is a file path, not a directory.")
+        print(f"  • LoraConfig task_type=IMAGE_2_IMAGE is not valid for Flux transformers.")
+        print(f"\nRe-run with {C.teal('--force')} to attempt anyway "
+              f"(expect failure / no-op output).\n")
+        sys.exit(2)
 
     success = train_lora(
         output_name=args.output,
