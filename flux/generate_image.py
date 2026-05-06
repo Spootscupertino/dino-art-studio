@@ -19,7 +19,7 @@ from typing import Optional
 # Flux-dev needs ~22GB; default MPS cap is ~20GB on a 24GB Mac.
 # Disable the upper limit so allocations spill to system RAM/swap instead
 # of OOMing. Must be set before importing torch.
-os.environ.setdefault("PYTORCH_MPS_HIGH_WATERMARK_RATIO", "0.0")
+os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
 
 import torch
 from diffusers import FluxPipeline
@@ -145,7 +145,20 @@ class FluxGenerator:
                 local_files_only=False,
             )
 
-            self.pipe = self.pipe.to(DEVICE)
+            # On a 24GB M1, .to("mps") on the full pipeline OOMs (Flux is
+            # ~22GB and MPS allocator caps below total RAM). Sequential CPU
+            # offload moves submodules onto MPS only while they're running,
+            # then back to CPU. Slower per generation, but it actually fits.
+            offloaded = False
+            if DEVICE == "mps" and hasattr(self.pipe, "enable_sequential_cpu_offload"):
+                try:
+                    self.pipe.enable_sequential_cpu_offload(device=DEVICE)
+                    offloaded = True
+                    print(f"  {C.dim('Using sequential CPU offload (memory-safe on 24GB M1)')}")
+                except Exception as e:
+                    print(f"  {C.yellow('⚠')} Sequential offload unavailable ({e}); using full move")
+            if not offloaded:
+                self.pipe = self.pipe.to(DEVICE)
 
             if hasattr(self.pipe, "enable_attention_slicing"):
                 self.pipe.enable_attention_slicing("auto")

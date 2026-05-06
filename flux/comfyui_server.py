@@ -18,7 +18,7 @@ from datetime import datetime
 from typing import Optional
 
 # Must be set before torch import; see flux/generate_image.py.
-os.environ.setdefault("PYTORCH_MPS_HIGH_WATERMARK_RATIO", "0.0")
+os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
 
 import torch
 
