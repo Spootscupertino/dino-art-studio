@@ -1,44 +1,43 @@
 #!/usr/bin/env python3
 """
-Flux-dev image generation for photorealistic dinosaur images.
-M1 Mac optimized. Supports LoRA fine-tuning.
+Flux-dev image generation for photorealistic dinosaur images on Apple Silicon.
+
+Backend: mflux (https://github.com/filipstrand/mflux). Uses Apple's MLX
+framework with 4-bit quantization so Flux-dev fits comfortably on a 24GB
+M1 / M2 / M3 (~6GB resident vs ~22GB for the diffusers/MPS path).
 
 Usage:
     python flux/generate_image.py --prompt "a Tyrannosaurus in a river delta"
-    python flux/generate_image.py --prompt "..." --lora dino_winners --seed 42
+    python flux/generate_image.py --prompt "..." --seed 42
 """
 
 import argparse
 import json
-import os
+import random
 import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
-# Flux-dev needs ~22GB; default MPS cap is ~20GB on a 24GB Mac.
-# Disable the upper limit so allocations spill to system RAM/swap instead
-# of OOMing. Must be set before importing torch.
-os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
-
-import torch
-from diffusers import FluxPipeline
 import PIL.Image
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Constants
 # ─────────────────────────────────────────────────────────────────────────────
 
-FLUX_MODEL = "black-forest-labs/FLUX.1-dev"
+FLUX_ALIAS = "dev"          # "dev" (slower, higher quality) or "schnell" (4 steps)
+QUANTIZE_BITS = 4           # 4 or 8. 4-bit is the right default for 24GB unified memory.
 LORA_DIR = Path(__file__).parent / "loras"
 OUTPUT_DIR = Path(__file__).parent.parent / "assets" / "gallery" / "flux"
 
-DTYPE = torch.bfloat16
-DEVICE = "mps" if torch.backends.mps.is_available() else "cpu"
+MODEL_NAME = f"FLUX.1-{FLUX_ALIAS} ({QUANTIZE_BITS}-bit, mflux/MLX)"
+DEVICE = "mps"              # mflux uses MLX which targets MPS; surfaced for sidecar metadata.
+DTYPE = "bfloat16"          # Same; surfaced for sidecar metadata only.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Color & formatting
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class C:
     RESET = "\033[0m"
@@ -108,9 +107,10 @@ def save_with_sidecar(
         "image": output_path.name,
         "prompt": prompt,
         "params": params,
-        "model": FLUX_MODEL,
+        "model": MODEL_NAME,
         "device": DEVICE,
-        "dtype": str(DTYPE).replace("torch.", ""),
+        "dtype": DTYPE,
+        "quantize_bits": QUANTIZE_BITS,
         "timestamp": datetime.now().isoformat(timespec="seconds"),
     }
     sidecar_path.write_text(json.dumps(sidecar, indent=2))
@@ -123,72 +123,48 @@ def save_with_sidecar(
 
 
 class FluxGenerator:
-    """M1-optimized Flux-dev pipeline with LoRA support."""
+    """
+    Apple Silicon-native Flux pipeline backed by mflux.
+
+    Public surface (called by flux/comfyui_server.py):
+      - load_model()
+      - generate(prompt, height, width, num_inference_steps, guidance_scale, seed, lora)
+      - model_loaded (bool)
+      - current_lora (Optional[str])
+    """
 
     def __init__(self):
-        self.pipe = None
+        self.flux = None
         self.model_loaded = False
         self.current_lora: Optional[str] = None
 
     def load_model(self):
-        """Load Flux-dev model with M1 optimizations."""
+        """Load Flux-dev (4-bit) via mflux."""
         if self.model_loaded:
             return
 
-        print(f"\n{C.teal('⏳ Loading Flux-dev model...')}")
-        print(f"  {C.dim('(first load may take 1-2 min, then cached)')}")
+        print(f"\n{C.teal('⏳ Loading Flux-dev model (4-bit, mflux)...')}")
+        print(f"  {C.dim('(first load downloads weights; subsequent loads use cache)')}")
 
         try:
-            self.pipe = FluxPipeline.from_pretrained(
-                FLUX_MODEL,
-                torch_dtype=DTYPE,
-                local_files_only=False,
+            from mflux import Flux1
+        except ImportError as e:
+            raise RuntimeError(
+                "mflux is not installed. Run: pip3 install mflux\n"
+                "(See flux/requirements.txt.)"
+            ) from e
+
+        try:
+            self.flux = Flux1.from_alias(
+                alias=FLUX_ALIAS,
+                quantize=QUANTIZE_BITS,
             )
-
-            # On a 24GB M1, .to("mps") on the full pipeline OOMs (Flux is
-            # ~22GB; MPS allocator caps below total RAM). enable_model_cpu_
-            # offload moves whole submodels (text encoder, transformer, VAE)
-            # to MPS only when they run, then back to CPU. Sequential offload
-            # would be safer memory-wise but is ~10x slower (per-layer swap),
-            # so we use model-level offload as the default and let users opt
-            # in to sequential via FLUX_SEQUENTIAL_OFFLOAD=1 if model offload
-            # still OOMs.
-            offloaded = False
-            if DEVICE == "mps":
-                use_seq = os.environ.get("FLUX_SEQUENTIAL_OFFLOAD") == "1"
-                if use_seq and hasattr(self.pipe, "enable_sequential_cpu_offload"):
-                    try:
-                        self.pipe.enable_sequential_cpu_offload(device=DEVICE)
-                        offloaded = True
-                        print(f"  {C.dim('Sequential CPU offload (slow but minimal memory)')}")
-                    except Exception as e:
-                        print(f"  {C.yellow('⚠')} Sequential offload failed ({e})")
-                if not offloaded and hasattr(self.pipe, "enable_model_cpu_offload"):
-                    try:
-                        self.pipe.enable_model_cpu_offload(device=DEVICE)
-                        offloaded = True
-                        print(f"  {C.dim('Model CPU offload (balanced for 24GB M1)')}")
-                    except Exception as e:
-                        print(f"  {C.yellow('⚠')} Model offload failed ({e}); falling back")
-            if not offloaded:
-                self.pipe = self.pipe.to(DEVICE)
-
-            if hasattr(self.pipe, "enable_attention_slicing"):
-                self.pipe.enable_attention_slicing("auto")
-            if hasattr(self.pipe, "enable_xformers_memory_efficient_attention"):
-                try:
-                    self.pipe.enable_xformers_memory_efficient_attention()
-                except Exception:
-                    pass
-
             self.model_loaded = True
-            print(f"  {C.green('✓')} Flux-dev ready")
-            self._print_memory_usage()
-
+            print(f"  {C.green('✓')} Flux-{FLUX_ALIAS} ready ({QUANTIZE_BITS}-bit, MLX)")
         except Exception as e:
             error_msg = str(e)
             print(f"  {C.red('✗')} Failed to load model: {e}")
-            if "401" in error_msg or "GatedRepoError" in error_msg or "Access to model" in error_msg:
+            if "401" in error_msg or "GatedRepoError" in error_msg or "Access" in error_msg:
                 print(f"\n  {C.yellow('⚠')} FLUX.1-dev requires HuggingFace authentication:")
                 print(f"    1. Get token: https://huggingface.co/settings/tokens")
                 print(f"    2. Run: hf auth login")
@@ -197,33 +173,17 @@ class FluxGenerator:
                     "FLUX.1-dev access denied. Run `hf auth login` and accept the "
                     "model license at https://huggingface.co/black-forest-labs/FLUX.1-dev"
                 ) from e
-            if "out of memory" in error_msg.lower() or "MPS" in error_msg:
-                raise RuntimeError(
-                    f"MPS out of memory loading Flux-dev. Try: "
-                    f"export PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 before starting the server. "
-                    f"Original: {error_msg}"
-                ) from e
             raise
 
     def _apply_lora(self, lora_name: Optional[str]) -> bool:
         """
-        Swap the active LoRA. Repeated calls used to fuse_lora() additively,
-        compounding weights across requests. We unload everything and then
-        load the requested LoRA fresh, tracking the current name so a no-op
-        request stays a no-op.
+        LoRA support is on the Phase C roadmap. mflux exposes LoRAs via a
+        different API (constructor arg, not runtime swap), so we cannot
+        switch them on a live instance. For now: log and continue with the
+        base model. Once Phase C ships, we'll instantiate Flux1 per-LoRA
+        and cache by name.
         """
-        if lora_name == self.current_lora:
-            return True
-
-        # Unload anything currently attached.
-        if self.current_lora is not None:
-            try:
-                self.pipe.unload_lora_weights()
-            except Exception as e:
-                print(f"  {C.yellow('⚠')} Failed to unload prior LoRA: {e}")
-            self.current_lora = None
-
-        if lora_name is None:
+        if lora_name is None or lora_name == self.current_lora:
             return True
 
         lora_path = LORA_DIR / f"{lora_name}.safetensors"
@@ -231,71 +191,63 @@ class FluxGenerator:
             print(f"  {C.yellow('⚠')} LoRA not found: {lora_path}")
             return False
 
-        try:
-            print(f"  {C.dim('Loading LoRA')}: {lora_name}")
-            self.pipe.load_lora_weights(str(lora_path), adapter_name=lora_name)
-            if hasattr(self.pipe, "set_adapters"):
-                self.pipe.set_adapters([lora_name], adapter_weights=[1.0])
-            self.current_lora = lora_name
-            print(f"  {C.green('✓')} LoRA active: {lora_name}")
-            return True
-        except Exception as e:
-            print(f"  {C.yellow('⚠')} Failed to load LoRA: {e}")
-            return False
+        print(f"  {C.yellow('⚠')} LoRA hot-swap not yet wired for mflux backend; "
+              f"running base model. (Phase C roadmap.)")
+        return False
 
     def generate(
         self,
         prompt: str,
         height: int = 1024,
         width: int = 1024,
-        num_inference_steps: int = 50,
+        num_inference_steps: int = 20,
         guidance_scale: float = 3.5,
         seed: Optional[int] = None,
         lora: Optional[str] = None,
     ) -> Optional[PIL.Image.Image]:
         """Generate a single image."""
-        if not self.pipe:
+        if not self.flux:
             self.load_model()
 
         self._apply_lora(lora)
 
-        if seed is not None:
-            generator = torch.Generator(device=DEVICE).manual_seed(seed)
-        else:
-            generator = None
+        if seed is None:
+            seed = random.randint(0, 2**31 - 1)
 
         print(f"\n{C.blue('═' * 60)}")
         print(f"  {C.bold('GENERATING')} {C.teal(f'{width}×{height}')}")
         print(f"{C.blue('═' * 60)}")
         print(f"  {C.dim('Prompt:')} {prompt[:70]}{'...' if len(prompt) > 70 else ''}")
-        if lora:
-            print(f"  {C.dim('LoRA:')} {lora}")
-        print(f"  {C.dim('Steps:')} {num_inference_steps}  {C.dim('Guidance:')} {guidance_scale}")
+        print(f"  {C.dim('Steps:')} {num_inference_steps}  "
+              f"{C.dim('Guidance:')} {guidance_scale}  "
+              f"{C.dim('Seed:')} {seed}")
 
         try:
-            with torch.no_grad():
-                image = self.pipe(
-                    prompt=prompt,
-                    height=height,
-                    width=width,
-                    num_inference_steps=num_inference_steps,
-                    guidance_scale=guidance_scale,
-                    generator=generator,
-                ).images[0]
+            from mflux import Config
+            config = Config(
+                num_inference_steps=num_inference_steps,
+                height=height,
+                width=width,
+                guidance=guidance_scale,
+            )
+            result = self.flux.generate_image(
+                seed=seed,
+                prompt=prompt,
+                config=config,
+            )
+
+            # mflux returns a GeneratedImage wrapper around a PIL.Image.
+            pil_image = getattr(result, "image", result)
+            if not isinstance(pil_image, PIL.Image.Image):
+                # Some mflux versions expose .pil_image instead.
+                pil_image = getattr(result, "pil_image", None) or pil_image
 
             print(f"\n  {C.green('✓')} Generated successfully")
-            self._print_memory_usage()
-            return image
+            return pil_image
 
         except Exception as e:
             print(f"  {C.red('✗')} Generation failed: {e}")
             return None
-
-    def _print_memory_usage(self):
-        if torch.backends.mps.is_available():
-            allocated = torch.mps.current_allocated_memory() / 1e9
-            reserved = torch.mps.driver_allocated_memory() / 1e9
-            print(f"  {C.dim(f'Memory: {allocated:.1f}GB allocated, {reserved:.1f}GB reserved')}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -305,12 +257,12 @@ class FluxGenerator:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate photorealistic dinosaur images with Flux-dev + LoRA"
+        description="Generate photorealistic dinosaur images with Flux-dev (4-bit, mflux)"
     )
     parser.add_argument("--prompt", type=str, required=True)
     parser.add_argument("--height", type=int, default=1024)
     parser.add_argument("--width", type=int, default=1024)
-    parser.add_argument("--steps", type=int, default=50)
+    parser.add_argument("--steps", type=int, default=20)
     parser.add_argument("--guidance", type=float, default=3.5)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--lora", type=str, default=None)

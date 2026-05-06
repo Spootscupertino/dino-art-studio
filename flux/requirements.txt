@@ -26,10 +26,10 @@ numpy>=1.24.0
 opencv-python>=4.8.0
 Pillow>=10.0.0
 
-# Optional: Model optimization
-
-# Optional: Quantization (if needed for memory)
-# bitsandbytes>=0.41.0  # May not work well on M1
+# Apple Silicon native Flux runner (4-bit quantized, MLX backend)
+# Replaces diffusers + bitsandbytes for actual inference on 24GB M1.
+# diffusers is still used by train_lora.py and stays in this file above.
+mflux>=0.5.0
 
 # Development
 pytest>=7.4.0

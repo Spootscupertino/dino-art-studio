@@ -10,17 +10,11 @@ Usage:
 
 import argparse
 import asyncio
-import os
 import re
 import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
-
-# Must be set before torch import; see flux/generate_image.py.
-os.environ["PYTORCH_MPS_HIGH_WATERMARK_RATIO"] = "0.0"
-
-import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -188,9 +182,10 @@ async def list_loras():
 @app.get("/api/models/flux")
 async def get_flux_status():
     return {
-        "model": "FLUX.1-dev",
-        "device": "mps" if torch.backends.mps.is_available() else "cpu",
+        "model": "FLUX.1-dev (4-bit, mflux/MLX)",
+        "device": "mps",
         "dtype": "bfloat16",
+        "quantize_bits": 4,
         "loaded": generator.model_loaded,
     }
 
@@ -522,7 +517,7 @@ def get_branded_html() -> str:
                         </div>
                         <div class="control-item">
                             <label>Steps</label>
-                            <input type="number" id="steps" value="50" min="20" max="100">
+                            <input type="number" id="steps" value="20" min="4" max="100">
                         </div>
                         <div class="control-item">
                             <label>Guidance</label>
