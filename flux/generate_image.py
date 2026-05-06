@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Flux-dev image generation for photorealistic dinosaur images on Apple Silicon.
+SDXL image generation for photorealistic dinosaur images on Apple Silicon.
 
-Backend: mflux (https://github.com/filipstrand/mflux). Uses Apple's MLX
-framework with 4-bit quantization so Flux-dev fits comfortably on a 24GB
-M1 / M2 / M3 (~6GB resident vs ~22GB for the diffusers/MPS path).
+Backend: diffusers StableDiffusionXLPipeline with bfloat16 on MPS and model_cpu_offload
+for memory management. Runs on M1 / M2 / M3 (~7GB resident, ~2x faster than Flux-dev,
+excellent quality for dinosaur anatomy feedback loop).
 
 Usage:
     python flux/generate_image.py --prompt "a Tyrannosaurus in a river delta"
@@ -20,19 +20,19 @@ from datetime import datetime
 from typing import Optional
 
 import PIL.Image
+import torch
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Constants
 # ─────────────────────────────────────────────────────────────────────────────
 
-FLUX_ALIAS = "dev"          # "dev" (slower, higher quality) or "schnell" (4 steps)
-QUANTIZE_BITS = 4           # 4 or 8. 4-bit is the right default for 24GB unified memory.
+MODEL_ID = "stabilityai/stable-diffusion-xl-base-1.0"
 LORA_DIR = Path(__file__).parent / "loras"
 OUTPUT_DIR = Path(__file__).parent.parent / "assets" / "gallery" / "flux"
 
-MODEL_NAME = f"FLUX.1-{FLUX_ALIAS} ({QUANTIZE_BITS}-bit, mflux/MLX)"
-DEVICE = "mps"              # mflux uses MLX which targets MPS; surfaced for sidecar metadata.
-DTYPE = "bfloat16"          # Same; surfaced for sidecar metadata only.
+MODEL_NAME = "SDXL 1.0 (bfloat16, diffusers, M1-optimized)"
+DEVICE = "mps"
+DTYPE = "bfloat16"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Color & formatting
@@ -110,7 +110,6 @@ def save_with_sidecar(
         "model": MODEL_NAME,
         "device": DEVICE,
         "dtype": DTYPE,
-        "quantize_bits": QUANTIZE_BITS,
         "timestamp": datetime.now().isoformat(timespec="seconds"),
     }
     sidecar_path.write_text(json.dumps(sidecar, indent=2))
@@ -124,7 +123,7 @@ def save_with_sidecar(
 
 class FluxGenerator:
     """
-    Apple Silicon-native Flux pipeline backed by mflux.
+    Apple Silicon-native SDXL pipeline backed by diffusers.
 
     Public surface (called by flux/comfyui_server.py):
       - load_model()
@@ -134,54 +133,59 @@ class FluxGenerator:
     """
 
     def __init__(self):
-        self.flux = None
+        self.pipe = None
         self.model_loaded = False
         self.current_lora: Optional[str] = None
 
     def load_model(self):
-        """Load Flux-dev (4-bit) via mflux."""
+        """Load SDXL via diffusers with bfloat16 on MPS."""
         if self.model_loaded:
             return
 
-        print(f"\n{C.teal('⏳ Loading Flux-dev model (4-bit, mflux)...')}")
+        print(f"\n{C.teal('⏳ Loading SDXL model (bfloat16, diffusers)...')}")
         print(f"  {C.dim('(first load downloads weights; subsequent loads use cache)')}")
 
         try:
-            from mflux import Flux1
+            from diffusers import StableDiffusionXLPipeline
         except ImportError as e:
             raise RuntimeError(
-                "mflux is not installed. Run: pip3 install mflux\n"
+                "diffusers is not installed. Run: pip3 install diffusers torch\n"
                 "(See flux/requirements.txt.)"
             ) from e
 
         try:
-            self.flux = Flux1.from_alias(
-                alias=FLUX_ALIAS,
-                quantize=QUANTIZE_BITS,
+            # Load base model
+            self.pipe = StableDiffusionXLPipeline.from_pretrained(
+                MODEL_ID,
+                torch_dtype=torch.bfloat16,
+                use_safetensors=True,
+                variant="fp16",
             )
+
+            # Move to MPS and enable memory optimization
+            self.pipe = self.pipe.to(DEVICE)
+            self.pipe.enable_model_cpu_offload()
+
             self.model_loaded = True
-            print(f"  {C.green('✓')} Flux-{FLUX_ALIAS} ready ({QUANTIZE_BITS}-bit, MLX)")
+            print(f"  {C.green('✓')} SDXL ready (bfloat16, MPS with cpu_offload)")
         except Exception as e:
             error_msg = str(e)
             print(f"  {C.red('✗')} Failed to load model: {e}")
             if "401" in error_msg or "GatedRepoError" in error_msg or "Access" in error_msg:
-                print(f"\n  {C.yellow('⚠')} FLUX.1-dev requires HuggingFace authentication:")
+                print(f"\n  {C.yellow('⚠')} SDXL requires HuggingFace authentication:")
                 print(f"    1. Get token: https://huggingface.co/settings/tokens")
                 print(f"    2. Run: hf auth login")
-                print(f"    3. Accept model: https://huggingface.co/black-forest-labs/FLUX.1-dev")
+                print(f"    3. Accept model: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0")
                 raise RuntimeError(
-                    "FLUX.1-dev access denied. Run `hf auth login` and accept the "
-                    "model license at https://huggingface.co/black-forest-labs/FLUX.1-dev"
+                    "SDXL access denied. Run `hf auth login` and accept the "
+                    "model license at https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0"
                 ) from e
             raise
 
     def _apply_lora(self, lora_name: Optional[str]) -> bool:
         """
-        LoRA support is on the Phase C roadmap. mflux exposes LoRAs via a
-        different API (constructor arg, not runtime swap), so we cannot
-        switch them on a live instance. For now: log and continue with the
-        base model. Once Phase C ships, we'll instantiate Flux1 per-LoRA
-        and cache by name.
+        LoRA support is on the Phase C roadmap. For now: log and continue with the
+        base model. Once Phase C ships, we'll call pipe.load_lora_weights() and cache.
         """
         if lora_name is None or lora_name == self.current_lora:
             return True
@@ -191,7 +195,7 @@ class FluxGenerator:
             print(f"  {C.yellow('⚠')} LoRA not found: {lora_path}")
             return False
 
-        print(f"  {C.yellow('⚠')} LoRA hot-swap not yet wired for mflux backend; "
+        print(f"  {C.yellow('⚠')} LoRA hot-swap not yet wired for SDXL backend; "
               f"running base model. (Phase C roadmap.)")
         return False
 
@@ -206,7 +210,7 @@ class FluxGenerator:
         lora: Optional[str] = None,
     ) -> Optional[PIL.Image.Image]:
         """Generate a single image."""
-        if not self.flux:
+        if not self.pipe:
             self.load_model()
 
         self._apply_lora(lora)
@@ -223,24 +227,19 @@ class FluxGenerator:
               f"{C.dim('Seed:')} {seed}")
 
         try:
-            from mflux import Config
-            config = Config(
-                num_inference_steps=num_inference_steps,
+            generator = torch.Generator(device=DEVICE).manual_seed(seed)
+
+            result = self.pipe(
+                prompt=prompt,
                 height=height,
                 width=width,
-                guidance=guidance_scale,
-            )
-            result = self.flux.generate_image(
-                seed=seed,
-                prompt=prompt,
-                config=config,
+                num_inference_steps=num_inference_steps,
+                guidance_scale=guidance_scale,
+                generator=generator,
             )
 
-            # mflux returns a GeneratedImage wrapper around a PIL.Image.
-            pil_image = getattr(result, "image", result)
-            if not isinstance(pil_image, PIL.Image.Image):
-                # Some mflux versions expose .pil_image instead.
-                pil_image = getattr(result, "pil_image", None) or pil_image
+            # diffusers returns an object with .images[0]
+            pil_image = result.images[0] if hasattr(result, 'images') else result
 
             print(f"\n  {C.green('✓')} Generated successfully")
             return pil_image
@@ -257,7 +256,7 @@ class FluxGenerator:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate photorealistic dinosaur images with Flux-dev (4-bit, mflux)"
+        description="Generate photorealistic dinosaur images with SDXL (bfloat16, diffusers)"
     )
     parser.add_argument("--prompt", type=str, required=True)
     parser.add_argument("--height", type=int, default=1024)
