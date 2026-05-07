@@ -584,26 +584,26 @@ TERRESTRIAL_MOOD_BY_LIGHTING = {
 }
 
 TERRESTRIAL_BEHAVIOR_BY_MOOD = {
-    "heat_rest":             ["basking_flat",      "resting_alert",     "post_rain_stillness","jaw_clean_on_ground","standing_still"],
+    "heat_rest":             ["basking_flat",      "resting_alert",     "post_rain_stillness","standing_still",    "mud_wallow"],
     "serene":                ["resting_alert",     "standing_still",    "post_rain_stillness","basking_flat",      "feeding"],
-    "closed_mouth_resting":  ["basking_flat",      "resting_alert",     "standing_still",    "post_rain_stillness","jaw_clean_on_ground"],
+    "closed_mouth_resting":  ["basking_flat",      "resting_alert",     "standing_still",    "post_rain_stillness","emerging_from_cover"],
     "eye_contact":           ["standing_still",    "scanning_territory","emerging_from_cover","threat_display",    "resting_alert"],
-    "menacing":              ["charging_full",     "threat_display",    "tail_swipe",        "head_butt_spar",    "scanning_territory"],
-    "alert_scan":            ["scanning_territory","freeze_detect",     "standing_still",    "resting_alert",     "emerging_from_cover"],
-    "mid_stride":            ["mid_stride",        "charging_full",     "tail_swipe",        "scanning_territory","emerging_from_cover"],
+    "menacing":              ["charging_full",     "threat_display",    "scanning_territory","emerging_from_cover","mid_stride"],
+    "alert_scan":            ["scanning_territory","freeze_detect",     "emerging_from_cover","resting_alert",     "mid_stride"],
+    "mid_stride":            ["mid_stride",        "charging_full",     "scanning_territory","emerging_from_cover","freeze_detect"],
     "drinking":              ["drinking_at_water", "shaking_off_water", "standing_still",    "mud_wallow",        "post_rain_stillness"],
-    "feeding_focus":         ["feeding",           "jaw_clean_on_ground","carcass_standing", "standing_still",    "scanning_territory"],
-    "territorial_hold":      ["threat_display",    "scanning_territory","tail_swipe",        "head_butt_spar",    "standing_still"],
+    "feeding_focus":         ["feeding",           "carcass_standing",  "standing_still",    "scanning_territory","resting_alert"],
+    "territorial_hold":      ["threat_display",    "scanning_territory","tail_swipe",        "standing_still",    "emerging_from_cover"],
     "post_kill_pause":       ["carcass_standing",  "standing_still",    "jaw_clean_on_ground","scanning_territory","resting_alert"],
-    "scent_tracking":        ["scanning_territory","emerging_from_cover","freeze_detect",    "standing_still",    "mid_stride"],
+    "scent_tracking":        ["scanning_territory","emerging_from_cover","freeze_detect",    "mid_stride",        "standing_still"],
     "dust_bath":             ["dust_rolling",      "shaking_off_water", "mud_wallow",        "basking_flat",      "resting_alert"],
     "wading_shallow":        ["drinking_at_water", "mud_wallow",        "shaking_off_water", "standing_still",    "post_rain_stillness"],
     "startled_freeze":       ["freeze_detect",     "standing_still",    "scanning_territory","resting_alert",     "emerging_from_cover"],
     "grooming":              ["jaw_clean_on_ground","shaking_off_water","dust_rolling",      "resting_alert",     "mud_wallow"],
     "herd_grazing":          ["feeding",           "mid_stride",        "standing_still",    "resting_alert",     "drinking_at_water"],
     "dawn_waking":           ["emerging_from_cover","standing_still",   "post_rain_stillness","shaking_off_water","scanning_territory"],
-    "quiet_power":           ["standing_still",    "scanning_territory","mid_stride",        "resting_alert",     "emerging_from_cover"],
-    "dusk_settling":         ["resting_alert",     "standing_still",    "basking_flat",      "post_rain_stillness","jaw_clean_on_ground"],
+    "quiet_power":           ["standing_still",    "scanning_territory","mid_stride",        "emerging_from_cover","resting_alert"],
+    "dusk_settling":         ["resting_alert",     "standing_still",    "basking_flat",      "post_rain_stillness","scanning_territory"],
 }
 
 TERRESTRIAL_CONDITION_BY_SPECIES = {
@@ -2700,7 +2700,11 @@ def make_environment_fix_prompt(species, environment: str, weather_param, lighti
     return f"{core} {flags}"
 
 
-
+def make_mouth_fix_prompt(species, mj_style: str, stylize: int = 20) -> str:
+    """Vary Region prompt for mouth/jaw. Paint over jaw area, paste this prompt."""
+    diet    = species["diet"] or ""
+    habitat = species["habitat"] or "terrestrial"
+    name    = species["name"]
 
     if habitat == "marine" and name in ("Megalodon", "Cretoxyrhina"):
         # Sharks — rows of triangular teeth, no gums like reptiles
@@ -2782,16 +2786,14 @@ def make_environment_fix_prompt(species, environment: str, weather_param, lighti
             )
     elif diet in ("Carnivore", "Piscivore", "Filter-feeder"):
         core = (
-            f"extreme close-up of {name} open jaw, "
-            "each tooth a different length and curvature, "
-            "yellowed and stained at base fading to off-white tip, "
-            "brown decay discolouration at gum line on several teeth, "
-            "fragment of bone or twig wedged between two teeth, "
-            "wet pink gum tissue, gum pockets raw and slightly receded, "
-            "heavy saliva stranding between upper and lower jaw, "
-            "single strand of saliva catching light, "
-            "flies on lip fold and nostril, animal unbothered, "
-            "water or moisture glistening on chin and lower jaw skin, "
+            f"extreme close-up of {name} jaw held slightly open, "
+            "each tooth a different length and curvature, yellowed and stained at base fading to off-white tip, "
+            "brown decay at gum line, fragment of bone wedged between two teeth, "
+            "thick rope of saliva hanging between upper and lower jaw, second strand catching rim light, "
+            "tongue flat and pale pink visible in jaw cavity, "
+            "breath condensation mist visible at jaw opening, "
+            "jaw muscles bulging at jaw hinge behind cheek, "
+            "wet skin glistening on chin and lower jaw, flies on lip fold, "
             "real wildlife photograph, saltwater crocodile jaw reference"
         )
     else:
@@ -3085,7 +3087,18 @@ def assemble_prompt(
     elif output_mode == "shoreline" and habitat == "marine":
         interaction = "body partially submerged, waterline crossing torso"
     else:
-        interaction = HABITAT_INTERACTION.get(habitat, HABITAT_INTERACTION["terrestrial"])
+        _trex_movement = {"mid_stride", "charging_full", "emerging_from_cover", "scent_tracking",
+                          "freeze_detect", "scanning_territory", "carcass_standing"}
+        if (habitat == "terrestrial"
+                and species["name"] in ("Tyrannosaurus rex", "Tyrannosaurus")
+                and behavior_param["name"] in _trex_movement):
+            interaction = (
+                "heavy footfall impact on damp soil, dust puffing from each step, "
+                "three-toed track impressions clearly visible behind animal, "
+                "displaced soil around toe impressions, ground compression visible"
+            )
+        else:
+            interaction = HABITAT_INTERACTION.get(habitat, HABITAT_INTERACTION["terrestrial"])
 
     # ── SECTION 3: ENVIRONMENT ────────────────────────────────────────────────
     # Habitat and period setting. Composition framing appended here.
@@ -4466,11 +4479,11 @@ def main() -> None:
         mood_param = _cpick("mood", f"for {lighting_param['name'].replace('_', ' ')} lighting")
         ctx["mood"] = mood_param["name"]
 
-        condition_param = _cpick("condition", f"for {species['name']} · {mood_param['name'].replace('_', ' ')}")
-        ctx["condition"] = condition_param["name"]
-
         behavior_param = _cpick("behavior", f"for {mood_param['name'].replace('_', ' ')} mood")
         ctx["behavior"] = behavior_param["name"]
+
+        condition_param = _cpick("condition", f"for {species['name']} · {behavior_param['name'].replace('_', ' ')}")
+        ctx["condition"] = condition_param["name"]
 
     # --- Weather: auto-selected with sky-compat filtering (Session 14) ---
     all_weather = fetch_parameters_by_category(conn, "weather", habitat=habitat)
