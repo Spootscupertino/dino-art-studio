@@ -94,10 +94,17 @@ _TREX_SIGNATURE = (
 
 
 def inject_trex_signature(prompt: str) -> str:
-    """Auto-append the T-rex triple threat (claws/mouth/feet) if prompt is a T-rex image."""
-    if any(kw in prompt.lower() for kw in _TREX_KEYWORDS):
-        return f"{prompt}, {_TREX_SIGNATURE}"
-    return prompt
+    """Auto-append the T-rex triple threat (claws/mouth/feet) if prompt is a T-rex image.
+
+    Idempotent: prompts that already came through generate_prompt.py's
+    TREX_SIGNATURE will contain "honey-gold teeth" — skip to avoid double-stamping.
+    """
+    p_lower = prompt.lower()
+    if not any(kw in p_lower for kw in _TREX_KEYWORDS):
+        return prompt
+    if "honey-gold" in p_lower:
+        return prompt
+    return f"{prompt}, {_TREX_SIGNATURE}"
 
 
 # ─────────────────────────────────────────────────────────────────────────────

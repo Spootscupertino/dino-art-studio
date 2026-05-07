@@ -16,11 +16,13 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
 
 from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 from flux.generate_image import FluxGenerator, save_with_sidecar, inject_trex_signature
@@ -40,8 +42,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-OUTPUT_DIR = Path("assets/gallery/flux")
-LORA_DIR = Path("flux/loras")
+OUTPUT_DIR = REPO_ROOT / "assets" / "gallery" / "flux"
+LORA_DIR = REPO_ROOT / "flux" / "loras"
+
+# Serve generated images as static files (absolute path)
+ASSETS_DIR = REPO_ROOT / "assets"
+if ASSETS_DIR.exists():
+    app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
 
 # The Flux pipeline is a single shared object. Two concurrent .generate() calls
 # would corrupt each other (LoRA swaps, RNG, MPS state). Serialize them.
@@ -160,9 +167,12 @@ async def generate_image(
         )
         if image is None:
             raise HTTPException(status_code=500, detail="Generation failed")
+        # Convert absolute path to URL path for browser
+        relative_path = output_path.relative_to(REPO_ROOT)
+        image_url = "/" + str(relative_path).replace("\\", "/")
         return {
             "success": True,
-            "image_path": str(output_path),
+            "image_path": image_url,
             "prompt": prompt,
             "params": params,
         }

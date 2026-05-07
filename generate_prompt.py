@@ -1523,6 +1523,23 @@ CANVAS_SPECIES_EXTRAS = {
 }
 
 # ---------------------------------------------------------------------------
+# T-REX ANATOMICAL DETAIL PARAMETERS (Phase B)
+# Granular control over claw and tooth rendering for highest accuracy
+# ---------------------------------------------------------------------------
+
+# T-REX SIGNATURE FEATURES (always applied, non-negotiable)
+# These are the three pillars of T-rex iconography: claws, mouth, presence
+TREX_SIGNATURE = {
+    "claws": "prominent dark curved claws 4-5 inches, sharp points, rough keratin texture, angled 45-60° downward",
+    "mouth": "massive jaw line with prominent conical honey-gold teeth 60+, visible tongue, saliva strands, breath mist in warm air",
+    "feet": "powerful foot impact on ground, visible footprints, heavy weight depression, dominant predatory stance",
+}
+
+def build_trex_anatomy_addon() -> str:
+    """Build T-rex signature addon: triple threat of claws, mouth detail, and ground presence."""
+    return f"{TREX_SIGNATURE['claws']}, {TREX_SIGNATURE['mouth']}, {TREX_SIGNATURE['feet']}"
+
+# ---------------------------------------------------------------------------
 # Output modes
 # Each entry drives fixed-camera text, composition instructions, and flags.
 # fixed_camera=None means the user picks a camera from the DB.
@@ -2967,6 +2984,11 @@ def assemble_prompt(
         anatomy_text = build_anatomy_prompt(anatomy, anatomy_mode)
         if anatomy_text:
             subject_parts.append(anatomy_text)
+
+        # ── T-rex Signature Features ──────────────────────────────────────────
+        # Emphasized claws + detailed teeth are non-negotiable T-rex identity
+        if species["name"] == "Tyrannosaurus rex":
+            subject_parts.append(build_trex_anatomy_addon())
 
         # ── Add LLaVA anatomy analysis from winning images ──────────────────
         # This reinforces what the anatomy module said with real-world examples
@@ -4439,6 +4461,10 @@ def main() -> None:
             print(f"  {C.YELLOW}⚠{C.RESET}  {C.WHITE}{fail}{C.RESET}")
         print()
 
+    # --- T-rex Signature Features (baked in) ---
+    if species["name"] == "Tyrannosaurus rex":
+        print(f"\n  {ok('AUTO-APPLIED')} {dim('[T-rex signature]')} {C.WHITE}Emphasized claws + detailed teeth{C.RESET}\n")
+
     # --- Show A/B test wins for this species (Session 17) ---
     _ensure_ab_tables(conn)
     show_species_ab_summary(conn, species["id"], species["name"])
@@ -4550,25 +4576,6 @@ def main() -> None:
     print(f"    {ok('+')} {dim('[weather]')}  {C.WHITE}{weather_param['name'].replace('_', ' ')}{C.RESET}")
     print()
 
-    # --- Context-aware refs (Session 23: 3-layer system) ---
-    # --sref: wildlife photos → photographic style guide
-    # --cref: paleoart renditions → correct morphology (or skeletal fallback)
-    sref_urls_list = []
-    cref_urls_list = []
-    cref_source = ""
-    if not args.sref:
-        sref_urls_list, cref_urls_list, cref_source = select_refs(
-            species["name"], output_mode, habitat, lighting_param["name"]
-        )
-        all_sref_data = load_sref_urls()
-        display_ref_selection(
-            species["name"], sref_urls_list, cref_urls_list, cref_source,
-            all_sref_data.get(species["name"], [])
-        )
-    else:
-        # CLI --sref passed: use it as-is (single URL from command line)
-        sref_urls_list = [args.sref]
-
     # --- Build prompt ---
     prompt_text = assemble_prompt(
         species, science, style_param, lighting_param, camera_param, mood_param,
@@ -4583,7 +4590,7 @@ def main() -> None:
         quality=args.quality,
         output_mode=output_mode,
         placement=placement,
-        has_sref=bool(sref_urls_list or cref_urls_list),
+        has_sref=False,
         habitat=habitat,
         secondary_species=secondary_species,
         interaction_type=interaction_type,
@@ -4594,18 +4601,6 @@ def main() -> None:
     tags  = make_tags(species, style_param, lighting_param, camera_param, mood_param,
                       condition_param=condition_param, behavior_param=behavior_param,
                       weather_param=weather_param, output_mode=output_mode)
-
-    # --- Append reference URLs to prompt ---
-    # Session 22: wildlife --sref only, --cref disabled (too literal)
-    if sref_urls_list:
-        sref_joined = " ".join(sref_urls_list)
-        prompt_text += f" --sref {sref_joined} --sw {DEFAULT_SW}"
-    # --cref: skeletal refs for anatomical proportions (low --cw)
-    if cref_urls_list:
-        cref_joined = " ".join(cref_urls_list)
-        prompt_text += f" --cref {cref_joined}"
-    elif args.cref:
-        prompt_text += f" --cref {args.cref}"
 
     # --- Build fix prompts ---
     period = species["period"] or "Other"
@@ -4632,14 +4627,6 @@ def main() -> None:
     print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
     print(f"\n  {C.WHITE}Title :{C.RESET} {C.BRIGHT_WHITE}{title}{C.RESET}")
     print(f"  {C.WHITE}Tags  :{C.RESET} {dim(tags)}")
-    if sref_urls_list:
-        sref_display = f"{len(sref_urls_list)} wildlife refs (--sw {DEFAULT_SW})"
-        print(f"  {C.WHITE}sref  :{C.RESET} {dim(sref_display)}")
-    if cref_urls_list:
-        cref_display = f"{len(cref_urls_list)} {cref_source} refs"
-        print(f"  {C.WHITE}cref  :{C.RESET} {dim(cref_display)}")
-    elif args.cref:
-        print(f"  {C.WHITE}cref  :{C.RESET} {dim(args.cref)}")
     print()
     validate_prompt(prompt_text, allow_mj_params=True,  label="STEP 1 main")
     print_prompt_box(prompt_text)

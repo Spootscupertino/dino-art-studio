@@ -288,21 +288,38 @@ def extract_mj_flags(text: str) -> Dict[str, str]:
 
 
 def paste_prompt() -> str:
-    """Read the MJ prompt (blocks until Enter), then clear the screen."""
+    """Read the MJ prompt reliably, handling large pastes."""
     print(f"\n  {C.BLUE}Paste the MJ prompt and press Enter:{C.RESET}")
+
+    # Increase input buffer size for large pastes
+    import signal
+    def timeout_handler(signum, frame):
+        raise TimeoutError("Paste input timed out")
+
     try:
+        # Set a generous timeout (30 seconds for large pastes)
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(30)
+
         line = input("  ").strip()
-    except EOFError:
+
+        signal.alarm(0)  # Cancel timeout
+    except (EOFError, KeyboardInterrupt, TimeoutError):
+        signal.alarm(0)
+        line = ""
+    except Exception as e:
+        signal.alarm(0)
+        print(f"  {C.YELLOW}Input error: {e}{C.RESET}")
         line = ""
 
-    # Flush any extra newlines that snuck in from the paste
+    # Flush input buffer after paste
     try:
         import termios
         termios.tcflush(sys.stdin, termios.TCIFLUSH)
     except Exception:
         pass
 
-    # Clear screen so next prompts aren't buried under the paste wall
+    # Clear screen
     import os
     os.system("clear")
     return line
