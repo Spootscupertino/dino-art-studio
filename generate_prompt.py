@@ -1338,8 +1338,15 @@ HYPERREALISM_STYLE = CLADE_STYLE["terrestrial"]
 # Mouth / teeth / saliva — diet-aware, injected as a dedicated prompt block
 # ---------------------------------------------------------------------------
 
-MOUTH_TEETH_CARNIVORE = "yellowed uneven teeth"
-MOUTH_TEETH_HERBIVORE = "grinding teeth worn flat"
+MOUTH_TEETH_CARNIVORE = (
+    "individual teeth varying lengths and curvature, yellowed at base fading off-white at tips, "
+    "saliva strands between upper and lower jaw, jaw line sharply defined behind lip fold, "
+    "moisture beading on lower jaw, breath condensation visible at nostrils"
+)
+MOUTH_TEETH_HERBIVORE = (
+    "grinding teeth worn flat, uneven wear across tooth row, "
+    "saliva pooling at jaw hinge, moisture on lips and chin"
+)
 
 # ---------------------------------------------------------------------------
 # Habitat-specific interaction blocks — replaces the old single GROUND_INTERACTION.
@@ -1352,7 +1359,11 @@ MOUTH_TEETH_HERBIVORE = "grinding teeth worn flat"
 # "fully aquatic, body partially submerged" on canvas/portrait/environmental
 # modes. Surface-state modes (`shoreline`, `surface_break`) override below.
 HABITAT_INTERACTION = {
-    "terrestrial": "feet fully weight-bearing",
+    "terrestrial": (
+        "feet fully weight-bearing, individual toe pads compressing into soil, "
+        "claws on each toe clearly visible, track impressions left behind animal, "
+        "dust drifting at footfall, ground compression around foot edges"
+    ),
     "marine":      "fully submerged",
     "aerial":      "body suspended in open sky",
     "arthropod":   "massive body weight pressing into ground",
@@ -3015,6 +3026,21 @@ def assemble_prompt(
         pass  # anatomy module handles wide mode detail level
     diet = species["diet"] or ""
 
+    # ── EXTREMITY + JAW EMPHASIS ────────────────────────────────────────────
+    # User priority: hands, feet, toes, claws, jaw line, teeth, saliva, breath
+    # are the make-or-break details for predator realism. Inject a dedicated
+    # emphasis line for terrestrial carnivores in close/mid framing so MJ
+    # spends attention budget on the parts that win or lose the image.
+    diet_for_emphasis = species["diet"] or ""
+    if (not wide_mode and not is_group
+            and habitat == "terrestrial"
+            and diet_for_emphasis in ("Carnivore", "Piscivore")):
+        subject_parts.append(
+            "claws on hands and feet sharply defined, individual toe pads visible, "
+            "jaw line sharply etched, teeth tip detail crisp, "
+            "saliva strands between jaws, breath condensation at nostrils"
+        )
+
     # Behavior — FIRST PHRASE ONLY (Session 10). Action verbs were the main
     # source of "narrative clutter" the user flagged: "jaw working on prey,
     # fragments drifting" reads like an event, not a static portrait.
@@ -3087,15 +3113,18 @@ def assemble_prompt(
     elif output_mode == "shoreline" and habitat == "marine":
         interaction = "body partially submerged, waterline crossing torso"
     else:
-        _trex_movement = {"mid_stride", "charging_full", "emerging_from_cover", "scent_tracking",
-                          "freeze_detect", "scanning_territory", "carcass_standing"}
-        if (habitat == "terrestrial"
-                and species["name"] in ("Tyrannosaurus rex", "Tyrannosaurus")
-                and behavior_param["name"] in _trex_movement):
+        _movement_behaviors = {"mid_stride", "charging_full", "emerging_from_cover", "scent_tracking",
+                               "freeze_detect", "scanning_territory", "carcass_standing"}
+        _is_large_terrestrial = (
+            habitat == "terrestrial"
+            and (species["diet"] or "") in ("Carnivore", "Piscivore", "Herbivore")
+        )
+        if _is_large_terrestrial and behavior_param["name"] in _movement_behaviors:
             interaction = (
                 "heavy footfall impact on damp soil, dust puffing from each step, "
-                "three-toed track impressions clearly visible behind animal, "
-                "displaced soil around toe impressions, ground compression visible"
+                "individual toe-pad impressions clearly visible behind animal, "
+                "claws scoring lines into soil at each step, "
+                "displaced earth around toe impressions, ground compression visible at footfall"
             )
         else:
             interaction = HABITAT_INTERACTION.get(habitat, HABITAT_INTERACTION["terrestrial"])
