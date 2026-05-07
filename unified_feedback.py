@@ -534,6 +534,9 @@ def save_winner(species: str, mj_prompt: str, mj_flags: Dict, final_score: float
             "timestamp": datetime.now().isoformat(),
         }
 
+        if image_path:
+            winner_entry["image_path"] = str(image_path)
+
         if anatomy_analysis:
             winner_entry["anatomy_analysis"] = anatomy_analysis
 
