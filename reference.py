@@ -223,8 +223,17 @@ def append_reference_entry(species: str, entry: dict) -> int:
 
 # ─── Main interview flow ────────────────────────────────────────────────────
 
-def run(image_path: Path) -> None:
-    banner("REFERENCE IMAGE INTERVIEW")
+def write_caption_file(image_dest: Path, species: str, anatomy_notes: str) -> Path:
+    """Write a .txt caption file for the image (for ai-toolkit LoRA training)."""
+    caption_path = image_dest.with_suffix(".txt")
+    caption = f"a photo of {species}, {anatomy_notes}"
+    with open(caption_path, "w") as f:
+        f.write(caption)
+    return caption_path
+
+
+def run_single(image_path: Path) -> dict:
+    """Run interview for a single image. Returns entry dict and dest path."""
     print(f"  {dim('image:')} {image_path}")
 
     section("Step 1 — Species")
@@ -278,6 +287,13 @@ def run(image_path: Path) -> None:
         composed_parts.append("LLaVA analysis:\n" + llava)
     composed_anatomy = "\n\n".join(composed_parts)
 
+    # For .txt caption: use just the accurate features (cleaner for training)
+    caption_notes = accurate.strip() if accurate else "reference image"
+
+    section("Step 7 — Write caption file")
+    caption_dest = write_caption_file(dest, species, caption_notes)
+    print(f"  {C.GREEN}✓{C.RESET} {dim(str(caption_dest.relative_to(REPO_ROOT)))}")
+
     entry = {
         "prompt": f"REFERENCE: {species} ({subtype})",
         "mj_flags": {},
@@ -293,12 +309,48 @@ def run(image_path: Path) -> None:
         "user_caveats": caveats,
     }
 
-    section("Step 7 — Save")
-    total = append_reference_entry(species, entry)
-    print(f"  {C.GREEN}✓{C.RESET} written to {dim(str(WINNERS_FILE.relative_to(REPO_ROOT)))}")
-    print(f"  {dim(f'{species} now has {total} winner entries (refs + generated).')}")
+    return {"entry": entry, "species": species, "dest": dest}
+
+
+def run(image_path: Path) -> None:
+    banner("REFERENCE IMAGE INTERVIEW — BATCH MODE")
+
+    results = []
+    total = 0
+
+    while True:
+        print()
+        result = run_single(image_path)
+        species = result["species"]
+        entry = result["entry"]
+
+        section("Step 8 — Save to winners.json")
+        total = append_reference_entry(species, entry)
+        print(f"  {C.GREEN}✓{C.RESET} written to {dim(str(WINNERS_FILE.relative_to(REPO_ROOT)))}")
+        print(f"  {dim(f'{species} now has {total} winner entries (refs + generated).')}")
+
+        results.append(result)
+
+        print()
+        more = ask(
+            "Add another image?",
+            default="n",
+            allow_blank=True,
+        ).lower()
+        if more not in ("y", "yes"):
+            break
+
+        print()
+        image_path = resolve_image_path(None)
+
     print()
-    print(f"  {bold(teal('Done.'))} generate_prompt.py will pull this anatomy into future {species} prompts.\n")
+    banner("SESSION SUMMARY")
+    print(f"  {C.GREEN}✓{C.RESET} {len(results)} image(s) processed")
+    for r in results:
+        print(f"    • {r['species']}: {r['dest'].name}")
+    print()
+    print(f"  {bold(teal('Done.'))} generate_prompt.py will pull anatomy into future prompts.")
+    print(f"  {bold(teal('Next:'))} run {teal('python3 flux/export_dataset.py')} to prepare for LoRA training.\n")
 
 
 def main() -> None:

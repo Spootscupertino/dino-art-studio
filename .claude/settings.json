@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "alias reference='python3 reference.py'",
+            "statusMessage": "Setting up reference alias"
+          }
+        ]
+      }
+    ]
+  }
+}
