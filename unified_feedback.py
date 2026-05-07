@@ -36,17 +36,32 @@ OPTUNA_DB  = Path(__file__).parent / "optuna_studies.db"
 VISION_MODEL = "llama3.2-vision"
 
 DIMENSIONS: List[Tuple[str, str, str, float]] = [
-    ("anatomy",     "Anatomy",          "Proportions, posture, limbs, key features",  0.35),
-    ("accuracy",    "Species accuracy", "Does it match the intended species?",         0.25),
-    ("realism",     "Realism/quality",  "Texture, lighting, detail, no AI mush",      0.25),
-    ("composition", "Composition",      "Framing, perspective, focal point, balance",  0.15),
+    ("anatomy",     "Anatomy",          "Proportions, posture, limbs, key features",  0.30),
+    ("accuracy",    "Species accuracy", "Does it match the intended species?",         0.20),
+    ("realism",     "Realism/quality",  "Texture, lighting, detail, no AI mush",      0.20),
+    ("composition", "Composition",      "Framing, perspective, focal point, balance",  0.10),
 ]
+# Standard weights sum to 0.80; TREX_PILLARS add 0.20 → 1.00 for T-rex.
+# compute_final_score normalizes by total_weight so both cases stay on 1-10 scale.
+
+# Extra scoring pillars injected automatically for T-rex images.
+# (key, label, description, weight-in-T-rex-total)
+TREX_PILLARS: List[Tuple[str, str, str, float]] = [
+    ("claw_detail",  "Claw detail",  "Keratin texture, angle (45-60°), sharpness, visibility",       0.10),
+    ("mouth_detail", "Mouth detail", "Jaw definition, tooth count/visibility, saliva, breath mist",  0.10),
+    ("foot_detail",  "Foot detail",  "Ground impact, footprint depression, dominant predatory stance", 0.00),
+]
+
+TREX_SPECIES_KEYS = {"tyrannosaurus rex", "tyrannosaurus", "t rex", "t-rex"}
 
 FOLLOWUP_HINTS = {
     "anatomy":     "e.g. bent wrists, dragging tail, wrong proportions, bad posture",
     "accuracy":    "e.g. wrong skull shape, missing feathers, extra fingers, wrong build",
     "realism":     "e.g. smeared textures, plastic look, weird lighting, blurry areas",
     "composition": "e.g. limbs cut off, too centered, awkward angle, bad framing",
+    "claw_detail":  "e.g. too smooth, poorly visible, wrong angle, no keratin texture",
+    "mouth_detail": "e.g. teeth too perfect/plastic, no saliva, jaw line weak, breath mist missing",
+    "foot_detail":  "e.g. feet floating, no ground depression, stance looks light/passive",
 }
 
 USABLE_THRESHOLD = 8.0
@@ -100,6 +115,9 @@ CREATE TABLE IF NOT EXISTS feedback_sessions (
     score_accuracy      INTEGER CHECK(score_accuracy BETWEEN 1 AND 10),
     score_realism       INTEGER CHECK(score_realism BETWEEN 1 AND 10),
     score_composition   INTEGER CHECK(score_composition BETWEEN 1 AND 10),
+    score_claw_detail   INTEGER CHECK(score_claw_detail BETWEEN 1 AND 10),
+    score_mouth_detail  INTEGER CHECK(score_mouth_detail BETWEEN 1 AND 10),
+    score_foot_detail   INTEGER CHECK(score_foot_detail BETWEEN 1 AND 10),
     final_score         REAL NOT NULL,
     is_usable           INTEGER NOT NULL DEFAULT 0,
     issues              TEXT,
@@ -111,6 +129,13 @@ CREATE TABLE IF NOT EXISTS feedback_sessions (
 )
 """
 
+_MIGRATION_COLUMNS = [
+    "ALTER TABLE feedback_sessions ADD COLUMN mj_prompt TEXT",
+    "ALTER TABLE feedback_sessions ADD COLUMN score_claw_detail INTEGER",
+    "ALTER TABLE feedback_sessions ADD COLUMN score_mouth_detail INTEGER",
+    "ALTER TABLE feedback_sessions ADD COLUMN score_foot_detail INTEGER",
+]
+
 
 def get_db(db_path: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path)
@@ -121,11 +146,11 @@ def get_db(db_path: Path) -> sqlite3.Connection:
 
 def ensure_table(conn: sqlite3.Connection):
     conn.execute(FEEDBACK_DDL)
-    # Add mj_prompt column to existing DBs that predate this field.
-    try:
-        conn.execute("ALTER TABLE feedback_sessions ADD COLUMN mj_prompt TEXT")
-    except sqlite3.OperationalError:
-        pass  # column already exists
+    for alter in _MIGRATION_COLUMNS:
+        try:
+            conn.execute(alter)
+        except sqlite3.OperationalError:
+            pass  # column already exists
     conn.commit()
 
 
@@ -311,27 +336,38 @@ def analyze_with_vision(image_path: str, species: Optional[str]) -> Optional[str
 
 def targeted_followup(dimension: str, vision: Optional[str]) -> str:
     if not vision:
-        return FOLLOWUP_HINTS[dimension]
+        return FOLLOWUP_HINTS.get(dimension, "")
 
     kw_map = {
         "anatomy":     ["wrist", "tail", "posture", "proportion", "limb", "joint", "spine", "neck", "bent", "dragging"],
         "accuracy":    ["skull", "feather", "spine", "teeth", "claw", "finger", "build", "wrong", "missing", "extra"],
         "realism":     ["texture", "plastic", "smear", "blur", "lighting", "shadow", "artifact", "noise", "mush"],
         "composition": ["cut off", "crop", "frame", "centered", "angle", "awkward", "perspective"],
+        "claw_detail":  ["claw", "keratin", "talon", "smooth", "angle"],
+        "mouth_detail": ["teeth", "jaw", "saliva", "mist", "tongue", "breath"],
+        "foot_detail":  ["foot", "feet", "ground", "impact", "stance", "step"],
     }
 
     v = vision.lower()
     for kw in kw_map.get(dimension, []):
         if kw in v:
-            return f"Vision noted '{kw}' — is that the issue? {FOLLOWUP_HINTS[dimension]}"
+            return f"Vision noted '{kw}' — is that the issue? {FOLLOWUP_HINTS.get(dimension, '')}"
 
-    return FOLLOWUP_HINTS[dimension]
+    return FOLLOWUP_HINTS.get(dimension, "")
 
 
 # ─── Scoring ─────────────────────────────────────────────────────────────────────
 
-def compute_final_score(scores: Dict[str, int]) -> float:
-    return round(sum(scores[k] * w for k, _, _, w in DIMENSIONS), 2)
+def is_trex(species: Optional[str]) -> bool:
+    if not species:
+        return False
+    return species.lower().replace("-", " ") in TREX_SPECIES_KEYS
+
+
+def compute_final_score(scores: Dict[str, int], species: Optional[str] = None) -> float:
+    dims = list(DIMENSIONS) + (TREX_PILLARS if is_trex(species) else [])
+    total_weight = sum(w for _, _, _, w in dims)
+    return round(sum(scores[k] * w for k, _, _, w in dims if k in scores) / total_weight, 2)
 
 
 # ─── Optuna integration ──────────────────────────────────────────────────────────
@@ -606,14 +642,19 @@ def run_interview(image_path: str, db_path: Path):
         print(f"  {C.dim('ℹ  Ollama not installed — skipping vision analysis')}")
 
     # ── Step 4: Rating interview ─────────────────────────────────────────────────
+    trex = is_trex(species)
+    active_dims = list(DIMENSIONS) + (TREX_PILLARS if trex else [])
+
     section("STEP 2 — RATE (1-10 each)")
+    if trex:
+        print(f"  {C.teal('🦖 T-rex signature active — scoring claws, mouth, and feet')}\n")
     print(f"  {C.dim('Scores below 7 trigger a follow-up question.')}\n")
 
     scores:      Dict[str, int] = {}
     all_issues:  List[str]      = []
     all_strengths: List[str]    = []
 
-    for key, label, description, _w in DIMENSIONS:
+    for key, label, description, _w in active_dims:
         print(f"\n  {C.BOLD}{C.TEAL}[{label}]{C.RESET}  {C.dim(description)}")
         hint  = targeted_followup(key, vision)
         score, notes = ask_score(label, hint)
@@ -629,7 +670,7 @@ def run_interview(image_path: str, db_path: Path):
                 all_strengths.append(f"{label}: {strength}")
 
     # ── Step 5: Score summary ────────────────────────────────────────────────────
-    final   = compute_final_score(scores)
+    final   = compute_final_score(scores, species)
     usable  = final >= USABLE_THRESHOLD
     sc      = score_color(final)
 
@@ -638,7 +679,7 @@ def run_interview(image_path: str, db_path: Path):
     verdict = C.green("✓  USABLE  (≥ 8)") if usable else C.red("✗  NOT USABLE  (< 8)")
     print(f"\n  {C.dim('FINAL SCORE')}  {C.BOLD}{sc}{final:.1f}{C.RESET}{C.dim('/10')}   {verdict}\n")
 
-    for key, label, _, _ in DIMENSIONS:
+    for key, label, _, _ in active_dims:
         bar = render_bar(scores[key])
         col = score_color(scores[key])
         print(f"    {C.blue(f'{label:<20}')} {bar}  {col}{scores[key]}{C.RESET}{C.dim('/10')}")
@@ -665,15 +706,18 @@ def run_interview(image_path: str, db_path: Path):
         """
         INSERT INTO feedback_sessions
             (image_path, species, score_anatomy, score_accuracy,
-             score_realism, score_composition, final_score, is_usable,
+             score_realism, score_composition,
+             score_claw_detail, score_mouth_detail, score_foot_detail,
+             final_score, is_usable,
              issues, strengths, vision_analysis, mj_params, mj_prompt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             image_path, species or None,
             scores["anatomy"], scores["accuracy"], scores["realism"], scores["composition"],
+            scores.get("claw_detail"), scores.get("mouth_detail"), scores.get("foot_detail"),
             final, int(usable),
-            json.dumps(all_issues)   if all_issues    else None,
+            json.dumps(all_issues)    if all_issues    else None,
             json.dumps(all_strengths) if all_strengths else None,
             vision,
             json.dumps(mj_flags) if mj_flags else None,

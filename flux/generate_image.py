@@ -81,6 +81,26 @@ class C:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# T-rex signature
+# ─────────────────────────────────────────────────────────────────────────────
+
+_TREX_KEYWORDS = {"tyrannosaurus rex", "tyrannosaurus", "t-rex", "t rex"}
+
+_TREX_SIGNATURE = (
+    "prominent dark curved claws 4-5 inches sharp points rough keratin texture angled 45-60 degrees downward, "
+    "massive jaw line with prominent conical honey-gold teeth 60+ visible tongue saliva strands breath mist, "
+    "powerful foot impact on ground visible footprints heavy weight depression dominant predatory stance"
+)
+
+
+def inject_trex_signature(prompt: str) -> str:
+    """Auto-append the T-rex triple threat (claws/mouth/feet) if prompt is a T-rex image."""
+    if any(kw in prompt.lower() for kw in _TREX_KEYWORDS):
+        return f"{prompt}, {_TREX_SIGNATURE}"
+    return prompt
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Sidecar saving
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -271,9 +291,13 @@ def main():
 
     gen = FluxGenerator()
 
+    final_prompt = inject_trex_signature(args.prompt)
+    if final_prompt != args.prompt:
+        print(f"  {C.teal('🦖 T-rex signature injected')}")
+
     try:
         image = gen.generate(
-            prompt=args.prompt,
+            prompt=final_prompt,
             height=args.height,
             width=args.width,
             num_inference_steps=args.steps,
@@ -300,7 +324,10 @@ def main():
         "seed": args.seed,
         "lora": args.lora,
     }
-    sidecar_path = save_with_sidecar(image, output_path, args.prompt, params)
+    if final_prompt != args.prompt:
+        params["base_prompt"] = args.prompt
+        params["trex_signature"] = True
+    sidecar_path = save_with_sidecar(image, output_path, final_prompt, params)
 
     print(f"\n  {C.green('✓')} Saved to: {C.teal(str(output_path))}")
     print(f"  {C.green('✓')} Sidecar:  {C.teal(str(sidecar_path))}\n")

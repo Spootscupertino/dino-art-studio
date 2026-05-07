@@ -23,7 +23,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from flux.generate_image import FluxGenerator, save_with_sidecar
+from flux.generate_image import FluxGenerator, save_with_sidecar, inject_trex_signature
 
 # ─────────────────────────────────────────────────────────────────────────────
 # App setup
@@ -152,10 +152,11 @@ async def generate_image(
     seed: Optional[int] = None,
     lora: Optional[str] = None,
 ):
-    _validate(prompt, height, width, steps, guidance, lora)
+    final_prompt = inject_trex_signature(prompt)
+    _validate(final_prompt, height, width, steps, guidance, lora)
     try:
         image, output_path, params = await _run_generation(
-            prompt, height, width, steps, guidance, seed, lora
+            final_prompt, height, width, steps, guidance, seed, lora
         )
         if image is None:
             raise HTTPException(status_code=500, detail="Generation failed")
