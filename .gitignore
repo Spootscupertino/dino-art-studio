@@ -37,9 +37,11 @@ env/
 .claude/worktrees/
 .claude/projects/
 .claude/scheduled_tasks.lock
+.claude/archive/
 
-# Gallery sync watcher logs (machine-local)
+# Gallery sync watcher logs + server logs (machine-local)
 tools/logs/
+flux/server.log
 
 # Environment
 .env
