@@ -51,6 +51,28 @@ PRODUCTS_JSON = REPO_ROOT / "site" / "src" / "data" / "products.json"
 CONFIG_PATH = Path(__file__).resolve().parent / "printify_config.yaml"
 LEDGER_PATH = Path(__file__).resolve().parent / "printify_ledger.json"
 
+
+def _is_flux_generated(image_path: Path) -> bool:
+    sidecar = image_path.with_suffix(".json")
+    if not sidecar.exists():
+        return False
+    try:
+        meta = json.loads(sidecar.read_text())
+    except Exception:
+        return False
+    return meta.get("source") == "flux" or "flux_params" in meta or bool(meta.get("lora"))
+
+
+def _needs_approval(image_path: Path) -> bool:
+    """Publish gate: Flux output requires <image>.approved sibling marker.
+
+    Mirrors tools/sync_gallery.py — duplicated by design so neither pipeline
+    can publish a LoRA experiment without explicit human sign-off.
+    """
+    if not _is_flux_generated(image_path):
+        return False
+    return not image_path.with_suffix(image_path.suffix + ".approved").exists()
+
 POSTER_SIZES = ["12x18", "18x24", "24x36"]
 CANVAS_SIZES = ["16x20", "18x24", "24x36"]
 MUG_SIZES = ["11oz_mug", "15oz_mug"]
@@ -566,6 +588,10 @@ def cmd_publish(args) -> int:
     for rel in targets:
         if ledger_key(rel) in ledger.get("entries", {}):
             print(f"[skip] {rel} already in ledger")
+            continue
+        abs_check = GALLERY_DIR / rel
+        if _needs_approval(abs_check):
+            print(f"[gate] {rel} — Flux output without {Path(rel).name}.approved marker, skipping")
             continue
         entry = find_feed_entry(rel, feed)
         if entry is None:

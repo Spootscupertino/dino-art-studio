@@ -25,6 +25,30 @@ REFS_BEST_DIR = ROOT / "refs" / "gallery_best"
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 VIDEO_EXTS = {".mp4", ".webm", ".mov"}
 
+
+def is_flux_generated(image_path: Path) -> bool:
+    """An image counts as Flux-generated if a sidecar .json marks it as such."""
+    sidecar = image_path.with_suffix(".json")
+    if not sidecar.exists():
+        return False
+    try:
+        meta = json.loads(sidecar.read_text())
+    except Exception:
+        return False
+    return meta.get("source") == "flux" or "flux_params" in meta or bool(meta.get("lora"))
+
+
+def needs_approval(image_path: Path) -> bool:
+    """Publish gate: Flux output requires an explicit <image>.approved marker.
+
+    Why: an unproven LoRA's first output is one auto-sync away from the
+    public gallery and Printify. Manual approval forces a human to eyeball
+    each Flux frame before it ships.
+    """
+    if not is_flux_generated(image_path):
+        return False
+    return not image_path.with_suffix(image_path.suffix + ".approved").exists()
+
 # Website categories only. horizontal/ and vertical/ are Printify-only drops.
 CATEGORIES = {"predators", "herbivores", "marine", "aerial", "flora_arthropods"}
 
@@ -278,6 +302,10 @@ def main() -> int:
             if not p.is_file() or p.name.startswith("."):
                 continue
             if p.suffix.lower() not in (IMAGE_EXTS | VIDEO_EXTS):
+                continue
+            if needs_approval(p):
+                print(f"[gate] skipping {category_dir.name}/{p.name} — "
+                      f"Flux output without {p.name}.approved marker", file=sys.stderr)
                 continue
             found.append((category_dir.name, p))
 
