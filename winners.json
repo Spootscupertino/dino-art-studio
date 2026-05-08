@@ -1,5 +1,5 @@
 {
-  "_format": "v2: each entry has signal_type ∈ {anatomy_ref, flux_quality, mj_composition}. Mixing signals across types corrupts downstream training — keep them separated.",
+  "_format": "v2: each entry has signal_type \u2208 {anatomy_ref, flux_quality, mj_composition}. Mixing signals across types corrupts downstream training \u2014 keep them separated.",
   "Tyrannosaurus": [
     {
       "signal_type": "mj_composition",
@@ -64,7 +64,8 @@
       "source_subtype": "museum",
       "source_url": "wikimedia",
       "user_accurate_notes": "teeth detail, curvuture, size",
-      "user_caveats": "its a skeleton"
+      "user_caveats": "its a skeleton",
+      "signal_type": "anatomy_ref"
     }
   ]
 }
