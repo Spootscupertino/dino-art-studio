@@ -1,6 +1,8 @@
 {
+  "_format": "v2: each entry has signal_type ∈ {anatomy_ref, flux_quality, mj_composition}. Mixing signals across types corrupts downstream training — keep them separated.",
   "Tyrannosaurus": [
     {
+      "signal_type": "mj_composition",
       "source": "mj",
       "prompt": "Test T-rex prompt",
       "mj_flags": {
@@ -15,6 +17,7 @@
   ],
   "Velociraptor": [
     {
+      "signal_type": "flux_quality",
       "source": "flux",
       "prompt": "a pack of three Velociraptors hunting, feathered, intelligent eyes, dynamic poses, forest setting",
       "flux_params": {
@@ -32,6 +35,7 @@
   ],
   "Mosasaurus": [
     {
+      "signal_type": "flux_quality",
       "source": "flux",
       "prompt": "a massive Mosasaurus swimming in clear ocean, sunlight filtering down, scale texture, dynamic pose",
       "flux_params": {

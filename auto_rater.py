@@ -6,7 +6,16 @@ Calibrated against human winners from dino_art.db.
 
 Usage:
     python auto_rater.py <image_path> [--species NAME]
-    python auto_rater.py --calibrate  # Show calibration data
+    python auto_rater.py <image_path> --write-candidate  # quarantined; never winners.json
+    python auto_rater.py --promote <species> <index>     # promote candidate → winners
+    python auto_rater.py --candidates                    # list candidates
+    python auto_rater.py --calibrate                     # show calibration data
+
+Quarantine policy: auto-rater output is NEVER written to winners.json directly.
+The heuristics are unvalidated against anatomical accuracy, so high auto-scores
+must be manually confirmed before they can become training signal. Use
+--write-candidate to land a rating in candidates.json, then --promote after
+you've eyeballed the image.
 """
 
 import argparse
@@ -250,6 +259,98 @@ class AutoRater:
 # CLI
 # ─────────────────────────────────────────────────────────────────────────────
 
+CANDIDATES_PATH = Path(__file__).parent / "candidates.json"
+WINNERS_PATH = Path(__file__).parent / "winners.json"
+
+CANDIDATES_FORMAT_DOC = (
+    "Quarantine bucket for auto-rater output. Heuristic scores here are "
+    "UNVALIDATED — they must be manually reviewed and promoted to winners.json "
+    "before they can be used as training signal."
+)
+
+
+def _load_json(path: Path, default):
+    if not path.exists():
+        return default
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except Exception:
+        return default
+
+
+def write_candidate(image_path: str, species: Optional[str], result: Dict) -> None:
+    """Append a rating to candidates.json. Never touches winners.json."""
+    from datetime import datetime
+    candidates = _load_json(CANDIDATES_PATH, {})
+    candidates["_format"] = CANDIDATES_FORMAT_DOC
+    sp = species or "unknown"
+    candidates.setdefault(sp, []).append({
+        "image_path": str(image_path),
+        "score": result["final"],
+        "scores": {k: result[k] for k in ("anatomy", "accuracy", "realism", "composition")},
+        "method": result["method"],
+        "timestamp": datetime.now().isoformat(),
+        "approved": False,
+    })
+    with open(CANDIDATES_PATH, "w") as f:
+        json.dump(candidates, f, indent=2)
+    print(f"\n{C.teal('→')} Quarantined to candidates.json under {C.bold(sp)} "
+          f"({C.dim('not in winners.json — review and --promote first')})")
+
+
+def list_candidates() -> None:
+    candidates = _load_json(CANDIDATES_PATH, {})
+    candidates.pop("_format", None)
+    if not candidates:
+        print(f"{C.dim('No candidates queued.')}")
+        return
+    print(f"\n{C.teal('Candidates awaiting promotion')}:")
+    for sp, items in sorted(candidates.items()):
+        print(f"\n  {C.bold(sp)}")
+        for i, c in enumerate(items):
+            mark = C.green("✓ approved") if c.get("approved") else C.dim("pending")
+            print(f"    [{i}] {c['score']}/10  {Path(c['image_path']).name}  {mark}")
+
+
+def promote_candidate(species: str, index: int) -> int:
+    """Move a reviewed candidate from candidates.json into winners.json.
+
+    Promotion is the single hand-off point: it forces the human to eyeball
+    the image and the score together before the entry can influence training.
+    """
+    candidates = _load_json(CANDIDATES_PATH, {})
+    items = candidates.get(species)
+    if not items or index >= len(items):
+        print(f"{C.red(f'No candidate {species}[{index}]')}")
+        return 1
+
+    cand = items[index]
+    # Lazy import to avoid pulling DB code on plain rating runs.
+    sys.path.insert(0, str(Path(__file__).parent))
+    from unified_feedback import save_winner
+    saved = save_winner(
+        species=species,
+        prompt=f"[auto-rated, promoted from candidates] {Path(cand['image_path']).name}",
+        params={},
+        final_score=cand["score"],
+        session_id=-1,
+        image_path=cand["image_path"],
+        source="flux",
+    )
+    if not saved:
+        print(f"{C.red('Promotion failed — winners.json write error')}")
+        return 1
+
+    items.pop(index)
+    if not items:
+        candidates.pop(species)
+    with open(CANDIDATES_PATH, "w") as f:
+        json.dump(candidates, f, indent=2)
+    print(f"{C.green('✓')} Promoted {species}[{index}] → winners.json (signal_type=flux_quality)")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Auto-rate dinosaur images (heuristic + optional LLaVA)"
@@ -260,6 +361,18 @@ def main():
     parser.add_argument(
         "--calibrate", action="store_true", help="Show calibration stats"
     )
+    parser.add_argument(
+        "--write-candidate", action="store_true",
+        help="Append rating to candidates.json (quarantined; never winners.json).",
+    )
+    parser.add_argument(
+        "--candidates", action="store_true",
+        help="List queued candidates awaiting promotion.",
+    )
+    parser.add_argument(
+        "--promote", nargs=2, metavar=("SPECIES", "INDEX"),
+        help="Promote a reviewed candidate to winners.json.",
+    )
 
     args = parser.parse_args()
 
@@ -267,6 +380,11 @@ def main():
 
     if args.calibrate:
         rater.show_calibration_stats()
+    elif args.candidates:
+        list_candidates()
+    elif args.promote:
+        sp, idx = args.promote
+        sys.exit(promote_candidate(sp, int(idx)))
     elif args.image:
         try:
             result = rater.rate(args.image, args.species)
@@ -275,6 +393,8 @@ def main():
                 print(f"  {k:<12} {result[k]}/10")
             print(f"  {'final':<12} {C.bold(f'{result['final']:.1f}')}/10")
             print(f"\n{C.dim(f'Method: {result['method']}')}")
+            if args.write_candidate:
+                write_candidate(args.image, args.species, result)
         except Exception as e:
             print(f"{C.red(f'Error: {e}')}")
             sys.exit(1)

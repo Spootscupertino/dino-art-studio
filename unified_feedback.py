@@ -517,9 +517,31 @@ def analyze_winner_anatomy(image_path: str) -> str:
         return ""
 
 
-def save_winner(species: str, mj_prompt: str, mj_flags: Dict, final_score: float, session_id: int, image_path: str = None) -> bool:
-    """Save a high-scoring prompt to the winners library with LLaVA anatomy analysis."""
+FORMAT_DOC = (
+    "v2: each entry has signal_type ∈ {anatomy_ref, flux_quality, mj_composition}. "
+    "Mixing signals across types corrupts downstream training — keep them separated."
+)
+
+
+def _infer_signal_type(source: str) -> str:
+    # mj winners teach prompt/composition; flux winners teach generator quality;
+    # anatomy_ref is reserved for hand-curated reference images (not generated output).
+    if source == "mj":
+        return "mj_composition"
+    if source == "flux":
+        return "flux_quality"
+    return "unknown"
+
+
+def save_winner(species: str, prompt: str, params: Dict, final_score: float, session_id: int, image_path: str = None, source: str = "mj") -> bool:
+    """Save a high-scoring entry to the winners library, tagged by signal_type.
+
+    signal_type is set from `source`: mj→mj_composition, flux→flux_quality.
+    Reference-image anatomy signals must be written via save_anatomy_ref() so
+    they never get mixed with generated-image signals.
+    """
     winners_file = Path(__file__).parent / "winners.json"
+    signal_type = _infer_signal_type(source)
 
     try:
         if winners_file.exists():
@@ -528,38 +550,41 @@ def save_winner(species: str, mj_prompt: str, mj_flags: Dict, final_score: float
         else:
             winners = {}
 
-        # Remove metadata keys if present
         winners.pop("_description", None)
-        winners.pop("_format", None)
+        winners["_format"] = FORMAT_DOC
 
-        # Initialize species entry if needed
         if species not in winners:
             winners[species] = []
 
-        # Analyze anatomy with LLaVA if image provided
         anatomy_analysis = ""
         if image_path:
             anatomy_analysis = analyze_winner_anatomy(image_path)
 
-        # Add new winner (keep as a list so we can have multiple winners per species)
         from datetime import datetime
         winner_entry = {
-            "prompt": mj_prompt,
-            "mj_flags": mj_flags,
+            "signal_type": signal_type,
+            "source": source,
+            "prompt": prompt,
             "score": final_score,
             "session_id": session_id,
             "timestamp": datetime.now().isoformat(),
         }
+        if source == "mj":
+            winner_entry["mj_flags"] = params
+        elif source == "flux":
+            winner_entry["flux_params"] = params
 
         if image_path:
             winner_entry["image_path"] = str(image_path)
-
         if anatomy_analysis:
             winner_entry["anatomy_analysis"] = anatomy_analysis
 
-        # Keep only top 3 winners per species
+        # Keep top 3 per species *per signal_type* so flux winners don't push out mj winners.
         winners[species].append(winner_entry)
-        winners[species] = sorted(winners[species], key=lambda x: x["score"], reverse=True)[:3]
+        same_type = [w for w in winners[species] if w.get("signal_type") == signal_type]
+        other_type = [w for w in winners[species] if w.get("signal_type") != signal_type]
+        same_type = sorted(same_type, key=lambda x: x["score"], reverse=True)[:3]
+        winners[species] = other_type + same_type
 
         with open(winners_file, "w") as f:
             json.dump(winners, f, indent=2)
@@ -758,7 +783,7 @@ def run_interview(image_path: str, db_path: Path):
 
     # ── Step 7b: Save high-scoring prompt to winners library ─────────────────────
     if usable and mj_prompt and species:
-        saved = save_winner(species, mj_prompt, mj_flags or {}, final, session_id, image_path)
+        saved = save_winner(species, mj_prompt, mj_flags or {}, final, session_id, image_path, source="mj")
         if saved:
             print(f"  {C.teal('✓')} Saved to winner library for {C.bold(species)}")
 
