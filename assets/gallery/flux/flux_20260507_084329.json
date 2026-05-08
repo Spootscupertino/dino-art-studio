@@ -1,0 +1,16 @@
+{
+  "image": "flux_20260507_084329.png",
+  "prompt": "tyrannosaurus rex in the jungle",
+  "params": {
+    "height": 512,
+    "width": 512,
+    "steps": 20,
+    "guidance": 3.5,
+    "seed": 0,
+    "lora": null
+  },
+  "model": "SDXL 1.0 (bfloat16, diffusers, M1-optimized)",
+  "device": "mps",
+  "dtype": "bfloat16",
+  "timestamp": "2026-05-07T08:43:29"
+}

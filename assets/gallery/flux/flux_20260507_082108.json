@@ -1,0 +1,16 @@
+{
+  "image": "flux_20260507_082108.png",
+  "prompt": "velociraptor",
+  "params": {
+    "height": 512,
+    "width": 512,
+    "steps": 8,
+    "guidance": 3.5,
+    "seed": null,
+    "lora": null
+  },
+  "model": "SDXL 1.0 (bfloat16, diffusers, M1-optimized)",
+  "device": "mps",
+  "dtype": "bfloat16",
+  "timestamp": "2026-05-07T08:21:08"
+}

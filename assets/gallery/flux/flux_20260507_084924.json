@@ -1,0 +1,16 @@
+{
+  "image": "flux_20260507_084924.png",
+  "prompt": " epic aerial photograph from 200m altitude, vast sweeping landscape dominates the frame, ultra-wide establishing shot, animals tiny in the environment, enormous scale, cinematic landscape photography, shot on ultra-wide 14mm lens, massive Tyrannosaurus rex, massive scaly bipedal predator with giant skull, tiny arms, thick horizontal tail, deep chest, sparse dark dorsal filament ridge along back, prominent dark curved claws 4-5 inches, keratin texture, angled 45\u00b0 downward, forelimb claws: prominent dark curved claws 4-5 inches long, rough keratin texture, sharp points, angled 45-60\u00b0 downward, clearly visible even at rest, hindlimb claws: large sharp dark curved claws on weight-bearing toes, prominent and visible, rough keratin texture with wear striations, prominent conical honey-gold teeth visible, 50-60 count, detailed wear striations and facets on working edges, natural aged coloration, 60+ conical serrated teeth with honey-gold fossil coloration, wear patterns and edge striations visible, anterior teeth prominent, full body visible head to tail, body lowered, healed bite scars neck, claw marks ribcage, individual scales catching sunlight, warm natural light, living animal, river delta, sandy bank, low flowering shrubs, long exposure, moving elements blurred, static elements sharp, feet fully weight-bearing, last moments before dark --no fused digits, merged toes, webbed feet, blob hands, extra fingers, missing claws, undefined claw tips, floating toes, amputated digits, incorrect toe count, melted feet, smooth footpad with no digit separation, smeared claws, indistinct talons, CGI smoothness on extremities, osteoderms, osteoderm, studio background, seamless backdrop, portrait lighting, gradient background",
+  "params": {
+    "height": 512,
+    "width": 512,
+    "steps": 20,
+    "guidance": 3.5,
+    "seed": 0,
+    "lora": null
+  },
+  "model": "SDXL 1.0 (bfloat16, diffusers, M1-optimized)",
+  "device": "mps",
+  "dtype": "bfloat16",
+  "timestamp": "2026-05-07T08:49:24"
+}

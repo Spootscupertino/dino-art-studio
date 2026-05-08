@@ -46,5 +46,21 @@
       "timestamp": "2025-05-06T10:30:00Z",
       "anatomy_analysis": "Serpentine body proportions correct, flipper angle realistic, jaw structure accurate"
     }
+  ],
+  "tyrannosaurus rex": [
+    {
+      "prompt": "REFERENCE: tyrannosaurus rex (museum)",
+      "mj_flags": {},
+      "score": 10.0,
+      "session_id": -1,
+      "timestamp": "2026-05-07T11:53:58.985963",
+      "image_path": "assets/gallery/flux/training_refs/tyrannosaurus-rex_20260507_115358_screenshot-2026-05-07-at-11-10-55-am.png",
+      "anatomy_analysis": "User-verified accurate features:\nteeth detail, curvuture, size\n\nCaveats:\nits a skeleton",
+      "source_type": "reference",
+      "source_subtype": "museum",
+      "source_url": "wikimedia",
+      "user_accurate_notes": "teeth detail, curvuture, size",
+      "user_caveats": "its a skeleton"
+    }
   ]
 }
