@@ -8,7 +8,9 @@
 
 **The wall we hit with Midjourney:** MJ is a black box. We've maxed out prompt engineering. The next leap: run Flux locally on M1 + fine-tune with a LoRA trained on scientifically accurate reference images. We own the model, we own the results.
 
-**Where we are now:** First T-rex reference image is in. Training starts next. We're going species by species, starting with T-rex.
+**Where we are now:** Pipeline is hardened with three guardrails (signal-split winners.json, auto-rater quarantine, publish gate), anatomy thesis written for T. rex, 5 curated training refs ingested (skeletal x2, paleoart x2, living analog cassowary x1). Phase 3 is the throwaway LoRA — train it, see what comes out, learn from the result.
+
+**The discipline:** 5 great refs > 50 mixed refs. One full loop completed > five half-built loops. Don't add more refs until Phase 4 tells us why we'd need them.
 
 ---
 
@@ -85,11 +87,17 @@ REFERENCE IMAGES                  YOUR FEEDBACK
 
 6. **winners.json feedback loop** — A single file that accumulates your best MJ images, Flux generations, and reference photos. Anatomy notes flow into future prompts automatically via `get_winner_anatomy_hints()`. The more you rate, the better the prompts get.
 
-7. **Auto-rater (`auto_rater.py`)** — Heuristic scoring for Flux images with no human required. Checks sharpness, composition, color, anatomy keywords. High scorers auto-feed into winners.json while you sleep.
+7. **Auto-rater (`auto_rater.py`)** — Heuristic scoring for Flux images. Output is **quarantined to `candidates.json`** — never reaches `winners.json` directly. Manual `--promote` is the gate, since the heuristics aren't validated against anatomical accuracy. Use `--write-candidate`, `--candidates`, `--promote SPECIES INDEX`.
 
 8. **Gallery watcher + auto-deploy** — Drop an image into any gallery subfolder and the launchd watcher auto-syncs to `site/src/assets/gallery/`, pushes to GitHub, and deploys to jurassinkart.com within minutes. Zero manual steps.
 
-9. **Printify pipeline** — Best images auto-publish as Posters and Wrapped Canvas at all sizes on Etsy/Printify. Cost-plus pricing, free shipping override, ledger tracks all product IDs and URLs.
+9. **Printify pipeline** — Best images publish as Posters and Wrapped Canvas at all sizes on Etsy/Printify. Cost-plus pricing, free shipping override, ledger tracks all product IDs and URLs. **Publish gate:** any Flux-tagged image requires a sibling `<image>.approved` marker before this pipeline (or `tools/sync_gallery.py`) will touch it.
+
+11. **Signal-split winners.json** — Every entry tagged `signal_type ∈ {mj_composition, flux_quality, anatomy_ref}`. Top-3 trim runs per signal_type per species, so MJ winners can't evict Flux winners and reference anatomy stays separated from generated quality.
+
+12. **Anatomy thesis (`refs/anatomy_theses/tyrannosaurus.md`)** — 5 scoring categories (posture, hands, feet, skull-body, realism) and auto-reject conditions (kangaroo posture, 3-finger hands, tail-dragging). The ruler used to judge refs and generated images.
+
+13. **Training-drops ingest (`flux/ingest_training_drops.py`)** — Manual-run pipeline: drop image into `~/Desktop/Jurassinkart/Training Drops/<species>/<source_type>/`, run script, image moves to `assets/gallery/flux/training_refs/` with auto-generated `.txt` and `.json` sidecars. Manual by design — auto-watching here is the trap the publish gate guards against.
 
 10. **Local Flux on M1** — Flux-dev runs on the Mac mini in ~45 seconds per image at bfloat16 precision with MPS acceleration. LoRA loading support is wired. ComfyUI server for visual iteration. No API bills, no rate limits.
 
@@ -130,19 +138,23 @@ REFERENCE IMAGES                  YOUR FEEDBACK
 | Phase A | Done | `generate_prompt.py`, species DB, parameter weights, MJ feedback loop |
 | Phase B | Done | Flux local generation, T-rex signature, `auto_rater.py`, ComfyUI server |
 | Phase C | Done | `reference.py` batch intake, `.txt` captions, `export_dataset.py`, `LORA_TRAINING.md` |
-| Phase D | In progress | LoRA training — first T-rex reference image in, training next |
-| Phase E | Not started | Generate with trained LoRA, evaluate, tighten loop |
+| Tightening 0 | Done | Three guardrails: signal-split winners.json, auto-rater quarantine, publish gate |
+| Tightening 1 | Done | T. rex anatomy thesis at `refs/anatomy_theses/tyrannosaurus.md` |
+| Tightening 2 | Done | 5 curated T. rex refs ingested + drop-folder pipeline (`flux/ingest_training_drops.py`) |
+| Tightening 3 | Next | Throwaway T. rex LoRA — does the loop work? |
+| Tightening 4 | Pending | A/B test: 25 paired seeds with/without LoRA, rated against the thesis |
+| Tightening 5 | Pending | Decide: keep, iterate config, or kill the LoRA |
 
-**Current milestone:** First reference image is in (`training_refs/`). Dataset pipeline is ready. Next session: collect more T-rex references, run `export_dataset.py`, install ai-toolkit, train first LoRA.
+**Current milestone:** 5 T. rex refs ingested. Dataset pipeline ready. Next session: verify ai-toolkit + Flux weights, run `export_dataset.py`, kick off small/fast LoRA training (r=8, ~500-1000 steps). Goal of Phase 3 is *not* a good LoRA — it's proving the loop works end-to-end.
 
 ---
 
 ## Next Level — Ideas to Push Image Quality Further
 
-### Immediate (next session)
-- **Collect 10–20 T-rex reference images** — paleoart from Witton/Csotonyi, museum skeletal mounts, bird/croc living analogs. More refs = better LoRA signal.
-- **Train first T-rex LoRA** — install ai-toolkit, run training on `flux/datasets/dino_refs/`, save to `flux/loras/trex_v1.safetensors`.
-- **A/B test LoRA vs. base** — generate same prompt with and without LoRA, rate both, compare anatomy accuracy.
+### Immediate (next session — Tightening 3)
+- **Train the throwaway T. rex LoRA** on the 5 refs we have. Small/fast config (r=8, ~500-1000 steps). Save to `flux/loras/trex_v1.safetensors`.
+- **Don't add more refs.** Phase 4 will tell us if/why we need them.
+- **Draft the A/B test plan** — 25 paired seeds, with vs. without LoRA, sidecar-tagged so the publish gate blocks accidental shipping.
 
 ### Short term
 - **Species-by-species LoRA library** — one LoRA per species starting with T-rex. Stack multiple LoRAs for mixed-species scenes.
