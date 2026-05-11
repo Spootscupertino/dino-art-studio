@@ -141,20 +141,27 @@ REFERENCE IMAGES                  YOUR FEEDBACK
 | Tightening 0 | Done | Three guardrails: signal-split winners.json, auto-rater quarantine, publish gate |
 | Tightening 1 | Done | T. rex anatomy thesis at `refs/anatomy_theses/tyrannosaurus.md` |
 | Tightening 2 | Done | 5 curated T. rex refs ingested + drop-folder pipeline (`flux/ingest_training_drops.py`) |
-| Tightening 3 | Next | Throwaway T. rex LoRA — does the loop work? |
-| Tightening 4 | Pending | A/B test: 25 paired seeds with/without LoRA, rated against the thesis |
+| Tightening 3 | IN PROGRESS | Throwaway T. rex LoRA — training submitted to Replicate H200, awaiting .safetensors |
+| Tightening 4 | Next | A/B test: 25 paired seeds with/without LoRA, rated against the thesis |
 | Tightening 5 | Pending | Decide: keep, iterate config, or kill the LoRA |
 
-**Current milestone:** 5 T. rex refs ingested. Dataset pipeline ready. Next session: verify ai-toolkit + Flux weights, run `export_dataset.py`, kick off small/fast LoRA training (r=8, ~500-1000 steps). Goal of Phase 3 is *not* a good LoRA — it's proving the loop works end-to-end.
+**Current milestone:** Training job ID `wad5pnmbb5rmy0cy2z29jefvqw` submitted to Replicate. Status: Processing on H200 GPU. Config: 1000 steps, rank 16, lr 0.0004, batch 1, res 512/768/1024, caption_dropout 0.05. ETA: ~20 min. Cost: ~$1.50–3.00. Next session: download trex_v1.safetensors from training detail page, run the 25-pair A/B test from `flux/ab_test_plan_trex_v1.md`.
 
 ---
 
 ## Next Level — Ideas to Push Image Quality Further
 
-### Immediate (next session — Tightening 3)
-- **Train the throwaway T. rex LoRA** on the 5 refs we have. Small/fast config (r=8, ~500-1000 steps). Save to `flux/loras/trex_v1.safetensors`.
-- **Don't add more refs.** Phase 4 will tell us if/why we need them.
-- **Draft the A/B test plan** — 25 paired seeds, with vs. without LoRA, sidecar-tagged so the publish gate blocks accidental shipping.
+### Immediate (Tightening 3 — IN PROGRESS)
+- ✓ **Phase A smoke test** — Local Flux-dev load on M1 failed at MPS watermark (exit 3 OOM: 20.13GB > 20.13GB cap). Concluded local training infeasible.
+- ✓ **Pivot to Replicate** — Submitted 1000-step LoRA training to Replicate ostris/flux-dev-lora-trainer on H200 GPU. Training ID: `wad5pnmbb5rmy0cy2z29jefvqw`. Status: Processing. ETA: ~20 min.
+- ✓ **A/B test plan drafted** — `flux/ab_test_plan_trex_v1.md` — 25 paired seeds, with vs. without LoRA, sidecar-tagged `.approved=false` (publish gate blocks accidental shipping).
+- ✓ **Dataset pipeline** — `flux/zip_dataset.py` bundles 5 image+caption pairs into 2.5MB zip. Uploaded and ingested by Replicate.
+
+### Next (Tightening 4 — A/B Testing)
+- **Download trex_v1.safetensors** from Replicate training detail page → `flux/loras/trex_v1.safetensors`
+- **Run A/B test** — execute both with_lora and without_lora generations for all 25 seeds, save to `assets/gallery/flux/ab_tests/trex_v1/`
+- **Rate against anatomy thesis** — score all 50 images (1–5) across 5 categories from `refs/anatomy_theses/tyrannosaurus.md`
+- **Analyze** — mean delta, win rate per seed. Success threshold: mean ≥ 2.0, LoRA wins ≥ 18/25 pairs
 
 ### Short term
 - **Species-by-species LoRA library** — one LoRA per species starting with T-rex. Stack multiple LoRAs for mixed-species scenes.
