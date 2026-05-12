@@ -1,0 +1,60 @@
+job: custom_job
+config:
+  name: flux_train_replicate
+  process:
+  - type: custom_sd_trainer
+    training_folder: output
+    device: cuda:0
+    trigger_word: trex_v1
+    network:
+      type: lora
+      linear: 16
+      linear_alpha: 16
+    save:
+      dtype: float16
+      save_every: 1001
+      max_step_saves_to_keep: 1
+    datasets:
+    - folder_path: input_images
+      caption_ext: txt
+      caption_dropout_rate: 0.05
+      shuffle_tokens: false
+      cache_latents_to_disk: false
+      cache_latents: true
+      resolution:
+      - 512
+      - 768
+      - 1024
+    train:
+      batch_size: 1
+      steps: 1000
+      gradient_accumulation_steps: 1
+      train_unet: true
+      train_text_encoder: false
+      content_or_style: balanced
+      gradient_checkpointing: false
+      noise_scheduler: flowmatch
+      optimizer: adamw8bit
+      lr: 0.0004
+      ema_config:
+        use_ema: true
+        ema_decay: 0.99
+      dtype: bf16
+    model:
+      name_or_path: FLUX.1-dev
+      is_flux: true
+      quantize: false
+    sample:
+      sampler: flowmatch
+      sample_every: 1001
+      width: 1024
+      height: 1024
+      prompts: []
+      neg: ''
+      seed: 42
+      walk_seed: true
+      guidance_scale: 3.5
+      sample_steps: 28
+meta:
+  name: flux_train_replicate
+  version: '1.0'

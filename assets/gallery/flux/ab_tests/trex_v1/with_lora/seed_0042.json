@@ -1,0 +1,18 @@
+{
+  "seed": 42,
+  "label": "with_lora",
+  "target": "version:59d8095859aef81024b314d6be18a466764c295fde2c3baf9995f446a2b15873",
+  "prompt": "trex_v1 Tyrannosaurus rex hunting in a misty river delta, photorealistic, horizontal posture, two-fingered hands, digitigrade feet",
+  "input": {
+    "aspect_ratio": "1:1",
+    "num_inference_steps": 28,
+    "guidance_scale": 3.0,
+    "output_format": "png",
+    "megapixels": "1",
+    "prompt": "trex_v1 Tyrannosaurus rex hunting in a misty river delta, photorealistic, horizontal posture, two-fingered hands, digitigrade feet",
+    "seed": 42
+  },
+  "prediction_id": "6g6ww066x5rmt0cy3j7tfgdbqc",
+  "output_url": "https://replicate.delivery/xezq/ftcPNK3qFgRFTKO4kLTF6wApDcdWC4xaciIeN21IXiGKlOkWA/out-0.png",
+  "timestamp": "2026-05-12T07:21:01"
+}
