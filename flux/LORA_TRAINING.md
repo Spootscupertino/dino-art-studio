@@ -1,220 +1,91 @@
-# LoRA Fine-Tuning Pipeline for Flux-dev
+# LoRA Training — Replicate Workflow
 
-This guide walks through collecting scientifically accurate reference images, preparing a training dataset, and fine-tuning a LoRA model to improve dinosaur generation quality.
+Train a Flux LoRA on Replicate's `ostris/flux-dev-lora-trainer`, then serve it through `flux/generate.py`.
 
-## The Three-Step Workflow
+## Workflow
 
-### Step 1: Collect & Interview Reference Images
+### 1. Curate and caption refs
 
-**Command:**
-```bash
-python3 reference.py
-```
+Use `reference.py` (at repo root) to intake reference images. Each one lands in `assets/gallery/flux/training_refs/` with a matching `.txt` caption (`"a photo of <species>, <anatomy notes>"`) and is logged to `winners.json` with `source_type="reference"`.
 
-This script handles batch intake of reference images with a guided interview:
+Aim for **5–10 images per species**, mixed sources (paleoart, museum, living analog).
 
-1. **Drag-drop (or paste path)** — Add one or more images in a single session
-2. **Species detection** — Auto-guesses from filename; you confirm or correct
-3. **Source metadata** — URL/attribution and source type (paleoart, museum, living analog, wildlife)
-4. **Anatomy review** — You describe what's anatomically accurate (tooth shape, claws, posture, etc.)
-5. **Caveats** — Optional notes on inaccuracies or limitations
-6. **LLaVA analysis** — Auto-runs if Ollama + llava are available
-7. **Caption generation** — Creates `.txt` file: `"a photo of [species], [anatomy notes]"`
-8. **Storage** — Copies image + caption to `assets/gallery/flux/training_refs/`
-9. **Logging** — Records entry in `winners.json` with `source_type="reference"`
+### 2. Bundle into a training zip
 
-**Output:**
-```
-assets/gallery/flux/training_refs/
-├── trex_20260505_123456_museum_photo.png
-├── trex_20260505_123456_museum_photo.txt
-├── velociraptor_20260505_234567_paleoart.png
-├── velociraptor_20260505_234567_paleoart.txt
-└── ...
-```
-
-Each `.txt` file contains: `"a photo of [species], [anatomy notes]"`
-
-**Batch mode:**
-The script asks "Add another image?" after each one, so you can intake multiple images without restarting.
-
----
-
-### Step 2: Export Training Dataset
-
-**Command:**
 ```bash
 python3 flux/export_dataset.py
 ```
+Produces `flux/datasets/<name>_dataset.zip` (image + caption pairs side-by-side).
 
-This script reads all reference images + captions and prepares them for ai-toolkit:
+### 3. Upload to Replicate's trainer
 
-1. **Scans** `assets/gallery/flux/training_refs/` for `.png` + `.txt` pairs
-2. **Filters** for reference images (checks `winners.json` for `source_type="reference"`)
-3. **Creates** `flux/datasets/dino_refs/` with:
-   - `images/` — symlinks to actual training data (no duplication)
-   - `dataset.json` — metadata (species counts, captions, image paths)
-   - `summary.txt` — human-readable report
+In the Replicate web UI:
 
-**Output:**
-```
-flux/datasets/dino_refs/
-├── images/
-│   ├── trex_20260505_123456_museum_photo.png → ../../assets/gallery/flux/training_refs/...
-│   ├── trex_20260505_123456_museum_photo.txt → ../../assets/gallery/flux/training_refs/...
-│   ├── velociraptor_20260505_234567_paleoart.png → ...
-│   ├── velociraptor_20260505_234567_paleoart.txt → ...
-│   └── ...
-├── dataset.json
-└── summary.txt
-```
+1. Open `ostris/flux-dev-lora-trainer`.
+2. Upload the zip from step 2.
+3. Set `trigger_word` (e.g. `trex_v1`). This must be unique per LoRA — used to invoke it in prompts.
+4. Set hyperparameters. Reasonable starting recipe:
+   - rank: 16
+   - learning rate: 1e-4 (or 5e-5 if dataset < 8 images)
+   - epochs: 1000 steps total, or 50–100 epochs whichever is smaller
+   - batch size: 1
+5. Run. ~$1–3 per run, ~20–40 min for small datasets.
 
-**Example summary:**
-```
-LORA Training Dataset Summary
-==================================================
+### 4. Archive the weights and snapshot the config
 
-Total images: 12
-Unique species: 4
+After training succeeds:
 
-Breakdown by species:
-  Tyrannosaurus rex: 5 images
-  Velociraptor: 4 images
-  Triceratops: 2 images
-  Stegosaurus: 1 image
+1. Download `.safetensors` from the Replicate run page → `flux/loras/<name>.safetensors` (gitignored, but kept locally for backup).
+2. Save the exact recipe as `flux/loras/<name>.config.yaml`. See `flux/loras/trex_v1.config.yaml` for the format.
+3. Note the **training ID** and **version hash** from the run page.
 
-Dataset ready for ai-toolkit training:
-  → Images (with captions): flux/datasets/dino_refs/images
-  → Metadata: flux/datasets/dino_refs/dataset.json
+### 5. Register the LoRA
+
+Add an entry to `flux/loras/registry.json`:
+
+```json
+"<name>": {
+  "replicate_owner": "<your_replicate_username>",
+  "replicate_model": "<model_slug>",
+  "version": "<version_hash>",
+  "trigger_word": "<name>",
+  "trained_on": "YYYY-MM-DD",
+  "training_id": "<replicate_training_id>"
+}
 ```
 
----
-
-### Step 3: Train LoRA with ai-toolkit
-
-**Install ai-toolkit:**
+Get the version hash via:
 ```bash
-# Clone the repo (or follow official instructions)
-git clone https://github.com/ostris/ai-toolkit.git
-cd ai-toolkit
-pip install -r requirements.txt
+curl -s -H "Authorization: Bearer $REPLICATE_API_TOKEN" \
+  https://api.replicate.com/v1/models/<owner>/<slug> | jq .latest_version.id
 ```
 
-**Point ai-toolkit at your dataset:**
+### 6. Validate with A/B test
+
 ```bash
-# Example: ai-toolkit config.yaml should reference the images folder
-# Edit config.yaml to point at:
-#   dataset_path: /path/to/dino_art/flux/datasets/dino_refs/images/
-# (ai-toolkit will find image + caption pairs automatically)
-
-# Then run training (exact command depends on ai-toolkit version)
-python train.py --config config.yaml
+python3 flux/ab_test_replicate.py
 ```
 
-**Output:**
-The trained LoRA will be saved to a `.safetensors` file. Place it in `flux/loras/`:
+(Adjust `SEEDS`, `BASE_PROMPT`, and `LORA_VERSION` for the new LoRA.)
+
+Score each pair on the 5-category anatomy rubric (1–5 each, max 25). Promotion threshold:
+
+- **Mean Δ ≥ 2.0** (LoRA mean − baseline mean)
+- **Win rate ≥ 80%** (LoRA wins ≥ 4/5)
+
+Record `ab_test_winrate` and `ab_test_mean_delta` in the registry entry.
+
+### 7. Use it
+
 ```bash
-cp ~/ai-toolkit/output/dino_winners.safetensors flux/loras/
+python3 flux/generate.py --prompt "<prompt>" --seed <n> --lora <name> --output <path>
 ```
 
----
+`generate.py` auto-prepends the trigger word if it isn't already in the prompt.
 
-## Data Format
+## Why Replicate (not local ai-toolkit)
 
-**Image files:**
-- Format: PNG, JPG, WEBP (any standard image format)
-- Location: `assets/gallery/flux/training_refs/`
-- Naming: `{species}_{timestamp}_{original_filename}.{ext}`
-
-**Caption files:**
-- Format: Plain text (`.txt`)
-- Location: Same folder as image (same base filename)
-- Content: `"a photo of [species], [anatomy notes]"`
-- Example: `a photo of Tyrannosaurus rex, massive 2-fingered hands, powerful hindquarters, correct tooth structure, balanced skull`
-
-**Metadata:**
-- `winners.json` — Stores full interview notes (anatomy analysis, caveats, source URL, LLaVA analysis)
-- `dataset.json` — Export-time snapshot (species, image counts, training metadata)
-
----
-
-## Workflow Integration
-
-The reference images feed into the broader feedback loop:
-
-```
-reference.py (collect + interview)
-       ↓
-assets/gallery/flux/training_refs/ (+ .txt captions)
-       ↓
-winners.json (logged with source_type="reference")
-       ↓
-export_dataset.py (prepare for training)
-       ↓
-flux/datasets/dino_refs/images/ (ai-toolkit input)
-       ↓
-ai-toolkit (external training)
-       ↓
-flux/loras/dino_winners.safetensors
-       ↓
-flux/generate_image.py (load LoRA during generation)
-       ↓
-Better dinosaur anatomy → higher auto-rated scores → reinforce the loop
-```
-
----
-
-## Best Practices
-
-### Collecting Reference Images
-
-1. **Source diversity:** Mix paleoart, museum specimens, and living analogs (crocs, birds) for robustness
-2. **Anatomy focus:** Prioritize images with clear tooth structure, claw morphology, posture, and proportions
-3. **Attribution:** Always record source URL — helps with reproducibility and respects creators
-4. **Accuracy notes:** Be specific in the interview (e.g., "sickle claw morphology on hind foot" vs. generic "looks good")
-
-### Training Dataset
-
-- **Minimum:** 5–10 reference images per species (more is better)
-- **Balance:** Try to keep species representation balanced (avoid 1 species dominating)
-- **Captions:** Keep them under 200 words; focus on anatomical features, not artistic style
-- **Versioning:** Date-stamped filenames in `training_refs/` make it easy to track which images were used for which LoRA
-
-### LoRA Hyperparameters (ai-toolkit)
-
-Common starting values (adjust based on ai-toolkit docs):
-- **Rank (r):** 8–16 (lower = smaller model, less memory)
-- **Learning rate:** 1e-4 to 5e-5 (start lower for M1 memory)
-- **Epochs:** 10–20 (more if dataset is small)
-- **Batch size:** 1 (M1 constraint; increase on GPU if available)
-
----
-
-## Troubleshooting
-
-**"No reference images found"**
-- Run `python3 reference.py` to add images first
-- Check that `assets/gallery/flux/training_refs/` exists and contains `.png` + `.txt` pairs
-
-**Missing caption files**
-- Each image needs a matching `.txt` file with the same base name
-- `reference.py` creates these automatically; check for errors during intake
-
-**winners.json issues**
-- Make sure `reference.py` successfully logged entries with `source_type="reference"`
-- View `winners.json` to verify entries exist
-
-**ai-toolkit training fails**
-- Consult ai-toolkit documentation (https://github.com/ostris/ai-toolkit)
-- Check that `dataset/images/` contains paired image + caption files
-- Verify image paths are absolute or relative correctly in `dataset.json`
-
----
-
-## Future Enhancements
-
-- **Auto-caption from LLaVA:** Use vision analysis to auto-generate better captions
-- **Anatomy validation:** Pre-check captions for anatomy keywords (claw, tooth, feather, etc.)
-- **Multi-species LoRA:** Train a single LoRA across multiple species vs. species-specific models
-- **LoRA versioning:** Tag trained models with dataset snapshot (date, species, image count)
-- **Comparison metrics:** A/B test generated images with/without new LoRA to measure improvement
+- The M1 mini can't train Flux LoRAs in reasonable time / memory.
+- One coherent stack: training and inference both run on Replicate's Flux-dev.
+- Cost is trivial: a full LoRA cycle (train + validate + 10 hero generations) lands under $5.
+- The `.safetensors` is archived locally, so if Replicate ever disappears we still own the weights.

@@ -8,7 +8,7 @@
 
 **The wall we hit with Midjourney:** MJ is a black box. We've maxed out prompt engineering. The next leap: run Flux locally on M1 + fine-tune with a LoRA trained on scientifically accurate reference images. We own the model, we own the results.
 
-**Where we are now:** Pipeline is hardened with three guardrails (signal-split winners.json, auto-rater quarantine, publish gate), anatomy thesis written for T. rex, 5 curated training refs ingested (skeletal x2, paleoart x2, living analog cassowary x1). Phase 3 is the throwaway LoRA — train it, see what comes out, learn from the result.
+**Where we are now:** The throwaway T. rex LoRA succeeded. Training ran on Replicate's `ostris/flux-dev-lora-trainer`; the resulting `trex_v1` LoRA beat baseline Flux-dev on 5/5 A/B pairs with mean Δ +7.2 / 25 against the anatomy thesis. We've committed fully to Replicate-Flux for both training and inference and retired the local SDXL stack — local SDXL couldn't load Flux LoRAs, so one coherent cloud stack replaces two incompatible halves. Cost is ~$0.03–0.05 per image, ~$1–3 per training run.
 
 **The discipline:** 5 great refs > 50 mixed refs. One full loop completed > five half-built loops. Don't add more refs until Phase 4 tells us why we'd need them.
 
@@ -29,23 +29,30 @@ REFERENCE IMAGES                  YOUR FEEDBACK
        |                                 |
        +-----------> winners.json <------+
                           |
-                          | (8+ score = training candidate)
+                          | (signal_type=anatomy_ref)
                           v
                  flux/export_dataset.py
-                 (formats for ai-toolkit)
+                 (zip image+caption pairs)
                           |
                           v
-                 flux/datasets/dino_refs/
+                 flux/datasets/*_dataset.zip
                           |
                           v
-                   ai-toolkit (external)
+            Replicate ostris/flux-dev-lora-trainer
+                 (web UI, ~$1–3, ~20 min)
                           |
                           v
-                 flux/loras/dino_winners.safetensors
+                trained LoRA version hash
+                 + flux/loras/<name>.safetensors (archived)
+                 + flux/loras/registry.json (registered)
                           |
                           v
-              flux/generate_image.py  <-- generate_prompt.py
-              (M1 Mac, local Flux-dev)     (builds the prompt)
+              flux/generate.py <-- generate_prompt.py
+              (Replicate Flux-dev API)    (builds the prompt)
+                          |
+                          v
+                 flux/ab_test_replicate.py
+                 (5 paired seeds, baseline vs LoRA)
                           |
                           v
                  assets/gallery/flux/
@@ -99,7 +106,7 @@ REFERENCE IMAGES                  YOUR FEEDBACK
 
 13. **Training-drops ingest (`flux/ingest_training_drops.py`)** — Manual-run pipeline: drop image into `~/Desktop/Jurassinkart/Training Drops/<species>/<source_type>/`, run script, image moves to `assets/gallery/flux/training_refs/` with auto-generated `.txt` and `.json` sidecars. Manual by design — auto-watching here is the trap the publish gate guards against.
 
-10. **Local Flux on M1** — Flux-dev runs on the Mac mini in ~45 seconds per image at bfloat16 precision with MPS acceleration. LoRA loading support is wired. ComfyUI server for visual iteration. No API bills, no rate limits.
+10. **Replicate-Flux generation (`flux/generate.py`)** — Single-image CLI calls Replicate's Flux-dev API. With `--lora <name>` looks up the trained LoRA in `flux/loras/registry.json` and POSTs to that version. ~$0.03–0.05/image, 20–40 sec round-trip, no local model weights.
 
 ---
 
@@ -122,11 +129,11 @@ REFERENCE IMAGES                  YOUR FEEDBACK
 | `unified_feedback.py` | Terminal interview: rate 1-10, save anatomy notes, track winners |
 | `reference.py` | Batch intake of reference images + auto .txt captions |
 | `auto_rater.py` | Heuristic auto-rating for Flux images |
-| `flux/export_dataset.py` | Export training_refs as ai-toolkit dataset |
-| `flux/train_lora.py` | LoRA scaffold — WIP, use ai-toolkit externally |
-| `flux/LORA_TRAINING.md` | Step-by-step guide to collect → export → train |
-| `flux/generate_image.py` | Runs Flux-dev locally on M1, supports LoRA |
-| `flux/comfyui_server.py` | Local web UI for Flux generation |
+| `flux/export_dataset.py` | Bundle training_refs into a zip for Replicate trainer |
+| `flux/LORA_TRAINING.md` | Replicate-hosted LoRA training workflow |
+| `flux/generate.py` | Single-image CLI: calls Replicate Flux-dev (baseline or LoRA) |
+| `flux/ab_test_replicate.py` | 5-pair A/B harness for validating a new LoRA |
+| `flux/loras/registry.json` | Trained LoRA registry: name → version hash + trigger word |
 | `tools/sync_gallery.py` | Watches gallery folders, syncs to site, auto-deploys |
 
 ---
@@ -141,27 +148,24 @@ REFERENCE IMAGES                  YOUR FEEDBACK
 | Tightening 0 | Done | Three guardrails: signal-split winners.json, auto-rater quarantine, publish gate |
 | Tightening 1 | Done | T. rex anatomy thesis at `refs/anatomy_theses/tyrannosaurus.md` |
 | Tightening 2 | Done | 5 curated T. rex refs ingested + drop-folder pipeline (`flux/ingest_training_drops.py`) |
-| Tightening 3 | IN PROGRESS | Throwaway T. rex LoRA — training submitted to Replicate H200, awaiting .safetensors |
-| Tightening 4 | Next | A/B test: 25 paired seeds with/without LoRA, rated against the thesis |
-| Tightening 5 | Pending | Decide: keep, iterate config, or kill the LoRA |
+| Tightening 3 | Done | Throwaway T. rex LoRA — training submitted to Replicate H200, `.safetensors` downloaded |
+| Tightening 4 | Done | A/B test: 5 paired seeds, LoRA won 5/5, mean Δ +7.2 / 25. LoRA promoted. |
+| Tightening 5 | Done | Retired local SDXL stack, committed to Replicate-Flux for training + inference |
 
-**Current milestone:** Training job ID `wad5pnmbb5rmy0cy2z29jefvqw` submitted to Replicate. Status: Processing on H200 GPU. Config: 1000 steps, rank 16, lr 0.0004, batch 1, res 512/768/1024, caption_dropout 0.05. ETA: ~20 min. Cost: ~$1.50–3.00. Next session: download trex_v1.safetensors from training detail page, run the 25-pair A/B test from `flux/ab_test_plan_trex_v1.md`.
+**Current milestone:** Stack is coherent end-to-end. `flux/generate.py` is the only generation path; `flux/ab_test_replicate.py` is the validation gate for any new LoRA. Next: train species #2 (Velociraptor? Triceratops?) and validate the same way.
 
 ---
 
 ## Next Level — Ideas to Push Image Quality Further
 
-### Immediate (Tightening 3 — IN PROGRESS)
-- ✓ **Phase A smoke test** — Local Flux-dev load on M1 failed at MPS watermark (exit 3 OOM: 20.13GB > 20.13GB cap). Concluded local training infeasible.
-- ✓ **Pivot to Replicate** — Submitted 1000-step LoRA training to Replicate ostris/flux-dev-lora-trainer on H200 GPU. Training ID: `wad5pnmbb5rmy0cy2z29jefvqw`. Status: Processing. ETA: ~20 min.
-- ✓ **A/B test plan drafted** — `flux/ab_test_plan_trex_v1.md` — 25 paired seeds, with vs. without LoRA, sidecar-tagged `.approved=false` (publish gate blocks accidental shipping).
-- ✓ **Dataset pipeline** — `flux/zip_dataset.py` bundles 5 image+caption pairs into 2.5MB zip. Uploaded and ingested by Replicate.
+### Recently done (Tightenings 3–5)
+- ✓ **Tightening 3** — Local Flux-dev training OOM'd on M1 (20.13GB / 20.13GB cap). Pivoted to Replicate `ostris/flux-dev-lora-trainer` on H200. Training ID `wad5pnmbb5rmy0cy2z29jefvqw`, 1000 steps, rank 16, lr 0.0004, caption_dropout 0.05.
+- ✓ **Tightening 4** — 5-pair A/B test on `flux/ab_test_replicate.py`. LoRA won 5/5, scores: 12.4 → 19.6 (mean Δ +7.2). Vanilla Flux defaults to upright kangaroo / screaming mouth / 3-finger hands. With LoRA: horizontal spine, lifted tail, 2-finger hands, digitigrade stance — the anatomy thesis showing up in the model.
+- ✓ **Tightening 5** — Retired local SDXL stack: `generate_image.py`, `comfyui_server.py`, `train_lora.py`, `SETUP.md`, `PHASE_B.md`, the launcher .command, and `DinoGenerator.app`. Created `flux/generate.py` (single-image CLI) and `flux/loras/registry.json`. Rewrote `flux/CLAUDE.md` and `flux/LORA_TRAINING.md`. One coherent cloud stack now.
 
-### Next (Tightening 4 — A/B Testing)
-- **Download trex_v1.safetensors** from Replicate training detail page → `flux/loras/trex_v1.safetensors`
-- **Run A/B test** — execute both with_lora and without_lora generations for all 25 seeds, save to `assets/gallery/flux/ab_tests/trex_v1/`
-- **Rate against anatomy thesis** — score all 50 images (1–5) across 5 categories from `refs/anatomy_theses/tyrannosaurus.md`
-- **Analyze** — mean delta, win rate per seed. Success threshold: mean ≥ 2.0, LoRA wins ≥ 18/25 pairs
+### Next (Tightening 6+)
+- **Species #2 LoRA** — pick a second species (raptor? Triceratops?). Curate 5–10 refs, caption, zip, train, A/B validate.
+- **Promote `trex_v1` images** — pick a few hero seeds, generate at higher resolution / vertical AR, add `.approved` marker, push to Printify.
 
 ### Short term
 - **Species-by-species LoRA library** — one LoRA per species starting with T-rex. Stack multiple LoRAs for mixed-species scenes.

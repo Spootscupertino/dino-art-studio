@@ -1,0 +1,12 @@
+{
+  "trex_v1": {
+    "replicate_owner": "spootscupertino",
+    "replicate_model": "trex-v1",
+    "version": "59d8095859aef81024b314d6be18a466764c295fde2c3baf9995f446a2b15873",
+    "trigger_word": "trex_v1",
+    "trained_on": "2026-05-11",
+    "training_id": "wad5pnmbb5rmy0cy2z29jefvqw",
+    "ab_test_winrate": "5/5",
+    "ab_test_mean_delta": 7.2
+  }
+}

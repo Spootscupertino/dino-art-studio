@@ -1,207 +1,85 @@
-# Next Session Prompt — Tightening 5: Commit to Replicate-Flux, Retire Local SDXL
+# Next Session Prompt — Tightening 6: Second-Species LoRA
 
 ## Status Coming In
 
-**Tightening 4 (A/B validation) is complete and the throwaway LoRA succeeded.**
+**Tightening 5 (retire local SDXL, commit to Replicate-Flux) is complete.**
 
-- LoRA: `flux/loras/trex_v1.safetensors` (164 MB, trained on Replicate's `ostris/flux-dev-lora-trainer`)
-- Replicate model: `spootscupertino/trex-v1` (private), version `59d8095859aef81024b314d6be18a466764c295fde2c3baf9995f446a2b15873`
-- A/B script: `flux/ab_test_replicate.py` — proven working (handles 429 throttling, private-version endpoint)
-- Output images: `assets/gallery/flux/ab_tests/trex_v1/{with,without}_lora/seed_{0042,0123,0777,1024,2025}.png` (+ sidecar JSON)
+- `flux/generate.py` is the only generator. Single-image CLI, calls Replicate. Smoke-tested.
+- `flux/loras/registry.json` is the source of truth. Currently registers `trex_v1` (5/5 win rate, mean Δ +7.2).
+- `flux/ab_test_replicate.py` is the validation gate for any new LoRA.
+- Local SDXL stack (`generate_image.py`, `comfyui_server.py`, `train_lora.py`, `SETUP.md`, `PHASE_B.md`, launcher, `DinoGenerator.app`, `PHASE_C_README.md`, `requirements.txt`) is deleted.
+- Docs (root `CLAUDE.md`, `flux/CLAUDE.md`, `flux/LORA_TRAINING.md`, `RECAP.md`) all describe the cloud-only Replicate-Flux stack.
 
-**Scores (5 pairs, 5-category anatomy rubric, 1–5 each, max 25):**
+The stack is coherent end-to-end. Time to put it through its paces with a second species.
 
-| Seed | Without LoRA | With LoRA | Δ |
-|------|---|---|---|
-| 42   | 12 | 20 | +8 |
-| 123  | 12 | 18 | +6 |
-| 777  | 13 | 18 | +5 |
-| 1024 | 12 | 21 | +9 |
-| 2025 | 13 | 21 | +8 |
-| **Mean** | **12.4** | **19.6** | **+7.2** |
+## What You're Doing This Session
 
-- Win rate: **5/5 (100%)**
-- Plan threshold for go/no-go: mean Δ ≥ 2.0, win rate ≥ 72%. Both blown past.
-- Visual pattern: vanilla Flux = upright kangaroo, screaming mouth, tail in water, 3-finger hands. With LoRA = horizontal spine, lifted tail, calmer mouth, clear 2-finger hands. Anatomy thesis is showing up in the model.
+**Train a LoRA for species #2.** The full loop — pick species, curate refs, caption, zip, train on Replicate, register, A/B validate, promote (or kill).
 
-## The Architectural Decision (already made — execute it)
-
-**Commit to Replicate-Flux for both training AND generation. Retire the local SDXL generator entirely.**
-
-Why: training pipeline already lives on Replicate (Flux-dev LoRA trainer); the LoRA we just validated is a Flux LoRA; local SDXL cannot load Flux LoRAs (different architectures). The local generator was a memory-driven compromise from before training existed and has no path to consume its own training output. One coherent stack > two incompatible halves.
-
-**Cost reality check:** ~$0.03–0.05 per Replicate image. At expected volume this is $5–15/month tops. Trivial vs. M1 thrash.
-
-## What You're Doing Today
-
-Clean the repo so the Replicate-Flux stack is the *only* generation path. Every file, doc, and reference to local Flux-dev or local SDXL gets deleted or rewritten. Repo must be coherent end-to-end when you finish — someone reading `flux/CLAUDE.md` should see exactly what's actually true.
+We proved the loop works on T. rex. Now we prove it generalizes. If species #2 hits the threshold, the next 10 species are mechanical.
 
 ## Step-by-Step
 
-### 1. Delete dead files
+### 1. Pick the species
+
+Pick one. Suggested candidates (any will do; pick by what you're most curious about):
+
+- **Velociraptor** — different body plan (feathered, smaller, sickle claw on hind foot). Tests whether the loop handles non-T-rex anatomy.
+- **Triceratops** — quadruped + frill + horns. Tests whether the loop handles quadrupedal posture vs the biped baked into T. rex refs.
+- **Spinosaurus** — sail-back, aquatic, elongated jaw. Tests an unusual body plan.
+
+Write a one-paragraph anatomy thesis at `refs/anatomy_theses/<species_lower>.md` if one doesn't exist. Mirror the structure of `refs/anatomy_theses/tyrannosaurus.md` (5 scoring categories, auto-reject conditions).
+
+### 2. Curate 5–10 refs
+
+Use `python3 reference.py` to intake each one. Mix sources (paleoart, museum, living analog). Each ref needs a `.txt` caption: `"a photo of <species>, <anatomy notes>"`.
+
+### 3. Zip and upload
 
 ```bash
-git rm flux/generate_image.py          # SDXL generator, no LoRA support, doesn't fit
-git rm flux/comfyui_server.py          # FastAPI wrapper around the SDXL generator
-git rm flux/train_lora.py              # Non-functional placeholder ("Phase C roadmap")
-git rm flux/SETUP.md                   # SDXL/Flux-dev local setup, obsolete
-git rm flux/PHASE_B.md                 # Historical, no longer load-bearing
-git rm "Launch Dino Generator.command" # Launcher for the retired UI
-git rm -r flux/DinoGenerator.app       # macOS app wrapper for same UI
+python3 flux/export_dataset.py
 ```
 
-Verify nothing else imports any of these before deletion:
-```bash
-grep -rn "from flux.generate_image\|import flux.generate_image\|from flux.train_lora\|from flux.comfyui_server" .
-grep -rn "Launch Dino Generator\|DinoGenerator.app" .
-```
+Upload `flux/datasets/<species>_dataset.zip` to Replicate's `ostris/flux-dev-lora-trainer` web UI. Use the same recipe that worked for T. rex (rank 16, lr 1e-4, 1000 steps, caption_dropout 0.05, batch 1, res 512/768/1024). Trigger word = `<species_lower>_v1`.
 
-If anything shows up, deal with it before deleting (probably also dead, but verify).
+### 4. Archive and register
 
-### 2. Create `flux/generate.py` (the new single-image generator)
+After training succeeds:
+- Download `.safetensors` → `flux/loras/<species>_v1.safetensors`
+- Save config snapshot → `flux/loras/<species>_v1.config.yaml`
+- Get version hash: `curl -s -H "Authorization: Bearer $REPLICATE_API_TOKEN" https://api.replicate.com/v1/models/<owner>/<slug> | jq .latest_version.id`
+- Add entry to `flux/loras/registry.json`
 
-This is the daily-driver replacement for `generate_image.py`. Refactor `flux/ab_test_replicate.py`:
-- Extract the Replicate API client (token loading, `api()` retry loop, `create_prediction()`, `wait_for()`, `download()`) into shared functions OR keep them in one file for simplicity
-- Single-image CLI: `--prompt`, `--seed`, `--lora <name>` (looks up `flux/loras/<name>.safetensors` for sidecar metadata; the actual weights live on Replicate via the trained model version), `--output <path>`, `--aspect-ratio`, `--steps`, `--guidance`
-- If `--lora trex_v1`: use version `59d8095859aef81024b314d6be18a466764c295fde2c3baf9995f446a2b15873`. Future LoRAs need a registry — see step 3.
-- Without `--lora`: hits `black-forest-labs/flux-dev` model endpoint
-- Writes PNG + sidecar JSON next to it (same format as ab_test_replicate.py)
+### 5. A/B validate
 
-Don't over-engineer. Mirror `flux/ab_test_replicate.py`'s style.
+Adjust the constants at the top of `flux/ab_test_replicate.py`:
+- `SEEDS` — keep the same 5 (42, 123, 777, 1024, 2025) for comparable scoring discipline
+- `BASE_PROMPT` — species-appropriate scene
+- `LORA_VERSION` — new version hash
+- `OUT_ROOT` — `assets/gallery/flux/ab_tests/<species>_v1`
 
-### 3. Add a tiny LoRA registry
+Run it. Score each pair 1–5 across the 5 thesis categories. Promotion threshold: **mean Δ ≥ 2.0, win rate ≥ 80%**.
 
-Create `flux/loras/registry.json`:
-```json
-{
-  "trex_v1": {
-    "replicate_owner": "spootscupertino",
-    "replicate_model": "trex-v1",
-    "version": "59d8095859aef81024b314d6be18a466764c295fde2c3baf9995f446a2b15873",
-    "trigger_word": "trex_v1",
-    "trained_on": "2026-05-11",
-    "training_id": "wad5pnmbb5rmy0cy2z29jefvqw",
-    "ab_test_winrate": "5/5",
-    "ab_test_mean_delta": 7.2
-  }
-}
-```
+### 6. Promote or kill
 
-`flux/generate.py` reads this for `--lora <name>` lookups. Adding a future LoRA = one new JSON entry, no code change.
-
-### 4. Slim `flux/requirements.txt`
-
-Current file has diffusers, torch (MPS), accelerate, peft, fastapi, uvicorn, websockets — all for the retired stack. After cleanup, the only runtime needs are Python stdlib (urllib for Replicate REST). Reduce to:
-
-```
-# No third-party deps needed at runtime — Replicate calls go through urllib.
-# Dev/test only:
-ruff  # if you use it
-```
-
-Or just delete the file. Up to you.
-
-### 5. Rewrite `flux/CLAUDE.md`
-
-Replace entirely. Should describe the actual stack:
-
-- Owner: `prompt-crafter`
-- Generation: Replicate-Flux (`black-forest-labs/flux-dev` for vanilla, `spootscupertino/trex-v1:<version>` for trex_v1 LoRA). No local generation.
-- Training: Replicate (`ostris/flux-dev-lora-trainer`). Submit via the web UI for now; dataset prep is `flux/export_dataset.py`.
-- Files: `generate.py` (single-image CLI), `ab_test_replicate.py` (A/B validation harness for new LoRAs), `export_dataset.py` (dataset prep), `loras/registry.json` (LoRA catalog), `loras/*.safetensors` (downloaded weights, kept for archival/reference even though Replicate runs from its own copy)
-- No more talk of ComfyUI, ControlNet, MPS, bfloat16, 24GB models, M1 optimization
-- Cost: ~$0.03–0.05/image, ~$1–3/training run
-
-### 6. Rewrite `flux/LORA_TRAINING.md`
-
-Single workflow now:
-1. Curate references (paleoart, skeletals, wildlife analogs)
-2. Caption them
-3. Zip them, `flux/export_dataset.py` if helpful
-4. Upload to Replicate `ostris/flux-dev-lora-trainer` via the web UI
-5. Set trigger word, set epochs/steps/learning rate, kick off
-6. Wait ~10–20 min, download `.safetensors` for archival
-7. Add entry to `flux/loras/registry.json`
-8. Validate with `python3 flux/ab_test_replicate.py` (5 pairs minimum) before treating it as a "real" LoRA
-9. If win rate ≥ 80%, promote; else iterate
-
-Cut all ai-toolkit / local M1 / Phase C content.
-
-### 7. Update root `CLAUDE.md`
-
-The flux/ row in the domain table currently says:
-> Local Flux-dev generation — M1-optimized image generation with LoRA fine-tuning + branded ComfyUI.
-
-Rewrite to:
-> Replicate-Flux generation — cloud Flux-dev image generation + LoRA inference, plus dataset prep for `ostris/flux-dev-lora-trainer` training.
-
-Also update the "Generation pipeline" section under "Cross-domain contracts" to reflect Replicate calls instead of local generation.
-
-### 8. Update `RECAP.md`
-
-Append a Tightening 4 section with:
-- A/B test result (5/5 win, +7.2 mean delta)
-- Architectural decision (committed to Replicate-Flux)
-- What was deleted in Tightening 5
-
-### 9. Verify nothing's broken
-
-```bash
-# No dangling references
-grep -rn "FluxGenerator\|StableDiffusionXLPipeline\|comfyui_server\|DinoGenerator" --include="*.py" --include="*.md" .
-
-# generate.py works end to end on a single image
-python3 flux/generate.py --prompt "Tyrannosaurus rex hunting in a misty river delta" --seed 99 --lora trex_v1 --output /tmp/smoke.png
-
-# ab_test_replicate.py still runs (skips existing files, no-ops cleanly)
-python3 flux/ab_test_replicate.py
-```
-
-### 10. Commit
-
-One commit, clear message: `Tightening 5: retire local SDXL, commit to Replicate-Flux`
+- **Promote:** Record `ab_test_winrate` + `ab_test_mean_delta` in the registry. Commit.
+- **Kill:** Note what failed in `RECAP.md`. Adjust the recipe (more refs, different caption discipline, different rank) and retry. Don't lower the threshold.
 
 ## Key Files
 
-- `flux/ab_test_replicate.py` — reference impl for Replicate API calls (token loading, 429 retry, version-hash predictions)
-- `flux/loras/trex_v1.safetensors` — first validated LoRA (archival; Replicate runs from its own copy)
-- `flux/loras/trex_v1.config.yaml` — training config snapshot
-- `assets/gallery/flux/ab_tests/trex_v1/` — A/B images + sidecars (keep as evidence)
-- `/Users/ericeldridge/dino_art/.env` — has `REPLICATE_API_TOKEN` set
-
-## Blockers / Escalations
-
-- If `grep` in step 9 surfaces references in `tools/`, `site/`, `printify/`, or `db/`: don't blindly delete. Read the call site. Most likely these reference the *gallery output directory* (`assets/gallery/flux/`) which we're keeping, not the SDXL generator itself. Different thing.
-- If `Launch Dino Generator.command` has an alias somewhere (Dock, login items): can't clean those programmatically; note in the commit message that user should remove manually.
-- If you find a *working* feature of the old SDXL UI you didn't know about (e.g. a unique parameter sweep mode), stop and ask the user before deleting — don't lose functionality silently.
+- `flux/generate.py` — daily-driver CLI
+- `flux/ab_test_replicate.py` — A/B harness (edit constants at top for each LoRA)
+- `flux/loras/registry.json` — registry; add new entry here
+- `flux/LORA_TRAINING.md` — full workflow reference
+- `refs/anatomy_theses/tyrannosaurus.md` — thesis template
 
 ## Definition of Done
 
-✓ All 7 files in step 1 deleted
-✓ `flux/generate.py` created and smoke-tested with one real Replicate call (produces an image)
-✓ `flux/loras/registry.json` created with `trex_v1` entry
-✓ `flux/requirements.txt` slimmed or deleted
-✓ `flux/CLAUDE.md`, `flux/LORA_TRAINING.md`, root `CLAUDE.md` rewritten to match reality
-✓ `RECAP.md` updated with Tightening 4 results + Tightening 5 cleanup
-✓ `grep` in step 9 returns no dead references
-✓ One commit landed with clean message
-
----
-
-## Reference: The validated A/B prompt
-
-Used in Tightening 4, in case you want to repro:
-
-- Baseline (vanilla Flux): `"Tyrannosaurus rex hunting in a misty river delta, photorealistic, horizontal posture, two-fingered hands, digitigrade feet"`
-- With LoRA: `"trex_v1 Tyrannosaurus rex hunting in a misty river delta, photorealistic, horizontal posture, two-fingered hands, digitigrade feet"`
-- Common params: `aspect_ratio=1:1`, `num_inference_steps=28`, `guidance_scale=3.0`, `output_format=png`, `megapixels=1`
-
-## Reference: Common Replicate API gotchas already solved
-
-1. **Rate limiting on accounts with <$5 credit:** 6 req/min, burst of 1. The 429 response includes `retry_after` in seconds. `ab_test_replicate.py:42` handles this; reuse the same retry loop.
-2. **Private trained models cannot be called via `/v1/models/<owner>/<name>/predictions`** — get 404. Must use `/v1/predictions` with `version` field set to the full version hash. `ab_test_replicate.py:create_prediction()` shows both patterns.
-3. **Version hash from API:** `GET /v1/models/<owner>/<name>` → `latest_version.id`. No need to scrape the web UI.
-
----
-
-**Remember:** the LoRA works. The throwaway succeeded. This session is *not* about chasing better images — it's about making the codebase reflect the path that actually works, so the next LoRA (Triceratops, Spinosaurus, whatever) drops into a clean home. Boring, mechanical, high-value cleanup. Ship it.
+✓ Species #2 chosen and anatomy thesis written
+✓ 5–10 refs curated via `reference.py`
+✓ Dataset zipped and trained on Replicate
+✓ `<species>_v1.safetensors` + config archived locally
+✓ Registry entry added
+✓ A/B test run, scored, recorded
+✓ Result documented in RECAP.md
+✓ One commit landed

@@ -1,120 +1,66 @@
-# Flux Domain — Local Image Generation
+# Flux Domain — Replicate-Flux Generation
 
-Owner: `prompt-crafter` (shared with mj domain for now, can split to dedicated agent)
+Owner: `prompt-crafter`
 
-## Goal
-Generate photorealistic dinosaur images locally on M1 Mac mini using **Flux-dev** + **LoRA fine-tuning** + **ControlNet anatomy guidance**. Replace or complement Midjourney with quality-first local generation.
+## What this domain does
 
-## What Lives Here
+Generate photorealistic dinosaur images via **Flux-dev hosted on Replicate**, optionally with a trained LoRA. Also prepares datasets for cloud LoRA training on Replicate's `ostris/flux-dev-lora-trainer`.
+
+**All inference is cloud.** No local model weights, no MPS / bfloat16 / ComfyUI / ControlNet. The earlier local SDXL stack was retired in Tightening 5 — local SDXL cannot load Flux LoRAs (different architecture), so one coherent cloud stack replaces two incompatible halves.
+
+## What lives here
 
 | File | Purpose |
 |---|---|
-| `generate_image.py` | Core image generation: Flux-dev + LoRA + ControlNet, M1-optimized |
-| `train_lora.py` | Fine-tune LoRA on high-scoring winners from unified_feedback.py |
-| `comfyui_server.py` | Headless ComfyUI server (teal/blue themed API) |
-| `comfyui_ui/` | Branded ComfyUI frontend (teal + blue + complementary colors) |
-| `requirements.txt` | M1-optimized PyTorch + diffusers dependencies |
-| `loras/` | Trained LoRA models (`dino_winners.safetensors`, etc.) |
-| `controlnets/` | ControlNet models for anatomy constraint (skeletal references) |
+| `generate.py` | Single-image CLI. Calls Replicate's Flux-dev model (baseline) or a trained LoRA version. |
+| `ab_test_replicate.py` | 5-seed A/B harness: baseline vs LoRA, same seeds both paths. Used to validate every new LoRA. |
+| `export_dataset.py` | Bundles `assets/gallery/flux/training_refs/` (image + caption pairs) into a zip for upload to Replicate's trainer. |
+| `ingest_training_drops.py` | Helper for dropping reference images into the training pool. |
+| `loras/registry.json` | Source of truth for trained LoRAs: name → Replicate version hash, trigger word, A/B stats. |
+| `loras/<name>.config.yaml` | Per-LoRA training config snapshot (recipe, hyperparams). |
+| `loras/<name>.safetensors` | LoRA weights archived locally (gitignored; Replicate hosts the canonical copy). |
+| `datasets/` | Zipped training datasets ready for upload. |
 
-## Tech Stack
+## Cost
 
-**Core generation:**
-- Flux-dev (24GB model, M1 runs at ~bfloat16)
-- Diffusers library (HuggingFace)
-- LoRA for fine-tuning
-- ControlNet for structural guidance
+- Generation: ~$0.03–0.05 per image
+- LoRA training run: ~$1–3 per run on `ostris/flux-dev-lora-trainer`
+- Expected steady-state: $5–15/month
 
-**M1 Optimization:**
-- PyTorch Metal acceleration (native GPU backend)
-- bfloat16 precision (saves memory, keeps quality)
-- Attention optimization (xformers or native sdpa)
-- Memory-mapped loading
-- Inference in ~30–60 seconds per image
+## CLI
 
-**UI:**
-- ComfyUI headless server
-- Custom teal/blue/complementary color theme
-- REST API for integration with feedback loop
-
-## Workflow Integration
-
-**Feedback loop:**
-```
-unified_feedback.py rates image (8+ = winner)
-  ↓
-save_winner() stores to winners.json
-  ↓
-train_lora.py (runs on schedule or manually)
-  → Reads winners from past 24 hours
-  → Fine-tunes dino_winners.safetensors
-  → Uploads to flux/loras/
-  ↓
-Next generation in ComfyUI loads updated LoRA
-  → Better dinosaur anatomy
-  → Loop tightens
-```
-
-**Output compatibility:**
-- Images saved to `assets/gallery/<category>/<timestamp>.png`
-- Same format as sync_gallery.py expects
-- Directly compatible with printify-publisher (no format conversion)
-
-## CLI Usage
-
-### Generate a single image
+**Generate a single image:**
 ```bash
-python flux/generate_image.py \
-  --prompt "a Tyrannosaurus rex in a river delta" \
-  --lora dino_winners \
-  --controlnet skeletal_anatomy \
+python3 flux/generate.py \
+  --prompt "Tyrannosaurus rex hunting in a misty river delta" \
   --seed 42 \
-  --output assets/gallery/dinosaurs/tx_river_001.png
+  --lora trex_v1 \
+  --output assets/gallery/flux/trex_river_001.png
 ```
+Optional flags: `--aspect-ratio 1:1`, `--steps 28`, `--guidance 3.0`. Omit `--lora` for baseline Flux-dev.
 
-### Train LoRA on winners
+**A/B validate a new LoRA:**
 ```bash
-python flux/train_lora.py \
-  --winners winners.json \
-  --species "Tyrannosaurus" \
-  --output flux/loras/dino_winners.safetensors
+python3 flux/ab_test_replicate.py
 ```
+Runs 5 seeds × {baseline, LoRA} and writes outputs to `assets/gallery/flux/ab_tests/<lora_name>/`.
 
-### Start ComfyUI server
-```bash
-python flux/comfyui_server.py --port 8888 --theme teal_blue
-# Open http://localhost:8888 in browser
-```
+## Solved gotchas
 
-## Contract with Other Domains
+1. **Rate limiting** (accounts with <$5 credit): 6 req/min, burst 1. 429 responses include `retry_after`. Both scripts retry automatically.
+2. **Private trained models return 404** on `/v1/models/<owner>/<name>/predictions`. POST to `/v1/predictions` with a `version` field instead. Registry stores the version hash.
+3. **Version hash discovery:** `GET /v1/models/<owner>/<name>` → `latest_version.id`.
+
+## Contract with other domains
 
 **Input:**
-- `winners.json` (from unified_feedback.py) — high-scoring images to train on
-- `generate_prompt.py` output — prompts that can be used locally
-- `--sref` / `--cref` URLs (converted to local refs)
+- Prompts from `generate_prompt.py` (root) or any text source.
+- Reference images in `assets/gallery/flux/training_refs/` (curated by `reference.py`).
 
 **Output:**
-- `assets/gallery/<category>/*.png` — images ready for sync_gallery.py
-- LoRA models in `flux/loras/` (can be versioned, shared)
-- ComfyUI UI at http://localhost:8888 (visual feedback during iteration)
+- Generated images: any path; pipeline convention is `assets/gallery/flux/<category>/*.png`.
+- Sidecar `<image>.png.json` with prompt, seed, prediction ID, output URL, timestamp.
 
-## M1 Performance Target
+## Adding a new LoRA
 
-- **Flux-dev generation:** ~45 seconds per image (bfloat16, attention optimization)
-- **LoRA training:** ~10 min per 10-image batch on winners
-- **Memory usage:** ~22–23GB peak (leaves 1–2GB headroom)
-
-## Philosophy
-
-**Local-first, not MJ-first:**
-- Flux is now the primary generator
-- Fast iteration: adjust prompts, parameters, LoRA weights live in ComfyUI
-- Optuna optimizes parameters locally instead of guessing at MJ
-- MJ becomes optional comparison tool ("how does this match MJ quality?")
-- Winners train better LoRA → next generation is better → compound improvement
-
-**Generator as the star agent:**
-- This domain owns image generation quality
-- Specialized in dinosaur anatomy via LoRA
-- Can experiment with ControlNets, samplers, schedulers
-- Decoupled from MJ, fully under your control
+See `flux/LORA_TRAINING.md` for the full workflow.
