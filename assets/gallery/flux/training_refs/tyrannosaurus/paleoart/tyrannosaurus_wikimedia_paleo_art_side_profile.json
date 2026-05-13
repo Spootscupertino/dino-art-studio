@@ -2,8 +2,14 @@
   "species": "tyrannosaurus",
   "source_type": "paleoart",
   "ingested_at": "2026-05-07T16:52:17",
-  "source_url": "",
-  "license": "",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tyrannosaurus-rex-Profile-steveoc86.png",
+  "image_url": "https://upload.wikimedia.org/wikipedia/commons/1/15/Tyrannosaurus-rex-Profile-steveoc86.png",
+  "creator": "Steveoc 86",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "verified": true,
+  "verified_by": "Ops (Gemini) confirmed source mapping 2026-05-13",
+  "source_checked_date": "2026-05-13",
   "thesis_score": {},
-  "notes": ""
+  "notes": "Side profile render, white background. Attribution required: Steveoc 86. ShareAlike applies to derivative works — legal status for LoRA training is unsettled but attribution is documented. Visual confirmation against Wikimedia source pending."
 }

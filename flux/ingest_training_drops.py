@@ -37,6 +37,26 @@ DEST_ROOT = REPO_ROOT / "assets" / "gallery" / "flux" / "training_refs"
 SOURCE_TYPES = ("skeletal", "paleoart", "living_analog")
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp"}
 
+# Licenses allowed for commercial LoRA training.
+# NC (Non-Commercial) and ND (No Derivatives) are banned.
+ALLOWED_LICENSES = {
+    "CC0",
+    "CC BY",      "CC BY 2.0",  "CC BY 3.0",  "CC BY 4.0",
+    "CC BY-SA",   "CC BY-SA 2.0", "CC BY-SA 3.0", "CC BY-SA 4.0",
+    "Public Domain",
+}
+BANNED_LICENSE_KEYWORDS = ("NC", "ND")
+
+LICENSE_URLS = {
+    "CC0":          "https://creativecommons.org/publicdomain/zero/1.0/",
+    "CC BY 4.0":    "https://creativecommons.org/licenses/by/4.0/",
+    "CC BY 3.0":    "https://creativecommons.org/licenses/by/3.0/",
+    "CC BY 2.0":    "https://creativecommons.org/licenses/by/2.0/",
+    "CC BY-SA 4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "CC BY-SA 3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "CC BY-SA 2.0": "https://creativecommons.org/licenses/by-sa/2.0/",
+}
+
 
 class C:
     RESET = "\033[0m"
@@ -108,7 +128,14 @@ def ingest_one(image: Path, species: str, source_type: str, dry_run: bool) -> bo
         "source_type": source_type,
         "ingested_at": datetime.now().isoformat(timespec="seconds"),
         "source_url": "",
+        "image_url": "",
+        "creator": "",
         "license": "",
+        "license_url": "",
+        "verified": False,
+        "source_checked_date": "",
+        "quarantined": False,
+        "quarantine_reason": "",
         "thesis_score": {},
         "notes": "",
     }
@@ -116,6 +143,7 @@ def ingest_one(image: Path, species: str, source_type: str, dry_run: bool) -> bo
     sidecar_txt.write_text(caption_stub(species, source_type) + "\n")
 
     print(f"  {C.green('✓')} {image.name} → {rel}")
+    print(f"  {C.yellow('!')} fill source_url, creator, license in {sidecar_json.name} before training")
     return True
 
 
@@ -164,14 +192,63 @@ def walk_and_ingest(dry_run: bool) -> int:
     return 0
 
 
+def validate_training_refs(species_filter: str | None = None) -> int:
+    """Audit all sidecar JSONs in training_refs/ for missing or banned license fields.
+    Returns number of problems found.
+    """
+    problems = 0
+    for sidecar in sorted(DEST_ROOT.rglob("*.json")):
+        try:
+            meta = json.loads(sidecar.read_text())
+        except Exception:
+            continue
+
+        species = meta.get("species", "")
+        if species_filter and species_filter.lower() not in species.lower():
+            continue
+
+        flags = []
+        if not meta.get("source_url"):
+            flags.append("missing source_url")
+        if not meta.get("creator"):
+            flags.append("missing creator")
+        if not meta.get("license"):
+            flags.append("missing license")
+        elif any(kw in meta["license"].upper() for kw in BANNED_LICENSE_KEYWORDS):
+            flags.append(f"BANNED license: {meta['license']}")
+        elif meta["license"] not in ALLOWED_LICENSES:
+            flags.append(f"unrecognized license: {meta['license']} (verify it's not NC/ND)")
+        if meta.get("quarantined"):
+            flags.append(f"QUARANTINED: {meta.get('quarantine_reason', 'no reason given')}")
+
+        if flags:
+            rel = sidecar.relative_to(REPO_ROOT)
+            print(f"  {C.red('✗')} {C.bold(str(rel))}")
+            for f in flags:
+                print(f"       {C.yellow('·')} {f}")
+            problems += 1
+
+    if problems == 0:
+        print(C.green("  ✓ all sidecars look clean"))
+    else:
+        print(f"\n  {C.bold(C.red(str(problems)))} sidecar(s) need attention before training")
+    return problems
+
+
 def main():
     ap = argparse.ArgumentParser(description="Ingest training drop folders into training_refs/")
     ap.add_argument("--add-species", metavar="NAME", help="Create empty drop folders for a new species")
     ap.add_argument("--dry-run", action="store_true", help="Show what would move without touching files")
+    ap.add_argument("--validate", action="store_true", help="Audit all training_refs/ sidecars for license issues")
+    ap.add_argument("--species", metavar="NAME", help="Filter --validate to one species")
     args = ap.parse_args()
 
     if args.add_species:
         sys.exit(add_species(args.add_species))
+    if args.validate:
+        print(f"\n{C.bold(C.teal('Training refs license audit'))}\n")
+        problems = validate_training_refs(args.species)
+        sys.exit(0 if problems == 0 else 1)
     sys.exit(walk_and_ingest(args.dry_run))
 
 

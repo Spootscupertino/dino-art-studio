@@ -2,8 +2,14 @@
   "species": "tyrannosaurus",
   "source_type": "paleoart",
   "ingested_at": "2026-05-07T16:52:17",
-  "source_url": "",
-  "license": "",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tyrannosaurus_rex_by_durbed.jpg",
+  "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Tyrannosaurus_rex_by_durbed.jpg",
+  "creator": "Durbed",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "verified": true,
+  "verified_by": "Ops (Gemini) confirmed source mapping 2026-05-13",
+  "source_checked_date": "2026-05-13",
   "thesis_score": {},
-  "notes": ""
+  "notes": "Feathered T-rex restoration, minimal feathers based on phylogenetic bracketing. Created 2012 by Durbed (DeviantArt). Attribution required. Visual confirmation against Wikimedia source pending."
 }

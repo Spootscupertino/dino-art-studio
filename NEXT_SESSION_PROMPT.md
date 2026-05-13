@@ -1,85 +1,88 @@
-# Next Session Prompt — Tightening 6: Second-Species LoRA
+# Next Session Prompt — T-rex LoRA v2: Scale to 20 Verified Refs + Retrain
 
-## Status Coming In
+## Context (read first)
 
-**Tightening 5 (retire local SDXL, commit to Replicate-Flux) is complete.**
+Last session established the **Dev/Ops boundary** and the license enforcement infrastructure for the T-rex LoRA training pipeline. You (Claude) are **Lead Dev**. Ops (the user + Gemini) handles all image sourcing and legal clearance via "Transmittal Packages."
 
-- `flux/generate.py` is the only generator. Single-image CLI, calls Replicate. Smoke-tested.
-- `flux/loras/registry.json` is the source of truth. Currently registers `trex_v1` (5/5 win rate, mean Δ +7.2).
-- `flux/ab_test_replicate.py` is the validation gate for any new LoRA.
-- Local SDXL stack (`generate_image.py`, `comfyui_server.py`, `train_lora.py`, `SETUP.md`, `PHASE_B.md`, launcher, `DinoGenerator.app`, `PHASE_C_README.md`, `requirements.txt`) is deleted.
-- Docs (root `CLAUDE.md`, `flux/CLAUDE.md`, `flux/LORA_TRAINING.md`, `RECAP.md`) all describe the cloud-only Replicate-Flux stack.
+### What landed last session
 
-The stack is coherent end-to-end. Time to put it through its paces with a second species.
+1. **Audit + attribution** on the 5 original T-rex training refs:
+   - 4 confirmed Wikimedia sources (steveoc86, Durbed, WildFrogs, Zissoudisctrucker — all CC BY-SA) marked `verified: true`
+   - 1 cassowary `quarantined: true` (unknown source, excluded from training)
 
-## What You're Doing This Session
+2. **Schema enforcement** in `flux/ingest_training_drops.py`:
+   - Sidecar JSON now requires `source_url`, `image_url`, `creator`, `license`, `license_url`, `verified`, `source_checked_date`, `quarantined`
+   - License allowlist: CC0 / CC BY (any version) / CC BY-SA (any version) / Public Domain
+   - **Hard ban**: NC and ND licenses
+   - New `--validate` flag audits the entire `training_refs/` tree
 
-**Train a LoRA for species #2.** The full loop — pick species, curate refs, caption, zip, train on Replicate, register, A/B validate, promote (or kill).
+3. **Interactive intake** in `reference.py`:
+   - Required: `source_url` and `creator` (no longer allow-blank)
+   - New `pick_license()` prompt that only shows allowed licenses
 
-We proved the loop works on T. rex. Now we prove it generalizes. If species #2 hits the threshold, the next 10 species are mechanical.
+4. **Batch 1 partially landed** in `~/Desktop/Jurassinkart/Training Drops/tyrannosaurus/skeletal/`:
+   - `tyrannosaurus-rex-2025-2460-1384_wideexact_1230.jpg` — AMNH 5027, Public Domain
+   - `Tyrannoskull.jpg` — A.E. Anderson, Public Domain
+   - `Tyrannosaurus_Sue_skeletal_reconstruction.png` — Scott A. Hartman, CC BY 4.0 (verified against Wikimedia Commons)
+   - `Tyrannosaurus_muscle_mass.png` — Hutchinson et al., CC BY 2.5 (Ops decision pending: stay in `skeletal/` or move to `paleoart/`?)
 
-## Step-by-Step
+5. **Still pending from Batch 1** (Ops will drop in next session):
+   - Item #4: Cassowary (Pearson Scott Foresman, Public Domain) → `living_analog/`
+   - Item #6: Luis Rey dynamic action pose (CC BY 2.5) → `paleoart/`
 
-### 1. Pick the species
+## Goal for next session
 
-Pick one. Suggested candidates (any will do; pick by what you're most curious about):
+Get from **5 verified refs → 20 verified refs**, then retrain as `trex_v2`.
 
-- **Velociraptor** — different body plan (feathered, smaller, sickle claw on hind foot). Tests whether the loop handles non-T-rex anatomy.
-- **Triceratops** — quadruped + frill + horns. Tests whether the loop handles quadrupedal posture vs the biped baked into T. rex refs.
-- **Spinosaurus** — sail-back, aquatic, elongated jaw. Tests an unusual body plan.
+Net after Batch 1 completes: **9 verified** (4 original + 5 new — cassowary quarantine replaced 1:1).
 
-Write a one-paragraph anatomy thesis at `refs/anatomy_theses/<species_lower>.md` if one doesn't exist. Mirror the structure of `refs/anatomy_theses/tyrannosaurus.md` (5 scoring categories, auto-reject conditions).
+Need to source **11 more** via additional Ops Transmittal Packages.
 
-### 2. Curate 5–10 refs
+## Diversity targets for the 11 remaining refs
 
-Use `python3 reference.py` to intake each one. Mix sources (paleoart, museum, living analog). Each ref needs a `.txt` caption: `"a photo of <species>, <anatomy notes>"`.
+Discuss with Ops. Aim for coverage gaps in the current 9:
 
-### 3. Zip and upload
+- **Action / behavior poses**: roaring head-up, lunging strike, walking three-quarter view, juvenile gait
+- **Lighting / environment**: backlit silhouette, low-angle daylight, mist/fog, harsh sun shadow
+- **Anatomical close-ups**: hand/claw detail, foot/digit, scleral ring, dorsal vertebrae
+- **Living analogs** (more variety beyond cassowary): secretarybird gait, monitor lizard skin texture, emu/ostrich locomotion
 
-```bash
-python3 flux/export_dataset.py
-```
+All sources must be CC0 / CC BY / CC BY-SA / Public Domain. NC and ND are auto-rejected.
 
-Upload `flux/datasets/<species>_dataset.zip` to Replicate's `ostris/flux-dev-lora-trainer` web UI. Use the same recipe that worked for T. rex (rank 16, lr 1e-4, 1000 steps, caption_dropout 0.05, batch 1, res 512/768/1024). Trigger word = `<species_lower>_v1`.
+## Concrete action items
 
-### 4. Archive and register
+1. **For each Ops Transmittal Package**:
+   - Confirm files dropped into `~/Desktop/Jurassinkart/Training Drops/tyrannosaurus/<skeletal|paleoart|living_analog>/`
+   - Run `python3 flux/ingest_training_drops.py` (moves files + writes sidecar stubs)
+   - Populate each sidecar JSON with the Transmittal attribution via `Edit` tool
+   - Hand-write a **descriptive** `.txt` caption per ref (anatomy-specific, not generic — generic captions are part of why trex_v1 was a 4/10)
+   - Run `python3 flux/ingest_training_drops.py --validate --species tyrannosaurus` after each batch
 
-After training succeeds:
-- Download `.safetensors` → `flux/loras/<species>_v1.safetensors`
-- Save config snapshot → `flux/loras/<species>_v1.config.yaml`
-- Get version hash: `curl -s -H "Authorization: Bearer $REPLICATE_API_TOKEN" https://api.replicate.com/v1/models/<owner>/<slug> | jq .latest_version.id`
-- Add entry to `flux/loras/registry.json`
+2. **Once 20 refs are clean**:
+   - Run `python3 flux/export_dataset.py` to bundle `flux/datasets/trex_v2_dataset.zip`
+   - Hand off to Ops with the recipe from [flux/LORA_TRAINING.md](flux/LORA_TRAINING.md):
+     - rank: 16
+     - learning rate: 1e-4
+     - steps: ~1500 (more refs → can push higher than v1's 1000)
+     - trigger_word: `trex_v2`
+   - **Ops runs the actual training on Replicate web UI** (~$1–3, ~30–60 min)
+   - Once Ops returns training ID + version hash, register `trex_v2` in `flux/loras/registry.json`
+   - Run `python3 flux/ab_test_replicate.py` for the 5-pair A/B vs v1
 
-### 5. A/B validate
+3. **Final validation**:
+   - Generate 3 test images with `flux/generate.py --lora trex_v2`: stalking shot, frontal portrait, running pose
+   - Compare side-by-side with v1 outputs
+   - Honest 1–10 rating, target: **7+/10** (v1 baseline was 4/10)
 
-Adjust the constants at the top of `flux/ab_test_replicate.py`:
-- `SEEDS` — keep the same 5 (42, 123, 777, 1024, 2025) for comparable scoring discipline
-- `BASE_PROMPT` — species-appropriate scene
-- `LORA_VERSION` — new version hash
-- `OUT_ROOT` — `assets/gallery/flux/ab_tests/<species>_v1`
+## Hard rules — DO NOT relax
 
-Run it. Score each pair 1–5 across the 5 thesis categories. Promotion threshold: **mean Δ ≥ 2.0, win rate ≥ 80%**.
+- **Dev/Ops boundary**: Do not download, scrape, or pull images yourself. Ops provides Transmittal Packages with URL + creator + license. If Ops sends NC or ND, refuse. If Ops sends an unrecognized license, flag before ingesting.
+- **No filename-based attribution**: Every sidecar must have `verified: true` only after Ops or visual confirmation against the source URL.
+- **Captions matter for LoRA quality**: Each caption should describe actual image content (pose, angle, anatomy emphasis), not be a generic species tag.
 
-### 6. Promote or kill
+## Files to read at session start
 
-- **Promote:** Record `ab_test_winrate` + `ab_test_mean_delta` in the registry. Commit.
-- **Kill:** Note what failed in `RECAP.md`. Adjust the recipe (more refs, different caption discipline, different rank) and retry. Don't lower the threshold.
-
-## Key Files
-
-- `flux/generate.py` — daily-driver CLI
-- `flux/ab_test_replicate.py` — A/B harness (edit constants at top for each LoRA)
-- `flux/loras/registry.json` — registry; add new entry here
-- `flux/LORA_TRAINING.md` — full workflow reference
-- `refs/anatomy_theses/tyrannosaurus.md` — thesis template
-
-## Definition of Done
-
-✓ Species #2 chosen and anatomy thesis written
-✓ 5–10 refs curated via `reference.py`
-✓ Dataset zipped and trained on Replicate
-✓ `<species>_v1.safetensors` + config archived locally
-✓ Registry entry added
-✓ A/B test run, scored, recorded
-✓ Result documented in RECAP.md
-✓ One commit landed
+- [flux/LORA_TRAINING.md](flux/LORA_TRAINING.md) — full retrain workflow
+- [flux/ingest_training_drops.py](flux/ingest_training_drops.py) — schema + allowlist
+- [reference.py](reference.py) — interactive intake fallback
+- [flux/loras/registry.json](flux/loras/registry.json) — to register `trex_v2` after training

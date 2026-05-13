@@ -3,7 +3,14 @@
   "source_type": "living_analog",
   "ingested_at": "2026-05-07T17:02:10",
   "source_url": "",
-  "license": "",
+  "image_url": "",
+  "creator": "",
+  "license": "UNKNOWN",
+  "license_url": "",
+  "verified": false,
+  "quarantined": true,
+  "quarantine_reason": "Source completely unknown — could not identify origin via reverse image search. Cannot use commercially until exact Wikimedia file or alternative CC0 source is confirmed.",
+  "source_checked_date": "2026-05-13",
   "thesis_score": {},
-  "notes": ""
+  "notes": "EXCLUDED FROM TRAINING. Replace with a confirmed CC0 cassowary image from Wikimedia Commons Category:Casuarius casuarius or Smithsonian Open Access."
 }

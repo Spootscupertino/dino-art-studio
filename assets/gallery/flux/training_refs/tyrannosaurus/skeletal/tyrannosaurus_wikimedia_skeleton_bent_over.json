@@ -2,8 +2,14 @@
   "species": "tyrannosaurus",
   "source_type": "skeletal",
   "ingested_at": "2026-05-07T16:52:17",
-  "source_url": "",
-  "license": "",
+  "source_url": "https://commons.wikimedia.org/wiki/File:FMNH_Sue_2018_update.jpg",
+  "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/60/FMNH_Sue_2018_update.jpg",
+  "creator": "Zissoudisctrucker",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "verified": true,
+  "verified_by": "Ops (Gemini) confirmed source mapping 2026-05-13",
+  "source_checked_date": "2026-05-13",
   "thesis_score": {},
-  "notes": ""
+  "notes": "Sue specimen, Field Museum of Natural History, Chicago. Dynamic forward-lean pose, dark background. Photo taken May 2018. Visual confirmation against Wikimedia source pending."
 }

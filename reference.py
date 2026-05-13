@@ -184,6 +184,44 @@ SOURCE_SUBTYPES = [
     ("other",          "Other (specify in source URL)"),
 ]
 
+# Only licenses cleared for commercial LoRA training. NC/ND are banned.
+_ALLOWED_LICENSES = [
+    ("CC0",          "CC0 — Public Domain (no attribution needed, gold standard)"),
+    ("CC BY 4.0",    "CC BY 4.0 — Attribution required"),
+    ("CC BY 3.0",    "CC BY 3.0 — Attribution required"),
+    ("CC BY 2.0",    "CC BY 2.0 — Attribution required"),
+    ("CC BY-SA 4.0", "CC BY-SA 4.0 — Attribution + ShareAlike (use with caution)"),
+    ("CC BY-SA 3.0", "CC BY-SA 3.0 — Attribution + ShareAlike (use with caution)"),
+    ("CC BY-SA 2.0", "CC BY-SA 2.0 — Attribution + ShareAlike (use with caution)"),
+    ("Public Domain","Public Domain — pre-1927 or government work"),
+]
+
+_LICENSE_URLS = {
+    "CC0":          "https://creativecommons.org/publicdomain/zero/1.0/",
+    "CC BY 4.0":    "https://creativecommons.org/licenses/by/4.0/",
+    "CC BY 3.0":    "https://creativecommons.org/licenses/by/3.0/",
+    "CC BY 2.0":    "https://creativecommons.org/licenses/by/2.0/",
+    "CC BY-SA 4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "CC BY-SA 3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "CC BY-SA 2.0": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "Public Domain": "",
+}
+
+
+def pick_license() -> str:
+    print(f"  {bold(blue('License'))} {dim('(NC and ND are banned — do not ingest those images)')}")
+    for i, (key, desc) in enumerate(_ALLOWED_LICENSES, start=1):
+        print(f"    {teal(str(i))}) {desc}")
+    while True:
+        raw = input(f"  {dim('>')} ").strip()
+        if raw.isdigit() and 1 <= int(raw) <= len(_ALLOWED_LICENSES):
+            return _ALLOWED_LICENSES[int(raw) - 1][0]
+        for key, _ in _ALLOWED_LICENSES:
+            if raw.upper() == key.upper():
+                return key
+        print(f"  {C.YELLOW}(pick 1-{len(_ALLOWED_LICENSES)}, or if NC/ND → abort and discard this image){C.RESET}")
+
+
 def pick_source_subtype() -> str:
     print(f"  {blue('Source type:')}")
     for i, (key, desc) in enumerate(SOURCE_SUBTYPES, start=1):
@@ -244,8 +282,11 @@ def run_single(image_path: Path) -> dict:
         allow_blank=False,
     )
 
-    section("Step 2 — Source")
-    source_url = ask("Source URL or attribution", allow_blank=True)
+    section("Step 2 — Source & License")
+    source_url = ask("Source URL (Wikimedia page, museum link, etc.)", allow_blank=False)
+    creator = ask("Creator / artist name", allow_blank=False)
+    license_str = pick_license()
+    license_url = _LICENSE_URLS.get(license_str, "")
     subtype = pick_source_subtype()
 
     section("Step 3 — What's anatomically accurate?")
@@ -305,6 +346,11 @@ def run_single(image_path: Path) -> dict:
         "source_type": "reference",
         "source_subtype": subtype,
         "source_url": source_url,
+        "creator": creator,
+        "license": license_str,
+        "license_url": license_url,
+        "verified": True,
+        "source_checked_date": datetime.now().strftime("%Y-%m-%d"),
         "user_accurate_notes": accurate,
         "user_caveats": caveats,
     }
