@@ -34,7 +34,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DROP_ROOT = Path.home() / "Desktop" / "Jurassinkart" / "Training Drops"
 DEST_ROOT = REPO_ROOT / "assets" / "gallery" / "flux" / "training_refs"
 
-SOURCE_TYPES = ("skeletal", "paleoart", "living_analog")
+SOURCE_TYPES = (
+    "skeletal", "paleoart", "living_analog",
+    "integument", "biomech_mouth", "corrected_mj", "extremes_macro",
+)
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp"}
 
 # Licenses allowed for commercial LoRA training.
@@ -44,6 +47,7 @@ ALLOWED_LICENSES = {
     "CC BY",      "CC BY 2.0",  "CC BY 3.0",  "CC BY 4.0",
     "CC BY-SA",   "CC BY-SA 2.0", "CC BY-SA 3.0", "CC BY-SA 4.0",
     "Public Domain",
+    "Midjourney",
 }
 BANNED_LICENSE_KEYWORDS = ("NC", "ND")
 
@@ -102,6 +106,14 @@ def caption_stub(species: str, source_type: str) -> str:
         return f"a {species_human}, scientifically accurate paleoart, anatomically correct, natural pose"
     if source_type == "living_analog":
         return f"a living animal reference for {species_human} anatomy, photographic"
+    if source_type == "integument":
+        return f"close-up reference of {species_human} integument: skin, scales, or fine surface texture"
+    if source_type == "biomech_mouth":
+        return f"a {species_human}, macro detail of the mouth and jaw: teeth, gums, lips, palate"
+    if source_type == "corrected_mj":
+        return f"a {species_human}, cinematic portrait with anatomically corrected proportions"
+    if source_type == "extremes_macro":
+        return f"a {species_human}, extreme macro close-up of an anatomical feature"
     return f"a {species_human}"
 
 
@@ -120,30 +132,55 @@ def ingest_one(image: Path, species: str, source_type: str, dry_run: bool) -> bo
         print(f"  {C.dim('would move')} {image.name} → {rel}")
         return True
 
+    # Check for pre-staged sidecars BEFORE moving the image (otherwise
+    # image.with_suffix would still resolve but to a nonexistent path).
+    src_json = image.with_suffix(".json")
+    src_txt = image.with_suffix(".txt")
+    had_prestaged_json = src_json.exists()
+    had_prestaged_txt = src_txt.exists()
+
     dest_dir.mkdir(parents=True, exist_ok=True)
     shutil.move(str(image), str(dest))
 
-    meta = {
-        "species": species,
-        "source_type": source_type,
-        "ingested_at": datetime.now().isoformat(timespec="seconds"),
-        "source_url": "",
-        "image_url": "",
-        "creator": "",
-        "license": "",
-        "license_url": "",
-        "verified": False,
-        "source_checked_date": "",
-        "quarantined": False,
-        "quarantine_reason": "",
-        "thesis_score": {},
-        "notes": "",
-    }
-    sidecar_json.write_text(json.dumps(meta, indent=2) + "\n")
-    sidecar_txt.write_text(caption_stub(species, source_type) + "\n")
+    # If a sidecar was pre-staged next to the source image, move it too rather
+    # than clobbering with a blank stub. Otherwise create a fresh stub.
+    if had_prestaged_json:
+        shutil.move(str(src_json), str(sidecar_json))
+        try:
+            meta = json.loads(sidecar_json.read_text())
+            meta["species"] = species
+            meta["source_type"] = source_type
+            meta.setdefault("ingested_at", datetime.now().isoformat(timespec="seconds"))
+            sidecar_json.write_text(json.dumps(meta, indent=2) + "\n")
+        except Exception:
+            pass
+    else:
+        meta = {
+            "species": species,
+            "source_type": source_type,
+            "ingested_at": datetime.now().isoformat(timespec="seconds"),
+            "source_url": "",
+            "image_url": "",
+            "creator": "",
+            "license": "",
+            "license_url": "",
+            "verified": False,
+            "source_checked_date": "",
+            "quarantined": False,
+            "quarantine_reason": "",
+            "thesis_score": {},
+            "notes": "",
+        }
+        sidecar_json.write_text(json.dumps(meta, indent=2) + "\n")
+
+    if had_prestaged_txt:
+        shutil.move(str(src_txt), str(sidecar_txt))
+    else:
+        sidecar_txt.write_text(caption_stub(species, source_type) + "\n")
 
     print(f"  {C.green('✓')} {image.name} → {rel}")
-    print(f"  {C.yellow('!')} fill source_url, creator, license in {sidecar_json.name} before training")
+    if not had_prestaged_json:
+        print(f"  {C.yellow('!')} fill source_url, creator, license in {sidecar_json.name} before training")
     return True
 
 

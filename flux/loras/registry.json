@@ -8,5 +8,15 @@
     "training_id": "wad5pnmbb5rmy0cy2z29jefvqw",
     "ab_test_winrate": "5/5",
     "ab_test_mean_delta": 7.2
+  },
+  "trex_v2": {
+    "replicate_owner": "spootscupertino",
+    "replicate_model": "trex_v2",
+    "version": "d8b82ba07d8e46d1f3b3962296d8e921d9f3fa3125e5e79279b4c9dd86935333",
+    "trigger_word": "trex_v2",
+    "trained_on": "2026-05-13",
+    "training_id": "yzx4g2vpesrmy0cy49tvqap360",
+    "ab_test_winrate": null,
+    "ab_test_mean_delta": null
   }
 }

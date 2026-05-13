@@ -27,7 +27,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
+import zipfile
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -100,7 +102,11 @@ def get_reference_images() -> dict[str, dict]:
         with open(WINNERS_FILE) as f:
             winners = json.load(f)
         for species, entries in winners.items():
+            if not isinstance(entries, list):
+                continue
             for entry in entries:
+                if not isinstance(entry, dict):
+                    continue
                 if entry.get("source_type") == "reference":
                     img_path = entry.get("image_path")
                     if img_path:
@@ -109,8 +115,8 @@ def get_reference_images() -> dict[str, dict]:
                             "entry": entry,
                         }
 
-    # Scan training_refs for image files
-    for image_file in TRAINING_DIR.glob("*"):
+    # Scan training_refs recursively for image files (subdirs are species/source_type/)
+    for image_file in TRAINING_DIR.rglob("*"):
         if image_file.is_file() and image_file.suffix.lower() in (
             ".png",
             ".jpg",
@@ -131,7 +137,24 @@ def get_reference_images() -> dict[str, dict]:
             # Look up metadata from winners.json
             rel_path = str(image_file.relative_to(REPO_ROOT))
             metadata = reference_entries.get(rel_path, {})
-            species = metadata.get("species", "Unknown")
+            # Prefer the path-derived species (training_refs/<species>/<source_type>/image)
+            # over winners.json so newly-ingested files don't get "Unknown".
+            try:
+                parts = image_file.relative_to(TRAINING_DIR).parts
+                species = parts[0] if len(parts) >= 2 else metadata.get("species", "Unknown")
+            except ValueError:
+                species = metadata.get("species", "Unknown")
+
+            # Skip refs whose sidecar is quarantined.
+            sidecar_json = image_file.with_suffix(".json")
+            if sidecar_json.exists():
+                try:
+                    meta = json.loads(sidecar_json.read_text())
+                    if meta.get("quarantined"):
+                        print(f"  {C.yellow('⊘')} {image_file.name} quarantined, skipping")
+                        continue
+                except Exception:
+                    pass
 
             stem = image_file.stem
             images[stem] = {
@@ -229,6 +252,19 @@ def export_dataset(images: dict[str, dict], output_dir: Path) -> bool:
 
     with open(output_dir / "summary.txt", "w") as f:
         f.write("\n".join(summary_lines))
+
+    # Also produce a zip of (image, caption) pairs for Replicate's trainer.
+    # The trainer expects a flat zip with files side-by-side, no subdirs.
+    zip_path = output_dir.with_suffix(".zip")
+    if zip_path.exists():
+        zip_path.unlink()
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        for stem, img_meta in images.items():
+            image_path = img_meta["image_path"]
+            caption_path = img_meta["caption_path"]
+            zf.write(image_path, arcname=image_path.name)
+            zf.write(caption_path, arcname=caption_path.name)
+    print(f"  {C.green('✓')} wrote zip: {zip_path.relative_to(REPO_ROOT)}")
 
     return True
 
