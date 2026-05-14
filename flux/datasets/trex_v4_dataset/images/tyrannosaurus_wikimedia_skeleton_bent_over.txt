@@ -1,0 +1,1 @@
+../../assets/gallery/flux/training_refs/tyrannosaurus/skeletal/tyrannosaurus_wikimedia_skeleton_bent_over.txt

@@ -1,0 +1,17 @@
+LORA Training Dataset Summary
+==================================================
+
+Total images: 31
+Unique species: 1
+
+Breakdown by species:
+  tyrannosaurus: 31 image(s)
+
+Dataset ready for ai-toolkit training:
+  → Images (with captions): flux/datasets/trex_v4_dataset/images
+  → Metadata: flux/datasets/trex_v4_dataset/dataset.json
+
+Next steps:
+  1. Install ai-toolkit (https://github.com/ostris/ai-toolkit)
+  2. Point ai-toolkit at the images/ folder for training
+  3. Save output LoRA to flux/loras/

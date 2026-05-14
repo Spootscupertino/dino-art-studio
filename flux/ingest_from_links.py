@@ -40,7 +40,7 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
-DROPS_ROOT = Path("/Users/ericeldridge/Desktop/Training Drops")
+DROPS_ROOT = Path("/Users/ericeldridge/dino_art/assets/gallery/flux/training_refs")
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 VALID_SOURCE_TYPES = {"living_analog", "skeletal", "paleoart", "integument", "corrected_mj"}

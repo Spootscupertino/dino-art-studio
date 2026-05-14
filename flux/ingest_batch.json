@@ -1,0 +1,106 @@
+[
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Nile_Crocodile_at_St_Lucia_Crocodile_Centre_1.JPG",
+    "filename": "croc_mouth_gumline.jpg",
+    "caption": "Close-up of an open Nile crocodile mouth showing the conical teeth rooted in a distinct, thick gumline with visible vascularized tissue.",
+    "source_type": "living_analog",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/c/ca/Varanus_komodoensis_mouth.jpg",
+    "filename": "komodo_oral_cavity.jpg",
+    "caption": "Internal view of a Komodo dragon mouth highlighting the pale palate, forked tongue, and serrated teeth partially covered by gingival tissue.",
+    "source_type": "living_analog",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Varanus_salvator_mouth_open.jpg",
+    "filename": "monitor_throat_tissue.jpg",
+    "caption": "Macro view of the soft tissue lining and glottis inside a monitor lizard's mouth, providing a reference for theropod throat anatomy.",
+    "source_type": "living_analog",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/7/78/Cassowary_foot.jpg",
+    "filename": "cassowary_claw_detail.jpg",
+    "caption": "Extreme close-up of a cassowary foot showing the three-toed digitigrade structure and the enlarged, dagger-like inner claw.",
+    "source_type": "living_analog",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/d/d3/Ostrich_foot_close_up.jpg",
+    "filename": "ostrich_pedal_scales.jpg",
+    "caption": "Detailed view of large scutate scales on an ostrich foot and the heavy, blunt claw curvature adapted for high-impact locomotion.",
+    "source_type": "living_analog",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Secretary_Bird_foot.jpg",
+    "filename": "secretary_bird_talon.jpg",
+    "caption": "Lateral view of a Secretary bird foot showing the recurved talon geometry and the robust digital pads used for striking prey.",
+    "source_type": "living_analog",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/4/41/Varanus_komodoensis_scales.jpg",
+    "filename": "monitor_integument_macro.jpg",
+    "caption": "Macro photography of lizard skin showing the non-overlapping mosaic polygon pattern of scales typical of many large reptiles.",
+    "source_type": "living_analog",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/a/aa/Crocodile_scales_scutes.jpg",
+    "filename": "croc_dorsal_osteoderms.jpg",
+    "caption": "Top-down view of dorsal scutes showing large, raised dome-like osteoderms surrounded by a field of smaller pebbled scales.",
+    "source_type": "living_analog",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/a/a0/Tyrannosaurus_rex_Field_Museum.jpg",
+    "filename": "trex_skull_frontal.jpg",
+    "caption": "Frontal view of the Sue specimen skull showing the narrow snout and wide rear skull which provided deep, binocular eye socket overlap.",
+    "source_type": "skeletal",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5a/T._rex_arm_bones.jpg",
+    "filename": "trex_manus_skeleton.jpg",
+    "caption": "Detail of the forelimb bones including the two-fingered manus and the reduced third metacarpal stub characteristic of Tyrannosaurids.",
+    "source_type": "skeletal",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/0/02/Tyrannosaurus_rex_skeleton_lateral.jpg",
+    "filename": "trex_lateral_pose.jpg",
+    "caption": "Full skeleton in lateral view showing the modern scientific horizontal posture with the tail acting as a counterbalance to the heavy head.",
+    "source_type": "skeletal",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/9/95/Tyrannosaurus_rex_by_Nobu_Tamura.jpg",
+    "filename": "trex_paleoart_tamura.jpg",
+    "caption": "Scientific reconstruction by Nobu Tamura showing a horizontal spine, accurate muscle mass, and updated integument theories.",
+    "source_type": "paleoart",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 3.0"
+  },
+  {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/0/0b/T._rex_skin_impression.jpg",
+    "filename": "trex_skin_fossil.jpg",
+    "caption": "Fossilized skin impression showing a fine, non-overlapping mosaic of basement scales, suggesting a scaly hide on parts of the body.",
+    "source_type": "integument",
+    "species": "tyrannosaurus",
+    "license": "CC BY-SA 4.0"
+  }
+]

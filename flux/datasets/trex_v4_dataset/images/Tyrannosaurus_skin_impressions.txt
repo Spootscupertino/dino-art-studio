@@ -1,0 +1,1 @@
+../../assets/gallery/flux/training_refs/tyrannosaurus/integument/Tyrannosaurus_skin_impressions.txt
