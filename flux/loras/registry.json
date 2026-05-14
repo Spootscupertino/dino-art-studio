@@ -26,7 +26,8 @@
     "trigger_word": "trex_v3",
     "trained_on": "2026-05-13",
     "training_id": "ec10nqyha1rmy0cy4eerzejnp8",
-    "ab_test_winrate": null,
-    "ab_test_mean_delta": null
+    "ab_test_winrate": "5/5",
+    "ab_test_mean_delta": null,
+    "ab_test_notes": "5/5 visual wins vs trex_v2. Mouth detail notably improved — lipped jaw, gumline, recurved teeth visible. Integument texture richer. Scored 2026-05-14."
   }
 }
