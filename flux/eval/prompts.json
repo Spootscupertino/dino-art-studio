@@ -1,0 +1,72 @@
+[
+  {
+    "id": "mouth_roar",
+    "seed": 42,
+    "prompt": "trex_TRIGGER Tyrannosaurus rex roaring, open-lipped mouth with recurved serrated teeth visible, exposed gumline, fleshy lip cover, tongue and palate, binocular forward-facing eyes, scaly hide, photorealistic, golden hour side light",
+    "rubric_focus": ["mouth_teeth", "integument"],
+    "description": "Open-mouth roar emphasizing lipped jaw and tooth anatomy"
+  },
+  {
+    "id": "frontal_portrait",
+    "seed": 123,
+    "prompt": "trex_TRIGGER Tyrannosaurus rex frontal portrait, head-on view, binocular forward-facing eyes at same horizontal plane, deep narrow skull, scaly furrowed brow, closed lipped mouth, photorealistic, overcast diffuse light",
+    "rubric_focus": ["proportions", "integument"],
+    "description": "Frontal portrait testing eye placement and skull depth"
+  },
+  {
+    "id": "full_body_stalking",
+    "seed": 777,
+    "prompt": "trex_TRIGGER Tyrannosaurus rex stalking through dense fern undergrowth, three-quarter view, horizontal spine, raised tail counterbalancing head, digitigrade stance, two-fingered forelimbs tucked, photorealistic, dappled forest light",
+    "rubric_focus": ["proportions", "hands", "feet"],
+    "description": "Full-body pose testing horizontal spine, forelimb and hindlimb anatomy"
+  },
+  {
+    "id": "foot_detail",
+    "seed": 1024,
+    "prompt": "trex_TRIGGER Tyrannosaurus rex foot close-up, three weight-bearing toes in digitigrade stance, large recurved claws, metatarsal column visible, scaly skin with osteoderms, photorealistic, shallow depth of field, natural ground level",
+    "rubric_focus": ["feet", "integument"],
+    "description": "Foot macro testing three-toed digitigrade anatomy"
+  },
+  {
+    "id": "integument_macro",
+    "seed": 2025,
+    "prompt": "trex_TRIGGER Tyrannosaurus rex skin texture extreme macro, mosaic of small polygonal scales with larger dome scales interspersed, no feathers on trunk, muted earth tones with subtle iridescence, photorealistic, raking light",
+    "rubric_focus": ["integument"],
+    "description": "Skin texture macro testing scale mosaic and absence of trunk feathers"
+  },
+  {
+    "id": "hand_detail",
+    "seed": 314,
+    "prompt": "trex_TRIGGER Tyrannosaurus rex forelimb close-up, two-fingered manus, strongly recurved claws, reduced third metacarpal stub only, palm facing medially, powerful flexor muscles, photorealistic, studio light",
+    "rubric_focus": ["hands"],
+    "description": "Hand macro testing two-finger anatomy and claw curvature"
+  },
+  {
+    "id": "juvenile",
+    "seed": 512,
+    "prompt": "trex_TRIGGER juvenile Tyrannosaurus rex sub-adult, longer gracile legs relative to body, narrower less-reinforced skull than adults, large eyes proportionally, smaller teeth, some filamentous integument on dorsal surface possible, photorealistic, morning mist",
+    "rubric_focus": ["proportions", "integument"],
+    "description": "Sub-adult proportions — longer legs, less massive skull, possible protofeathers"
+  },
+  {
+    "id": "silhouette_backlit",
+    "seed": 99,
+    "prompt": "trex_TRIGGER Tyrannosaurus rex silhouette backlit by low setting sun, anatomy readable as pure outline: horizontal spine, tiny forelimbs, massive head, raised tail, three-toed feet, photorealistic, rim light only",
+    "rubric_focus": ["proportions", "hands", "feet"],
+    "description": "Backlit silhouette — anatomy graded purely by outline shape"
+  },
+  {
+    "id": "environmental_mist",
+    "seed": 256,
+    "prompt": "trex_TRIGGER Tyrannosaurus rex standing in shallow river at dawn, atmospheric mist, telephoto compression, animal exists in habitat without posed aggression, horizontal spine, photorealistic, cool blue-grey morning light",
+    "rubric_focus": ["proportions"],
+    "description": "Environmental shot testing natural pose and habitat integration"
+  },
+  {
+    "id": "action_lunge",
+    "seed": 888,
+    "prompt": "trex_TRIGGER Tyrannosaurus rex predator strike, lunging forward with open mouth, forelimbs forward for balance, one foot planted three-toed on ground, dynamic motion blur on extremities, photorealistic, harsh directional light",
+    "rubric_focus": ["proportions", "mouth_teeth", "hands", "feet"],
+    "description": "Dynamic action shot testing all anatomy axes simultaneously"
+  }
+]

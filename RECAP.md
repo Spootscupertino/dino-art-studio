@@ -138,6 +138,20 @@ REFERENCE IMAGES                  YOUR FEEDBACK
 
 ---
 
+## Training Set Audit — v1/v2/v3 (2026-05-14)
+
+What each LoRA actually trained on, reconstructed from Replicate training run inputs.
+
+| LoRA | Images | Autocaption | LR | Steps | Notes |
+|---|---|---|---|---|---|
+| trex_v1 | 5 | OFF | 0.0004 | 1000 | Clean flat refs: cassowary, 2× paleoart, 2× skeleton. A/B 5/5 Δ+7.2 — valid. |
+| trex_v2 | 23 | **ON** | 5e-5 | 1000 | Autocaption=True overrides all hand-written captions. Contains `Allosaurus_skeleton_1.jpg` (non-T-rex contamination). LR 10× lower than v1. Never A/B tested. |
+| trex_v3 | 26 | OFF | 1e-4 | 1500 | 19/26 are MJ self-generations (feedback-loop risk). Correct captions. A/B vs v2 running 2026-05-14. |
+
+**Key finding on v2:** `autocaption=True` means the Replicate trainer discarded all hand-written captions and generated its own. The effort spent on caption quality for v2 had zero effect on training. LR drop from 4e-4 → 5e-5 likely underfit. Since v2 was never A/B tested, its position in the champion chain is unknown — v1 may still be the best LoRA.
+
+**Key finding on the subdir bug:** The `training_refs/*` vs `training_refs/**/*` bug in `export_dataset.py` was fixed in the v3 session. v1 was pre-subdir (flat, unaffected). v2 appears to have been built before the subdir structure was fully adopted, so the bug's impact on v2 is unclear. v3 used the corrected glob.
+
 ## Where We Are Now
 
 | Phase | Status | What shipped |
@@ -151,8 +165,10 @@ REFERENCE IMAGES                  YOUR FEEDBACK
 | Tightening 3 | Done | Throwaway T. rex LoRA — training submitted to Replicate H200, `.safetensors` downloaded |
 | Tightening 4 | Done | A/B test: 5 paired seeds, LoRA won 5/5, mean Δ +7.2 / 25. LoRA promoted. |
 | Tightening 5 | Done | Retired local SDXL stack, committed to Replicate-Flux for training + inference |
+| Tightening 6 | Done | v2 + v3 LoRA datasets built and submitted to Replicate. v3 registered, A/B underway. |
+| Tightening 7 | Done | Training set audit: v2's autocaption=True bug documented. Frozen eval harness built (`flux/eval/`). |
 
-**Current milestone:** Stack is coherent end-to-end. `flux/generate.py` is the only generation path; `flux/ab_test_replicate.py` is the validation gate for any new LoRA. Next: train species #2 (Velociraptor? Triceratops?) and validate the same way.
+**Current milestone:** Eval harness (`flux/eval/run.py` + `flux/eval/score.py`) provides a single comparable score per LoRA. v4 experiment (drop MJ ratio to ~30%) can proceed once v3 A/B is scored.
 
 ---
 

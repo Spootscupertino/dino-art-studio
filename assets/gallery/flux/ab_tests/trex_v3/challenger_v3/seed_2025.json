@@ -1,0 +1,18 @@
+{
+  "seed": 2025,
+  "label": "challenger_v3",
+  "target": "version:118755ce85509ea2da256350e98c65ad21caff803ecc936f35c18d6ce7f8955f",
+  "prompt": "trex_v3 Tyrannosaurus rex roaring at low golden hour light, three-quarter portrait, open lipped mouth with recurved serrated teeth visible, exposed gumline, binocular forward-facing eyes, scaly hide with fine integument texture, photorealistic",
+  "input": {
+    "aspect_ratio": "1:1",
+    "num_inference_steps": 28,
+    "guidance_scale": 3.0,
+    "output_format": "png",
+    "megapixels": "1",
+    "prompt": "trex_v3 Tyrannosaurus rex roaring at low golden hour light, three-quarter portrait, open lipped mouth with recurved serrated teeth visible, exposed gumline, binocular forward-facing eyes, scaly hide with fine integument texture, photorealistic",
+    "seed": 2025
+  },
+  "prediction_id": "y2skyqdtxhrmw0cy4vzajvbmx0",
+  "output_url": "https://replicate.delivery/xezq/R9spRmo6ZcLIO5sGuBp7K9jx6NupVHCeYpZkNY2HoSsFqcSLA/out-0.png",
+  "timestamp": "2026-05-14T07:58:22"
+}
