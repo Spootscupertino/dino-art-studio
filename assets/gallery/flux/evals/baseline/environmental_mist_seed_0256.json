@@ -1,0 +1,13 @@
+{
+  "lora": "baseline",
+  "prompt_id": "environmental_mist",
+  "seed": 256,
+  "prompt": "Tyrannosaurus rex standing in shallow river at dawn, atmospheric mist, telephoto compression, animal exists in habitat without posed aggression, horizontal spine, photorealistic, cool blue-grey morning light",
+  "target": "model:black-forest-labs/flux-dev",
+  "rubric_focus": [
+    "proportions"
+  ],
+  "prediction_id": "apk7k4yy5nrmy0cy4x7tc00g0g",
+  "output_url": "https://replicate.delivery/xezq/k0yDUGEWW45FF5H0XZX2cyEzmAWjcQ9hbgKmOLPT2TwxpOpF/out-0.png",
+  "timestamp": "2026-05-14T09:26:49"
+}

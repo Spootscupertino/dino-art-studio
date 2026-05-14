@@ -1,0 +1,542 @@
+[
+  {
+    "lora": "baseline",
+    "lora_token": "01bada15",
+    "prompt_id": "action_lunge",
+    "seed": 888,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:32:04",
+    "image_path": "assets/gallery/flux/evals/baseline/action_lunge_seed_0888.png",
+    "scores": {
+      "proportions": 2,
+      "hands": 1,
+      "feet": 3,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 8,
+    "notes": "cartoon"
+  },
+  {
+    "lora": "baseline",
+    "lora_token": "01bada15",
+    "prompt_id": "environmental_mist",
+    "seed": 256,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:32:42",
+    "image_path": "assets/gallery/flux/evals/baseline/environmental_mist_seed_0256.png",
+    "scores": {
+      "proportions": 3,
+      "hands": 1,
+      "feet": 2,
+      "mouth_teeth": 2,
+      "integument": 1
+    },
+    "total": 9,
+    "notes": "very fake"
+  },
+  {
+    "lora": "baseline",
+    "lora_token": "01bada15",
+    "prompt_id": "foot_detail",
+    "seed": 1024,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:34:32",
+    "image_path": "assets/gallery/flux/evals/baseline/foot_detail_seed_1024.png",
+    "scores": {
+      "proportions": 4,
+      "hands": 3,
+      "feet": 4,
+      "mouth_teeth": 3,
+      "integument": 2
+    },
+    "total": 16,
+    "notes": "claws are looking closer"
+  },
+  {
+    "lora": "baseline",
+    "lora_token": "01bada15",
+    "prompt_id": "frontal_portrait",
+    "seed": 123,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:35:17",
+    "image_path": "assets/gallery/flux/evals/baseline/frontal_portrait_seed_0123.png",
+    "scores": {
+      "proportions": 3,
+      "hands": 3,
+      "feet": 3,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 11,
+    "notes": "very fake"
+  },
+  {
+    "lora": "baseline",
+    "lora_token": "01bada15",
+    "prompt_id": "full_body_stalking",
+    "seed": 777,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:35:58",
+    "image_path": "assets/gallery/flux/evals/baseline/full_body_stalking_seed_0777.png",
+    "scores": {
+      "proportions": 3,
+      "hands": 1,
+      "feet": 2,
+      "mouth_teeth": 2,
+      "integument": 2
+    },
+    "total": 10,
+    "notes": "wrong number of claws, cartoon"
+  },
+  {
+    "lora": "baseline",
+    "lora_token": "01bada15",
+    "prompt_id": "hand_detail",
+    "seed": 314,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:36:24",
+    "image_path": "assets/gallery/flux/evals/baseline/hand_detail_seed_0314.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 5,
+    "notes": "really creepy slop"
+  },
+  {
+    "lora": "baseline",
+    "lora_token": "01bada15",
+    "prompt_id": "integument_macro",
+    "seed": 2025,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:36:58",
+    "image_path": "assets/gallery/flux/evals/baseline/integument_macro_seed_2025.png",
+    "scores": {
+      "proportions": 3,
+      "hands": 1,
+      "feet": 3,
+      "mouth_teeth": 3,
+      "integument": 1
+    },
+    "total": 11,
+    "notes": "looks really weird, wrong number of fingers"
+  },
+  {
+    "lora": "baseline",
+    "lora_token": "01bada15",
+    "prompt_id": "juvenile",
+    "seed": 512,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:37:26",
+    "image_path": "assets/gallery/flux/evals/baseline/juvenile_seed_0512.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 5,
+    "notes": "fake, cartoon, aweful"
+  },
+  {
+    "lora": "baseline",
+    "lora_token": "01bada15",
+    "prompt_id": "mouth_roar",
+    "seed": 42,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:37:51",
+    "image_path": "assets/gallery/flux/evals/baseline/mouth_roar_seed_0042.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 2,
+      "feet": 2,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 7,
+    "notes": "cartoon, fake, aweful"
+  },
+  {
+    "lora": "baseline",
+    "lora_token": "01bada15",
+    "prompt_id": "silhouette_backlit",
+    "seed": 99,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:38:22",
+    "image_path": "assets/gallery/flux/evals/baseline/silhouette_backlit_seed_0099.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 2,
+      "feet": 1,
+      "mouth_teeth": 2,
+      "integument": 1
+    },
+    "total": 7,
+    "notes": "fake, terrible proportions, real bad"
+  },
+  {
+    "lora": "trex_v3",
+    "lora_token": "fab20930",
+    "prompt_id": "action_lunge",
+    "seed": 888,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:39:05",
+    "image_path": "assets/gallery/flux/evals/trex_v3/action_lunge_seed_0888.png",
+    "scores": {
+      "proportions": 2,
+      "hands": 2,
+      "feet": 2,
+      "mouth_teeth": 2,
+      "integument": 1
+    },
+    "total": 9,
+    "notes": "fake, good ground movement"
+  },
+  {
+    "lora": "trex_v3",
+    "lora_token": "fab20930",
+    "prompt_id": "environmental_mist",
+    "seed": 256,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:39:42",
+    "image_path": "assets/gallery/flux/evals/trex_v3/environmental_mist_seed_0256.png",
+    "scores": {
+      "proportions": 2,
+      "hands": 2,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 7,
+    "notes": "fake, bad details"
+  },
+  {
+    "lora": "trex_v3",
+    "lora_token": "fab20930",
+    "prompt_id": "foot_detail",
+    "seed": 1024,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:40:03",
+    "image_path": "assets/gallery/flux/evals/trex_v3/foot_detail_seed_1024.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 3
+    },
+    "total": 7,
+    "notes": "slop, wrong number of digits"
+  },
+  {
+    "lora": "trex_v3",
+    "lora_token": "fab20930",
+    "prompt_id": "frontal_portrait",
+    "seed": 123,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:40:39",
+    "image_path": "assets/gallery/flux/evals/trex_v3/frontal_portrait_seed_0123.png",
+    "scores": {
+      "proportions": 2,
+      "hands": 1,
+      "feet": 2,
+      "mouth_teeth": 1,
+      "integument": 2
+    },
+    "total": 8,
+    "notes": "wrong digits, no feel in the mouth, too smooth"
+  },
+  {
+    "lora": "trex_v3",
+    "lora_token": "fab20930",
+    "prompt_id": "full_body_stalking",
+    "seed": 777,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:42:03",
+    "image_path": "assets/gallery/flux/evals/trex_v3/full_body_stalking_seed_0777.png",
+    "scores": {
+      "proportions": 2,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 2
+    },
+    "total": 7,
+    "notes": "slop, wrong hand digits 2 claws only, foot slop"
+  },
+  {
+    "lora": "trex_v3",
+    "lora_token": "fab20930",
+    "prompt_id": "hand_detail",
+    "seed": 314,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:42:22",
+    "image_path": "assets/gallery/flux/evals/trex_v3/hand_detail_seed_0314.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 5,
+    "notes": "pure slop, aweful, wrong anatomy"
+  },
+  {
+    "lora": "trex_v3",
+    "lora_token": "fab20930",
+    "prompt_id": "integument_macro",
+    "seed": 2025,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:42:38",
+    "image_path": "assets/gallery/flux/evals/trex_v3/integument_macro_seed_2025.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 5,
+    "notes": "all slop"
+  },
+  {
+    "lora": "trex_v3",
+    "lora_token": "fab20930",
+    "prompt_id": "juvenile",
+    "seed": 512,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:43:04",
+    "image_path": "assets/gallery/flux/evals/trex_v3/juvenile_seed_0512.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 2
+    },
+    "total": 6,
+    "notes": "all slop on the digits, horrible anatomy"
+  },
+  {
+    "lora": "trex_v3",
+    "lora_token": "fab20930",
+    "prompt_id": "mouth_roar",
+    "seed": 42,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:43:35",
+    "image_path": "assets/gallery/flux/evals/trex_v3/mouth_roar_seed_0042.png",
+    "scores": {
+      "proportions": 2,
+      "hands": 2,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 2
+    },
+    "total": 8,
+    "notes": "no detail"
+  },
+  {
+    "lora": "trex_v3",
+    "lora_token": "fab20930",
+    "prompt_id": "silhouette_backlit",
+    "seed": 99,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:44:02",
+    "image_path": "assets/gallery/flux/evals/trex_v3/silhouette_backlit_seed_0099.png",
+    "scores": {
+      "proportions": 2,
+      "hands": 3,
+      "feet": 2,
+      "mouth_teeth": 2,
+      "integument": 2
+    },
+    "total": 11,
+    "notes": "i like the tail bend"
+  },
+  {
+    "lora": "trex_v4",
+    "lora_token": "306d30be",
+    "prompt_id": "action_lunge",
+    "seed": 888,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:49:26",
+    "image_path": "assets/gallery/flux/evals/trex_v4/action_lunge_seed_0888.png",
+    "scores": {
+      "proportions": 2,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 2
+    },
+    "total": 7,
+    "notes": "wrong number of digits, the earth impact isnt in the correct spot"
+  },
+  {
+    "lora": "trex_v4",
+    "lora_token": "306d30be",
+    "prompt_id": "environmental_mist",
+    "seed": 256,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:49:55",
+    "image_path": "assets/gallery/flux/evals/trex_v4/environmental_mist_seed_0256.png",
+    "scores": {
+      "proportions": 1,
+      "hands": null,
+      "feet": null,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 3,
+    "notes": "everything is wrong"
+  },
+  {
+    "lora": "trex_v4",
+    "lora_token": "306d30be",
+    "prompt_id": "foot_detail",
+    "seed": 1024,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:50:32",
+    "image_path": "assets/gallery/flux/evals/trex_v4/foot_detail_seed_1024.png",
+    "scores": {
+      "proportions": 2,
+      "hands": null,
+      "feet": 2,
+      "mouth_teeth": null,
+      "integument": 2
+    },
+    "total": 6,
+    "notes": "cool detail just looks more like a bird than a t rex"
+  },
+  {
+    "lora": "trex_v4",
+    "lora_token": "306d30be",
+    "prompt_id": "frontal_portrait",
+    "seed": 123,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:51:20",
+    "image_path": "assets/gallery/flux/evals/trex_v4/frontal_portrait_seed_0123.png",
+    "scores": {
+      "proportions": 2,
+      "hands": null,
+      "feet": null,
+      "mouth_teeth": 4,
+      "integument": 3
+    },
+    "total": 9,
+    "notes": "great wet look on the jaw! teeth are too smooth"
+  },
+  {
+    "lora": "trex_v4",
+    "lora_token": "306d30be",
+    "prompt_id": "full_body_stalking",
+    "seed": 777,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:51:37",
+    "image_path": "assets/gallery/flux/evals/trex_v4/full_body_stalking_seed_0777.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 5,
+    "notes": "pure slop"
+  },
+  {
+    "lora": "trex_v4",
+    "lora_token": "306d30be",
+    "prompt_id": "hand_detail",
+    "seed": 314,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:51:56",
+    "image_path": "assets/gallery/flux/evals/trex_v4/hand_detail_seed_0314.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 5,
+    "notes": "creepy slop, in accurate digit count"
+  },
+  {
+    "lora": "trex_v4",
+    "lora_token": "306d30be",
+    "prompt_id": "integument_macro",
+    "seed": 2025,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:52:12",
+    "image_path": "assets/gallery/flux/evals/trex_v4/integument_macro_seed_2025.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 1
+    },
+    "total": 5,
+    "notes": "weird slop"
+  },
+  {
+    "lora": "trex_v4",
+    "lora_token": "306d30be",
+    "prompt_id": "juvenile",
+    "seed": 512,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:52:49",
+    "image_path": "assets/gallery/flux/evals/trex_v4/juvenile_seed_0512.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 1,
+      "integument": 5
+    },
+    "total": 9,
+    "notes": "love the skin and feathers! everything else is off"
+  },
+  {
+    "lora": "trex_v4",
+    "lora_token": "306d30be",
+    "prompt_id": "silhouette_backlit",
+    "seed": 99,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:53:42",
+    "image_path": "assets/gallery/flux/evals/trex_v4/silhouette_backlit_seed_0099.png",
+    "scores": {
+      "proportions": 1,
+      "hands": 1,
+      "feet": 1,
+      "mouth_teeth": 2,
+      "integument": 1
+    },
+    "total": 6,
+    "notes": "pure slop"
+  },
+  {
+    "lora": "trex_v4",
+    "lora_token": "306d30be",
+    "prompt_id": "mouth_roar",
+    "seed": 42,
+    "scorer": "eric",
+    "scored_at": "2026-05-14T09:54:59",
+    "image_path": "assets/gallery/flux/evals/trex_v4/mouth_roar_seed_0042.png",
+    "scores": {
+      "proportions": 3,
+      "hands": null,
+      "feet": null,
+      "mouth_teeth": 4,
+      "integument": 3
+    },
+    "total": 10,
+    "notes": "best one yet, love the wet feel of the mouth, teeth are a little too smooth"
+  }
+]

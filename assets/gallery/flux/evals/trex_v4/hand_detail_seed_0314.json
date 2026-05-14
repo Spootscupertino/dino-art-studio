@@ -1,0 +1,13 @@
+{
+  "lora": "trex_v4",
+  "prompt_id": "hand_detail",
+  "seed": 314,
+  "prompt": "trex_v4 Tyrannosaurus rex forelimb close-up, two-fingered manus, strongly recurved claws, reduced third metacarpal stub only, palm facing medially, powerful flexor muscles, photorealistic, studio light",
+  "target": "version:01f7a87a60e3ead499252f20558fc5ff4ba4b60a322f726a552f083a11665260",
+  "rubric_focus": [
+    "hands"
+  ],
+  "prediction_id": "31w2w7jxhhrmw0cy4xh993akjg",
+  "output_url": "https://replicate.delivery/xezq/dzfyLg05CDX4FCUqGVzHlG0n7VEp3h6r6wuR0eOREUfU01JtA/out-0.png",
+  "timestamp": "2026-05-14T09:47:08"
+}

@@ -1,0 +1,16 @@
+{
+  "lora": "trex_v3",
+  "prompt_id": "action_lunge",
+  "seed": 888,
+  "prompt": "trex_v3 Tyrannosaurus rex predator strike, lunging forward with open mouth, forelimbs forward for balance, one foot planted three-toed on ground, dynamic motion blur on extremities, photorealistic, harsh directional light",
+  "target": "version:118755ce85509ea2da256350e98c65ad21caff803ecc936f35c18d6ce7f8955f",
+  "rubric_focus": [
+    "proportions",
+    "mouth_teeth",
+    "hands",
+    "feet"
+  ],
+  "prediction_id": "pkp2fqxqrnrmw0cy4x8thd11y0",
+  "output_url": "https://replicate.delivery/xezq/InsHfDFvTOQMRCsfD4TkzYzhausRB19bRsdvZPDDfjYPS1JtA/out-0.png",
+  "timestamp": "2026-05-14T09:28:57"
+}

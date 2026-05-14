@@ -29,5 +29,16 @@
     "ab_test_winrate": "5/5",
     "ab_test_mean_delta": null,
     "ab_test_notes": "5/5 visual wins vs trex_v2. Mouth detail notably improved — lipped jaw, gumline, recurved teeth visible. Integument texture richer. Scored 2026-05-14."
+  },
+  "trex_v4": {
+    "replicate_owner": "spootscupertino",
+    "replicate_model": "trex_v4",
+    "version": "01f7a87a60e3ead499252f20558fc5ff4ba4b60a322f726a552f083a11665260",
+    "trigger_word": "trex_v4",
+    "trained_on": "2026-05-14",
+    "training_id": "ktgpp6zqhhrmt0cy4x0v03919r",
+    "ab_test_winrate": null,
+    "ab_test_mean_delta": null,
+    "ab_test_notes": null
   }
 }

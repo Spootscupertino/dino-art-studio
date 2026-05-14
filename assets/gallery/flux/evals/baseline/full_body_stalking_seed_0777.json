@@ -1,0 +1,15 @@
+{
+  "lora": "baseline",
+  "prompt_id": "full_body_stalking",
+  "seed": 777,
+  "prompt": "Tyrannosaurus rex stalking through dense fern undergrowth, three-quarter view, horizontal spine, raised tail counterbalancing head, digitigrade stance, two-fingered forelimbs tucked, photorealistic, dappled forest light",
+  "target": "model:black-forest-labs/flux-dev",
+  "rubric_focus": [
+    "proportions",
+    "hands",
+    "feet"
+  ],
+  "prediction_id": "zxnc9hxja5rmr0cy4x7a0cmst4",
+  "output_url": "https://replicate.delivery/xezq/ouov0LjDQk4fYarm0CbbfNicnSnx5SJfk9MNakdVCnM2L1JtA/out-0.png",
+  "timestamp": "2026-05-14T09:25:33"
+}

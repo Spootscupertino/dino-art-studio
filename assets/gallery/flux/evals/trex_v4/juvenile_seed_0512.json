@@ -1,0 +1,14 @@
+{
+  "lora": "trex_v4",
+  "prompt_id": "juvenile",
+  "seed": 512,
+  "prompt": "trex_v4 juvenile Tyrannosaurus rex sub-adult, longer gracile legs relative to body, narrower less-reinforced skull than adults, large eyes proportionally, smaller teeth, some filamentous integument on dorsal surface possible, photorealistic, morning mist",
+  "target": "version:01f7a87a60e3ead499252f20558fc5ff4ba4b60a322f726a552f083a11665260",
+  "rubric_focus": [
+    "proportions",
+    "integument"
+  ],
+  "prediction_id": "yedjgkm6fsrmr0cy4xh8mfa3dr",
+  "output_url": "https://replicate.delivery/xezq/sGeNquTCFAUvKCe0EBflK05FkfQ6q9KlAqMVFOIeRc4kSXn0C/out-0.png",
+  "timestamp": "2026-05-14T09:47:19"
+}

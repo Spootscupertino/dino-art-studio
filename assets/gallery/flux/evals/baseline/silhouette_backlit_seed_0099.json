@@ -1,0 +1,15 @@
+{
+  "lora": "baseline",
+  "prompt_id": "silhouette_backlit",
+  "seed": 99,
+  "prompt": "Tyrannosaurus rex silhouette backlit by low setting sun, anatomy readable as pure outline: horizontal spine, tiny forelimbs, massive head, raised tail, three-toed feet, photorealistic, rim light only",
+  "target": "model:black-forest-labs/flux-dev",
+  "rubric_focus": [
+    "proportions",
+    "hands",
+    "feet"
+  ],
+  "prediction_id": "49h87zxazxrmt0cy4x7r584f5r",
+  "output_url": "https://replicate.delivery/xezq/gUqEMi1MXfxDH6GgBlYUVnBSyG1HlQifiR98k0e9QyC1N1JtA/out-0.png",
+  "timestamp": "2026-05-14T09:26:36"
+}

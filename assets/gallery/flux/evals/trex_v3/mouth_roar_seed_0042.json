@@ -1,0 +1,14 @@
+{
+  "lora": "trex_v3",
+  "prompt_id": "mouth_roar",
+  "seed": 42,
+  "prompt": "trex_v3 Tyrannosaurus rex roaring, open-lipped mouth with recurved serrated teeth visible, exposed gumline, fleshy lip cover, tongue and palate, binocular forward-facing eyes, scaly hide, photorealistic, golden hour side light",
+  "target": "version:118755ce85509ea2da256350e98c65ad21caff803ecc936f35c18d6ce7f8955f",
+  "rubric_focus": [
+    "mouth_teeth",
+    "integument"
+  ],
+  "prediction_id": "5war0nhtmdrmt0cy4x89xa9p88",
+  "output_url": "https://replicate.delivery/xezq/l4rYa9jUXnqcFxEl0m34g43YNSQsQI4bgPPJofYn7t3zTdSLA/out-0.png",
+  "timestamp": "2026-05-14T09:27:23"
+}

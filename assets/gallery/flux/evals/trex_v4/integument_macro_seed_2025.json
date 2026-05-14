@@ -1,0 +1,13 @@
+{
+  "lora": "trex_v4",
+  "prompt_id": "integument_macro",
+  "seed": 2025,
+  "prompt": "trex_v4 Tyrannosaurus rex skin texture extreme macro, mosaic of small polygonal scales with larger dome scales interspersed, no feathers on trunk, muted earth tones with subtle iridescence, photorealistic, raking light",
+  "target": "version:01f7a87a60e3ead499252f20558fc5ff4ba4b60a322f726a552f083a11665260",
+  "rubric_focus": [
+    "integument"
+  ],
+  "prediction_id": "xx1bb1hmjdrmy0cy4xha7vpa0w",
+  "output_url": "https://replicate.delivery/xezq/YMAg00b1zQ4wNliRIGehM7VTGS5MjsC97FzvBOqhMEgf56kWA/out-0.png",
+  "timestamp": "2026-05-14T09:46:58"
+}

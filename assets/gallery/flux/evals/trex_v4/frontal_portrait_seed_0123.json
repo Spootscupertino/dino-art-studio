@@ -1,0 +1,14 @@
+{
+  "lora": "trex_v4",
+  "prompt_id": "frontal_portrait",
+  "seed": 123,
+  "prompt": "trex_v4 Tyrannosaurus rex frontal portrait, head-on view, binocular forward-facing eyes at same horizontal plane, deep narrow skull, scaly furrowed brow, closed lipped mouth, photorealistic, overcast diffuse light",
+  "target": "version:01f7a87a60e3ead499252f20558fc5ff4ba4b60a322f726a552f083a11665260",
+  "rubric_focus": [
+    "proportions",
+    "integument"
+  ],
+  "prediction_id": "pd09xb5sydrmt0cy4xgvw8r8xr",
+  "output_url": "https://replicate.delivery/xezq/QOv6SwzyjTqVIZmGeic354Y6FzzFWo479QnMITYdBfXg56kWA/out-0.png",
+  "timestamp": "2026-05-14T09:46:26"
+}

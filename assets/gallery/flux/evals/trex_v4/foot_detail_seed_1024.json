@@ -1,0 +1,14 @@
+{
+  "lora": "trex_v4",
+  "prompt_id": "foot_detail",
+  "seed": 1024,
+  "prompt": "trex_v4 Tyrannosaurus rex foot close-up, three weight-bearing toes in digitigrade stance, large recurved claws, metatarsal column visible, scaly skin with osteoderms, photorealistic, shallow depth of field, natural ground level",
+  "target": "version:01f7a87a60e3ead499252f20558fc5ff4ba4b60a322f726a552f083a11665260",
+  "rubric_focus": [
+    "feet",
+    "integument"
+  ],
+  "prediction_id": "1n6stcrbrhrmr0cy4xhbsqmb2g",
+  "output_url": "https://replicate.delivery/xezq/eDyEeSc3zqj2BUAoppVvSnMYXxbrpvG6eoFOb8Dwsp6rz1JtA/out-0.png",
+  "timestamp": "2026-05-14T09:46:47"
+}
