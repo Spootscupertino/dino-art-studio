@@ -1,0 +1,22 @@
+{
+  "_comment": "Repeat counts per folder. Images in high-weight folders are duplicated N times in the zip so the trainer sees them more often. 1 = normal weight. 0 = excluded from export.",
+  "_v5_thesis": "Mouth as hero aesthetic (6x), forelimb as competitive differentiator vs MJ (4x), eye signature detail (3x). Skeletal + living_analog from v4 excluded — didn't transfer to photorealistic output per v4 eval. v4 LOST to baseline 7-1-2 on the strict rubric; v5 is a deliberate architecture shift, not an incremental change.",
+  "_roadmap": "v5–v7: mouth/eye/integument lock in, captions methodology converges. v8–v9: forelimb plateau likely → commission photorealistic paleoart refs ($300-500 from Emily Willoughby / RJ Palmer) if hands rubric score still < 2.0. v10–v12: hyperparameter tuning (rank 16→32, step count, LR) for polish. Target ship: v9 plausible, v12 proud. Total cost ~$50, ~25h focused work.",
+  "_scoring_note": "v3 was scored under loose rubric (1=bad floor); v4+ under strict rubric (0=not viewable). Re-score v3 under strict rubric after v5 to make trajectory honest.",
+  "v5_mouth_macro": 6,
+  "v5_forelimb_hand": 4,
+  "v5_eye_detail": 3,
+  "v5_hindfoot_claw": 2,
+  "v5_integument_head": 2,
+  "v5_portrait_frontal": 2,
+  "extremes_macro": 2,
+  "v5_full_body_action": 1,
+  "v5_portrait_3quarter": 1,
+  "v5_integument_body": 1,
+  "biomech_mouth": 1,
+  "corrected_mj": 1,
+  "integument": 1,
+  "paleoart": 1,
+  "skeletal": 0,
+  "living_analog": 0
+}

@@ -1,0 +1,1 @@
+../../assets/gallery/flux/training_refs/tyrannosaurus/v5_forelimb_hand/Tyrannosaurus_arm_bone_and_flesh.txt

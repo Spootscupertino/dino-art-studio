@@ -37,8 +37,20 @@
     "trigger_word": "trex_v4",
     "trained_on": "2026-05-14",
     "training_id": "ktgpp6zqhhrmt0cy4x0v03919r",
+    "ab_test_winrate": "1/10",
+    "ab_test_mean_delta": -2.4,
+    "ab_test_notes": "Scored under strict rubric (0=not viewable). LOST to baseline 7-1-2. Hands axis catastrophic (1.0 vs 1.6 baseline). Only integument improved (2.00 vs 1.20). Total: 6.50 vs baseline 8.90."
+  },
+  "trex_v5": {
+    "replicate_owner": "spootscupertino",
+    "replicate_model": "trex_v5",
+    "version": "eac1808ae052ea37e09733b0371282576e08e5d7f70cc89295619fe18ff257db",
+    "trigger_word": "trex_v5",
+    "trained_on": "2026-05-17",
+    "training_id": "65g9491vsdrmt0cy6tzrg2k2xc",
     "ab_test_winrate": null,
     "ab_test_mean_delta": null,
-    "ab_test_notes": null
+    "ab_test_notes": null,
+    "dataset_notes": "44 source images, 97 weighted training instances. Mouth 6x, forelimb 4x, eye 3x, hindfoot 2x, integument_head 2x, portrait_frontal 2x, extremes_macro 2x. Added Steveoc 86 lateral paleoart (original + mirror). Excluded skeletal + living_analog (weight 0). Quarantined museum statue. Training duration ~18 min on H200."
   }
 }

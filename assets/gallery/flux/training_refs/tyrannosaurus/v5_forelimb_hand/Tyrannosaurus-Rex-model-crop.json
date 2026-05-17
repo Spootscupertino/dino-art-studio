@@ -1,0 +1,6 @@
+{
+  "species": "tyrannosaurus",
+  "source_type": "v5_forelimb_hand",
+  "quarantined": true,
+  "quarantine_reason": "Outdoor fiberglass museum model in upright Godzilla-style posture with parking garage ceiling structure visible in background. Manus geometry is correct but environment + painted-plastic surface + incorrect upright pose risks teaching Flux 'T-rex = museum statue + building'. Excluded from v5 export."
+}

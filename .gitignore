@@ -54,3 +54,6 @@ flux/server.log
 reference_images/**/*.jpg
 reference_images/**/*.jpeg
 reference_images/**/*.png
+
+# Flux training dataset zips — large binaries, regenerate via flux/export_dataset.py
+flux/datasets/*.zip

@@ -1,0 +1,16 @@
+{
+  "species": "tyrannosaurus",
+  "source_type": "v5_full_body_action",
+  "ingested_at": "2026-05-17",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tyrannosaurus-rex-Profile-steveoc86_(coloured).png",
+  "image_url": "",
+  "creator": "Steveoc 86",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "verified": true,
+  "source_checked_date": "2026-05-17",
+  "quarantined": false,
+  "quarantine_reason": "",
+  "thesis_score": {},
+  "notes": "Horizontal mirror of the Steveoc 86 lateral restoration. Caption varied from original to reduce overfitting risk. Attribution required on public display per CC BY-SA 4.0."
+}

@@ -1,0 +1,1 @@
+../../assets/gallery/flux/training_refs/tyrannosaurus/integument/emu_foot_scutes.txt

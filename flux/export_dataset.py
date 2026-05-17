@@ -39,6 +39,18 @@ TRAINING_DIR = REPO_ROOT / "assets" / "gallery" / "flux" / "training_refs"
 WINNERS_FILE = REPO_ROOT / "winners.json"
 
 
+def load_folder_weights(species_dir: Path) -> dict[str, int]:
+    """Read weights.json from a species training_refs folder. Returns folder_name -> repeat count."""
+    weights_file = species_dir / "weights.json"
+    if not weights_file.exists():
+        return {}
+    try:
+        data = json.loads(weights_file.read_text())
+        return {k: int(v) for k, v in data.items() if not k.startswith("_") and isinstance(v, (int, float))}
+    except Exception:
+        return {}
+
+
 class C:
     RESET = "\033[0m"
     BOLD = "\033[1m"
@@ -255,16 +267,40 @@ def export_dataset(images: dict[str, dict], output_dir: Path) -> bool:
 
     # Also produce a zip of (image, caption) pairs for Replicate's trainer.
     # The trainer expects a flat zip with files side-by-side, no subdirs.
+    # Images in weighted folders are repeated N times (different filenames) so the
+    # trainer sees them more often — standard technique for emphasizing rare anatomy.
     zip_path = output_dir.with_suffix(".zip")
     if zip_path.exists():
         zip_path.unlink()
+
+    # Build per-species folder weights
+    species_weights: dict[str, dict[str, int]] = {}
+    for species_dir in TRAINING_DIR.iterdir():
+        if species_dir.is_dir():
+            species_weights[species_dir.name] = load_folder_weights(species_dir)
+
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for stem, img_meta in images.items():
             image_path = img_meta["image_path"]
             caption_path = img_meta["caption_path"]
-            zf.write(image_path, arcname=image_path.name)
-            zf.write(caption_path, arcname=caption_path.name)
-    print(f"  {C.green('✓')} wrote zip: {zip_path.relative_to(REPO_ROOT)}")
+            species = img_meta["species"]
+
+            # Determine repeat count from folder name
+            folder_name = image_path.parent.name
+            repeat = species_weights.get(species, {}).get(folder_name, 1)
+
+            for i in range(repeat):
+                suffix = f"_w{i+1}" if i > 0 else ""
+                zf.write(image_path, arcname=f"{image_path.stem}{suffix}{image_path.suffix}")
+                cap_text = caption_path.read_text()
+                zf.writestr(f"{image_path.stem}{suffix}.txt", cap_text)
+
+    weighted_count = sum(
+        species_weights.get(img_meta["species"], {}).get(img_meta["image_path"].parent.name, 1)
+        for img_meta in images.values()
+    )
+    print(f"  {C.green('✓')} wrote zip: {zip_path.relative_to(REPO_ROOT)} "
+          f"({C.teal(str(weighted_count))} weighted entries from {len(images)} source images)")
 
     return True
 

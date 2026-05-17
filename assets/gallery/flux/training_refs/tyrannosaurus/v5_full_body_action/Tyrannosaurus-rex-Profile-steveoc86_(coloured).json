@@ -1,0 +1,16 @@
+{
+  "species": "tyrannosaurus",
+  "source_type": "v5_full_body_action",
+  "ingested_at": "2026-05-17",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Tyrannosaurus-rex-Profile-steveoc86_(coloured).png",
+  "image_url": "",
+  "creator": "Steveoc 86",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "verified": true,
+  "source_checked_date": "2026-05-17",
+  "quarantined": false,
+  "quarantine_reason": "",
+  "thesis_score": {},
+  "notes": "Wikimedia Commons life restoration by Steveoc 86. High-value ref: shows correct two-fingered manus geometry, accurate proportions per Scott Hartman skeletals, scaly integument with disruptive countershading. White background = no environment contamination. Attribution required on public display per CC BY-SA 4.0."
+}
