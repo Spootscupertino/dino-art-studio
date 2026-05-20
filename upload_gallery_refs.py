@@ -20,6 +20,7 @@ FOLDERS = [
     ROOT / "assets/gallery/flux/training_refs/tyrannosaurus/v5_mouth_macro",
     ROOT / "assets/gallery/flux/training_refs/tyrannosaurus/biomech_mouth",
     ROOT / "assets/gallery/flux/training_refs/tyrannosaurus/v5_hindfoot_claw",
+    ROOT / "assets/gallery/flux/training_refs/tyrannosaurus/v5_forelimb_hand",
 ]
 
 
