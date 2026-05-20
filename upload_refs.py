@@ -213,20 +213,28 @@ def _download_via_api(original_url, dest_path, width=1024):
     decoded = urllib.parse.unquote(filename)
     ua = "DinoArtStudio/1.0 (reference download; contact github.com/Spootscupertino)"
 
-    # Strategy 1: commons.wikimedia.org/wiki/Special:FilePath (redirect-based)
-    # This goes through the wiki server, not the upload CDN directly.
-    special_url = "https://commons.wikimedia.org/wiki/Special:FilePath/%s?width=%d" % (
-        urllib.parse.quote(decoded), width
-    )
-    try:
-        req = urllib.request.Request(special_url, headers={"User-Agent": ua})
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = resp.read()
-            if len(data) > 100:  # sanity check — not an error page
-                dest_path.write_bytes(data)
-                return True
-    except Exception:
-        pass
+    # Strategy 1: Special:FilePath with descending widths.
+    # When no pre-generated thumbnail exists at the requested width, Wikimedia
+    # redirects to the original full-res file. When a thumbnail exists but the
+    # original is smaller than the requested width, it may 400 — try smaller.
+    for w in [width, 800, 640, 500, 0]:
+        if w == 0:
+            # Width=0: no ?width param → redirects to original full-res file
+            url_attempt = "https://commons.wikimedia.org/wiki/Special:FilePath/%s" % urllib.parse.quote(decoded)
+        else:
+            url_attempt = "https://commons.wikimedia.org/wiki/Special:FilePath/%s?width=%d" % (urllib.parse.quote(decoded), w)
+        try:
+            req = urllib.request.Request(url_attempt, headers={"User-Agent": ua})
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = resp.read()
+                if len(data) > 100:
+                    dest_path.write_bytes(data)
+                    return True
+        except urllib.error.HTTPError as e:
+            if e.code in (400, 404):
+                continue
+        except Exception:
+            pass
 
     # Strategy 2: REST API v1 endpoint
     rest_url = "https://api.wikimedia.org/core/v1/commons/file/File:%s" % (
@@ -236,7 +244,6 @@ def _download_via_api(original_url, dest_path, width=1024):
         req = urllib.request.Request(rest_url, headers={"User-Agent": ua})
         with urllib.request.urlopen(req, timeout=15) as resp:
             meta = json.loads(resp.read())
-        # Get the preferred thumbnail URL from REST response
         thumb = meta.get("preferred", {}).get("url", "")
         if not thumb:
             thumb = meta.get("original", {}).get("url", "")
@@ -494,25 +501,36 @@ def cmd_download(args):
                 time.sleep(2.0)
                 continue
 
-            # Fallback: direct thumb URL (may 429)
-            dl_url = _to_thumb_url(item["url"], 1024)
-            req = urllib.request.Request(
-                dl_url,
-                headers={"User-Agent": "DinoArtStudio/1.0 (reference download; contact github.com/Spootscupertino)"},
-            )
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                dest.write_bytes(resp.read())
+            # Fallback: try descending thumbnail widths.
+            # HTTP 400 "Use thumbnail sizes listed on wiki page" happens when
+            # the requested width exceeds the original image's width — Wikimedia
+            # refuses to upscale.  Walk down until one succeeds.
+            ua = "DinoArtStudio/1.0 (reference download; contact github.com/Spootscupertino)"
+            downloaded = False
+            for w in [1024, 800, 640, 500, 320]:
+                try:
+                    dl_url = _to_thumb_url(item["url"], w)
+                    req = urllib.request.Request(dl_url, headers={"User-Agent": ua})
+                    with urllib.request.urlopen(req, timeout=30) as resp:
+                        dest.write_bytes(resp.read())
+                    downloaded = True
+                    break
+                except urllib.error.HTTPError as http_err:
+                    if http_err.code in (400, 404):
+                        break  # no point trying smaller widths if file doesn't exist
+                    if http_err.code == 429:
+                        break  # rate limited; let outer handler sleep and count as failed
+                    raise
+            if not downloaded:
+                raise Exception("Wikimedia download failed (400/404/429)")
             url_to_local[item["url"]] = dest
             total += 1
-            print("    OK (direct)")
+            print("    OK (direct @%dpx)" % w)
             time.sleep(2.0)
         except Exception as ex:
             print("    FAILED: %s" % str(ex)[:120])
-            # Clean up partial file
             if dest.exists():
                 dest.unlink()
-            failed += 1
-            time.sleep(10.0)
             failed += 1
             time.sleep(10.0)
 
