@@ -2839,6 +2839,56 @@ def make_mouth_fix_prompt(species, mj_style: str, stylize: int = 20) -> str:
     return f"{core}, telephoto macro, shallow depth of field, muted colour, film grain {flags}"
 
 
+# Tyrannosaurids are didactyl (two-fingered); other terrestrial theropods default to tridactyl.
+DIDACTYL_GENERA = {"Tyrannosaurus", "Tarbosaurus", "Albertosaurus", "Daspletosaurus", "Gorgosaurus", "Nanotyrannus"}
+
+
+def make_hand_fix_prompt(species, mj_style: str, stylize: int = 20):
+    """Vary Region prompt for forelimb/hands. Paint over arm/hand area, paste this prompt.
+
+    Returns None for habitats where 'hand' isn't meaningful (marine flippers,
+    aerial wings, arthropod legs, plant) — those are covered by feet_fix.
+    """
+    diet    = species["diet"] or ""
+    habitat = species["habitat"] or "terrestrial"
+    name    = species["name"]
+
+    if habitat != "terrestrial":
+        return None
+    if diet not in ("Carnivore", "Piscivore", "Omnivore"):
+        return None
+
+    genus = name.split()[0] if name else ""
+    if genus in DIDACTYL_GENERA:
+        core = (
+            f"extreme close-up of {name} forelimb, "
+            "tiny muscular two-fingered hand, didactyl manus exactly two digits, "
+            "palms inward facing midline, "
+            "dark curved keratin claws 4-5 inches each, recurved tips, "
+            "individual digit bones visible under tight pebbly scaly skin, "
+            "knuckle joints flexed, "
+            "olive-brown dorsal hide transitioning to tawny underside, "
+            "natural wear and small scars on claws, "
+            "real wildlife photograph of reptile forelimb"
+        )
+        no_extra = "three-fingered, four-fingered, extra fingers, fused digits, missing claws, oversized arms, human hand, mammalian hand"
+    else:
+        core = (
+            f"extreme close-up of {name} forelimb, "
+            "three-fingered hand, tridactyl manus, "
+            "elongated middle finger, asymmetric digit lengths, "
+            "recurved keratin claws each a different curvature and wear pattern, "
+            "individual digit bones visible under tight scaly skin, "
+            "wrist flexed mid-grasp, "
+            "natural scars and chips on claws, "
+            "real wildlife photograph of reptile forelimb"
+        )
+        no_extra = "two-fingered, four-fingered, fused digits, missing claws, blob hand, human hand, mammalian hand"
+
+    flags = f"--no {no_extra}, {build_negative_prompt(habitat)} --style {mj_style} --stylize {stylize}"
+    return f"{core}, telephoto macro, shallow depth of field, muted colour, film grain {flags}"
+
+
 # ---------------------------------------------------------------------------
 # CLIP tokenizer helpers (Session 17)
 # MJ uses CLIP ViT-L/14 which tokenizes text into ~77 tokens max.
@@ -4608,11 +4658,15 @@ def lean_main(args) -> None:
 
     # Fix prompts — still useful after getting a lean base image
     feet_fix = make_feet_fix_prompt(species, args.style, stylize=min(stylize, 100))
+    hand_fix = make_hand_fix_prompt(species, args.style, stylize=min(stylize, 100))
     mouth_fix = make_mouth_fix_prompt(species, args.style, stylize=min(stylize, 100))
 
     if feet_fix:
         print(f"\n  {hdr('EXTREMITY FIX — Vary Region over claws/flippers/wings')}")
         print(f"  {C.BRIGHT_WHITE}{feet_fix}{C.RESET}\n")
+    if hand_fix:
+        print(f"\n  {hdr('HAND FIX — Vary Region over forelimb/hands')}")
+        print(f"  {C.BRIGHT_WHITE}{hand_fix}{C.RESET}\n")
     if mouth_fix:
         print(f"\n  {hdr('MOUTH/TEETH FIX — Vary Region over jaw area')}")
         print(f"  {C.BRIGHT_WHITE}{mouth_fix}{C.RESET}\n")
@@ -4950,15 +5004,27 @@ def main() -> None:
     print(f"\n  {hdr('/imagine prompt:')}")
     print(f"  {C.BRIGHT_WHITE}{env_fix_clean}{C.RESET}\n")
 
-    # STEP 4 — Mouth fix — skipped for plants
+    # STEP 4 — Hand fix — terrestrial carnivores/omnivores only (returns None otherwise)
+    hand_fix_prompt = make_hand_fix_prompt(species, mj_style=args.style)
+    if hand_fix_prompt:
+        hand_fix_clean = strip_mj_params(hand_fix_prompt)
+        validate_prompt(hand_fix_clean, allow_mj_params=False, label="STEP 4 hand fix")
+        print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
+        print(f"  {C.BOLD_CYAN}STEP 4 — HAND FIX{C.RESET}  {C.DIM}[Vary Region → paint over forelimb/hands]{C.RESET}")
+        print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
+        print_prompt_box(hand_fix_clean)
+        print(f"\n  {hdr('/imagine prompt:')}")
+        print(f"  {C.BRIGHT_WHITE}{hand_fix_clean}{C.RESET}\n")
+
+    # STEP 5 — Mouth fix — skipped for plants
     if habitat != "plant":
         mouth_fix_prompt = make_mouth_fix_prompt(species, mj_style=args.style)
         mouth_fix_clean  = strip_mj_params(mouth_fix_prompt)
-        validate_prompt(mouth_fix_clean, allow_mj_params=False, label="STEP 4 mouth fix")
-        step4_label = "MOUTHPART FIX" if habitat == "arthropod" else "MOUTH FIX"
-        step4_region = "mandibles/chelicerae" if habitat == "arthropod" else "mouth/jaw"
+        validate_prompt(mouth_fix_clean, allow_mj_params=False, label="STEP 5 mouth fix")
+        step5_label = "MOUTHPART FIX" if habitat == "arthropod" else "MOUTH FIX"
+        step5_region = "mandibles/chelicerae" if habitat == "arthropod" else "mouth/jaw"
         print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
-        print(f"  {C.BOLD_CYAN}STEP 4 — {step4_label}{C.RESET}  {C.DIM}[Vary Region → paint over {step4_region}]{C.RESET}")
+        print(f"  {C.BOLD_CYAN}STEP 5 — {step5_label}{C.RESET}  {C.DIM}[Vary Region → paint over {step5_region}]{C.RESET}")
         print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
         print_prompt_box(mouth_fix_clean)
         print(f"\n  {hdr('/imagine prompt:')}")

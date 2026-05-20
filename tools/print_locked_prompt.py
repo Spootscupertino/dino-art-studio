@@ -75,7 +75,7 @@ def main() -> int:
               f"or DEFAULT_PROMPTS in {Path(__file__).name})", file=sys.stderr)
         return 3
 
-    print(f"{base} --sref " + " ".join(urls))
+    print(" ".join(urls) + " " + base)
     return 0
 
 
