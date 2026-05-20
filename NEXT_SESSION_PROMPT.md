@@ -1,30 +1,37 @@
-# Next Session Prompt — Session 23 Close
+# Next Session Prompt — Session 24 Close
 
-## T. rex MJ Prompt: LOCKED
+## T. rex MJ Prompt: LOCKED (5-ref set canonicalized)
 
-Anatomy quality is production-ready. Ref strategy proved out. Pick this up and iterate poses/environments, or move to next species.
+Session 24 promoted the ref lock from 4 → 5 (added hindfoot/claw close-up) and moved the
+canonical list out of this doc into [`refs/locked_refs.json`](refs/locked_refs.json) so it
+can be read by tooling. The lookup snippet below now resolves URLs from that file in order.
+
+Anatomy quality is production-ready. Pick this up and iterate poses/environments, or move
+to next species.
 
 ### Locked Base Prompt (text only — refs must be refreshed each session)
 ```
 solitary Tyrannosaurus rex, massive deep skull forward binocular eyes rugose brow ridges, conical honey-gold serrated teeth visible along jaw, tight pebbly scaly hide olive-brown dorsal tawny underbelly, vestigial forearms two curved dark keratin claws, pillar-like hindlimbs digitigrade three-toed feet dark curved claws, thick muscular tail held rigidly horizontal, 12 meters long 8-tonne apex predator --no three-fingered, extra fingers, fused digits, dragging tail, skeleton, fossilized, feathered, pair of animals --style raw --stylize 75 --sw 50 --q 1 --sref <refs>
 ```
 
-### Locked Ref Set (4 files — refresh CDN tokens at session start)
+### Locked Ref Set (5 files — refresh CDN tokens at session start)
+Canonical source: [`refs/locked_refs.json`](refs/locked_refs.json) — `Tyrannosaurus rex` key.
 Run `python3 upload_gallery_refs.py` first, then look up URLs:
 1. `tyrannosaurus_wikimedia_paleo_art_side_profile.png` — full body proportions
 2. `spootscupertino_A_cinematic_macro_shot_of_the_interior_mouth__9c1213c1...` — interior mouth/teeth
-3. `spootscupertino_A_frontal_binocular_view_portrait_of_a_Tyrannos_45c56d6b...` — frontal skull angle
+3. `spootscupertino_A_frontal_binocular_view_portrait_of_a_Tyrannos_45c56d6b...` — frontal skull/binocular eye anchor
 4. `Tyrannosaurus_arm_bone_and_flesh.jpg` — forelimb anatomy (two-finger anchor)
+5. `spootscupertino_Hyper-realistic_close-up_of_Tyrannosaurus_rex_9ffb8e4d...` — hindfoot / claw close-up
 
-Lookup command:
+Lookup command (reads locked_refs.json, prints fresh CDN URLs in order):
 ```bash
 python3 -c "
 import json
-sref = json.load(open('sref_urls.json'))
-trex = sref.get('Tyrannosaurus rex', [])
-for term in ['tyrannosaurus_wikimedia_paleo_art_side_profile.png', '9c1213c1', '45c56d6b', 'Tyrannosaurus_arm_bone_and_flesh']:
-    m = next((e for e in trex if term in e.get('label','')), None)
-    if m: print(m['url'])
+locked = json.load(open('refs/locked_refs.json'))['Tyrannosaurus rex']['refs']
+pool   = json.load(open('sref_urls.json')).get('Tyrannosaurus rex', [])
+by_label = {e['label']: e['url'] for e in pool}
+for r in locked:
+    print(by_label.get(r['label'], '!! MISSING — re-run upload_gallery_refs.py'))
 "
 ```
 
