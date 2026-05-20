@@ -74,16 +74,26 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
-        "twin parallel bony head crests with vivid skin",
-        "shaggy emu-like proto-feather plumage",
-        "gracile lean 7m feathered biped predator",
-        "display plumes framing crests like secretary bird",
-        "bare scaly legs and snout",
-        "kinked jaw with subnarial notch",
+        "twin parallel bony head crests with flushed display skin",
+        "shaggy emu-like proto-feather plumage covering body",
+        "gracile lean 7-meter feathered biped predator",
+        "kinked jaw with subnarial notch in upper jaw",
         "long thin feathered horizontal tail",
+        "bare scaly legs and snout",
     ],
 
-    recommended_stylize=(50, 100, 175),
+    bias_corrections=[
+        "no neck frill, no venom spitting (Jurassic Park inventions)",
+        "human-sized predator NOT small dog-sized",
+        "feathered emu-like NOT scaly reptile",
+        "twin straight crests NOT fan crest",
+    ],
+
+    coloration_phrase="drab tawny-brown feathers with vivid flushed crests, drab body display-color head palette",
+
+    scale_anchor="7 meters long, 400kg lean biped predator",
+
+    recommended_stylize=(50, 75, 150),
 
     known_failures=[
         "neck frill — Jurassic Park invention, Dilophosaurus had NO frill whatsoever",

@@ -92,17 +92,27 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
-        "dark curved keratin claws 4-5 inches, angled downward",
-        "conical honey-gold teeth visible along jaw",
-        "massive deep skull with binocular eyes",
-        "tiny two-fingered muscular arms",
-        "tight pebbly scaly hide, earth-toned olive-brown with tawny underbelly",
-        "bare pebbly facial skin, sparse dark dorsal ridge",
-        "thick horizontal tail counterbalance",
-        "powerful biped legs with curved hindlimb claws",
+        "dark curved keratin claws 4-5 inches on hands and feet, angled downward",
+        "conical honey-gold teeth visible along jaw, wear striations",
+        "tiny two-fingered muscular arms, palms inward",
+        "massive deep skull with forward binocular eyes",
+        "tight pebbly scaly hide, sparse dark dorsal filament ridge",
+        "thick muscular tail held horizontal counterbalance",
+        "pillar-like hindlimbs digitigrade stance",
     ],
 
-    recommended_stylize=(50, 100, 200),
+    bias_corrections=[
+        "two-fingered hands NOT three-fingered",
+        "horizontal tail NOT dragging on ground",
+        "predominantly scaly hide NOT shaggy feathered",
+        "honey-gold teeth NOT bright white",
+    ],
+
+    coloration_phrase="earth-toned olive-brown dorsal, tawny countershaded underbelly, drab Komodo-dragon palette",
+
+    scale_anchor="12 meters long, 4m at hip, 8-tonne apex predator",
+
+    recommended_stylize=(50, 75, 150),
 
     known_failures=[
         "three-fingered arms — MJ defaults to three fingers; must specify two-fingered with claws",

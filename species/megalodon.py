@@ -71,15 +71,26 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
-        "hand-sized triangular serrated teeth",
-        "broad heavy great-white body plan scaled up",
+        "hand-sized triangular serrated teeth in massive jaw",
+        "broad heavy great-white body plan scaled up massive",
         "rough dermal-denticle sandpaper skin",
-        "scarred blunt snout battle-worn",
-        "powerful crescent caudal fin",
-        "school-bus-sized 15m apex shark",
+        "scarred blunt snout, battle-worn from prey impact",
+        "powerful crescent caudal fin for thrust",
+        "robust pectoral fins held wide for stability",
     ],
 
-    recommended_stylize=(100, 175, 350),
+    bias_corrections=[
+        "great-white body plan scaled up NOT generic monster shark",
+        "hand-sized triangular teeth NOT curved fangs",
+        "rough denticle skin NOT smooth scales",
+        "robust stocky build NOT sleek eel-shaped",
+    ],
+
+    coloration_phrase="dark grey dorsal with white underbelly, classic countershaded apex shark palette",
+
+    scale_anchor="15-18 meters long, 50-tonne apex shark",
+
+    recommended_stylize=(75, 100, 200),
 
     known_failures=[
         "smooth skin — shark skin is rough sandpaper-like dermal denticles",

@@ -74,15 +74,26 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
+        "toothless pointed pelican-like beak",
         "long backward-sweeping bony cranial crest",
-        "toothless pointed beak pelican-like",
-        "taut wing membrane to ankles",
-        "fuzzy pycnofiber body covering",
-        "tiny body 7m wingspan 25kg",
-        "quadrupedal on ground folded wings",
+        "taut wing membrane attached to ankles, single elongated finger",
+        "fuzzy pycnofiber body covering, not feathers",
+        "tiny body compared to 7-meter wingspan",
+        "quadrupedal on ground with folded wings",
     ],
 
-    recommended_stylize=(75, 125, 250),
+    bias_corrections=[
+        "wing membrane attached to ankle NOT bird feathered wing",
+        "toothless pointed beak NOT toothed jaws",
+        "pycnofiber fuzz NOT smooth lizard skin or feathers",
+        "quadrupedal stance on ground NOT bipedal standing",
+    ],
+
+    coloration_phrase="drab grey-white seabird-like palette, possibly flushed crest for display",
+
+    scale_anchor="7 meter wingspan, tiny 25kg pterosaur body",
+
+    recommended_stylize=(50, 75, 150),
 
     known_failures=[
         "teeth — Pteranodon is TOOTHLESS; name literally means 'toothless wing'",

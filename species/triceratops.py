@@ -75,15 +75,26 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
-        "three-horned skull with solid bony frill",
-        "parrot-like keratinous beak",
-        "pebbly rosette-patterned scales",
-        "rhino-proportioned stocky quadruped",
-        "semi-erect forelimbs elbows bowed out",
-        "9m long 9-tonne ceratopsian",
+        "three forward-pointing horns and solid bony frill",
+        "parrot-like keratinous beak with no front teeth",
+        "pebbly rosette-patterned scales across hide",
+        "rhino-proportioned stocky quadrupedal body",
+        "semi-erect forelimbs with elbows slightly bowed out",
+        "thick muscular neck supporting massive skull",
     ],
 
-    recommended_stylize=(50, 100, 200),
+    bias_corrections=[
+        "solid bony frill NOT holed lattice frill",
+        "parrot-like beak NOT lizard mouth with teeth",
+        "rhino-stocky quadruped NOT sleek dragon",
+        "three short forward horns NOT spike crown",
+    ],
+
+    coloration_phrase="drab earth-toned brown-grey hide, possibly patterned frill for display, rhinoceros palette",
+
+    scale_anchor="9 meters long, 3 meters at hip, 9-tonne ceratopsian",
+
+    recommended_stylize=(50, 75, 150),
 
     known_failures=[
         "fenestrated frill — Triceratops frill is SOLID bone, not windowed",

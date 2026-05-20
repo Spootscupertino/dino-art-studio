@@ -73,15 +73,26 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
-        "massive bony tail club",
-        "interlocking dorsal armor osteoderms",
-        "low flat wide tank body",
-        "four pyramidal skull horns",
-        "lateral triangular body spikes",
-        "armored eyelids",
+        "massive bony tail club at end of stiff tail",
+        "interlocking dorsal armor osteoderms in rows",
+        "low flat wide tank-shaped body",
+        "four pyramidal skull horns at rear of head",
+        "lateral triangular body spikes along flanks",
+        "short stocky legs, armored eyelids",
     ],
 
-    recommended_stylize=(75, 125, 250),
+    bias_corrections=[
+        "wide flat tank body NOT tall narrow profile",
+        "bony tail club NOT spiked mace",
+        "interlocking osteoderm armor NOT smooth scaly hide",
+        "low to the ground NOT elevated stance",
+    ],
+
+    coloration_phrase="drab brown-grey armored hide with mottled camouflage, naturalistic palette",
+
+    scale_anchor="8 meters long, 6-tonne armored quadruped",
+
+    recommended_stylize=(50, 75, 150),
 
     known_failures=[
         "spiked tail — tail has a bony CLUB, not spikes (spikes are Stegosaurus)",

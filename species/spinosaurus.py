@@ -77,15 +77,26 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
+        "deep paddle-shaped eel-like swimming tail fin",
         "massive dorsal sail 1.7m tall neural spines",
-        "elongated crocodile-like narrow snout",
-        "deep paddle-shaped eel-like tail fin",
-        "conical unserrated fish-catching teeth",
-        "low quadrupedal stance small hindlimbs",
-        "14m semi-aquatic sail-backed predator",
+        "elongated crocodile-like narrow snout with conical fish-catching teeth",
+        "short stubby hindlimbs, low quadrupedal stance",
+        "long forelimbs with curved claws for hooking fish",
+        "dense bone for diving ballast, semi-aquatic body",
     ],
 
-    recommended_stylize=(50, 100, 200),
+    bias_corrections=[
+        "semi-aquatic paddle-tailed swimmer NOT bipedal T-rex-like",
+        "short stubby hindlimbs NOT long bipedal legs",
+        "deep paddle tail fin NOT thick muscular tail",
+        "narrow crocodile snout NOT broad theropod skull",
+    ],
+
+    coloration_phrase="dark grey-brown crocodile-like dorsal, pale underbelly, drab piscivore palette",
+
+    scale_anchor="15 meters long, 7-tonne semi-aquatic predator",
+
+    recommended_stylize=(50, 75, 150),
 
     known_failures=[
         "crocodilian body — 'crocodilian' triggers crocodile rendering; use 'crocodile-like snout' only",

@@ -73,15 +73,26 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
-        "staggered diamond dorsal plates alternating left-right",
-        "four tail spikes thagomizer",
-        "absurdly tiny head held low",
-        "arched back peaking over hips",
+        "staggered diamond dorsal plates alternating left-right NOT paired",
+        "four tail spikes thagomizer at tip",
+        "absurdly tiny head held low to ground",
+        "arched back peaking high over hips",
         "pebbly scales with embedded osteoderms",
         "bus-sized quadruped sloping forward",
     ],
 
-    recommended_stylize=(75, 125, 250),
+    bias_corrections=[
+        "alternating staggered dorsal plates NOT paired symmetric",
+        "exactly four tail spikes NOT cluster of many",
+        "tiny low-slung head NOT proportional skull",
+        "arched back highest at hips NOT level spine",
+    ],
+
+    coloration_phrase="drab grey-brown body, possibly flushed plates for display, naturalistic palette",
+
+    scale_anchor="9 meters long, 5-tonne plated quadruped",
+
+    recommended_stylize=(50, 75, 150),
 
     known_failures=[
         "paired symmetrical plates — plates alternate LEFT-RIGHT, not paired side-by-side",

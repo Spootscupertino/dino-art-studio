@@ -135,6 +135,37 @@ class SpeciesAnatomy:
     # notes and to actively avoid these terms in prompt assembly.
     known_failures: list[str] = field(default_factory=list)
 
+    # ── Pop-culture bias corrections (Session 22) ────────────────────
+    # MJ's training data is dominated by Jurassic Park / Walking with
+    # Dinosaurs / generic dragon imagery. These corrections are punchy
+    # "X NOT Y" phrases injected as the FIRST tokens of the prompt to
+    # actively override MJ's pop-culture defaults before it commits to
+    # a composition. Each phrase should be 4-10 words, contrast-form.
+    # Examples:
+    #   "two-fingered hands NOT three-fingered"
+    #   "horizontal tail NOT dragging on ground"
+    #   "turkey-sized NOT human-sized monster"
+    # Keep to 2-4 highest-leverage corrections per species — more dilutes.
+    bias_corrections: list[str] = field(default_factory=list)
+
+    # ── Coloration phrase (Session 22) ───────────────────────────────
+    # ONE tight palette line for direct prompt injection. The detailed
+    # ColorationEvidence dataclass is the scientific reference; this is
+    # the CLIP-optimized distillation. Should be ~40-80 chars, drab/
+    # naturalistic, anti-rainbow. MJ defaults to dramatic saturated
+    # palettes unless told otherwise.
+    # Example: "earth-toned olive-brown dorsal, tawny underbelly, drab"
+    coloration_phrase: str = ""
+
+    # ── Scale anchor (Session 22) ────────────────────────────────────
+    # ONE tight scale phrase that gives MJ a concrete size reference.
+    # Should be ~20-40 chars. Use measurements + comparison if useful.
+    # Examples:
+    #   "12 meters long, 4m at hip, 8 tonne predator"
+    #   "turkey-sized, 50cm hip height, 15kg"
+    # Critical for size_class (massive/small/large) to actually land.
+    scale_anchor: str = ""
+
 
 # ── Prompt builders ──────────────────────────────────────────────────
 

@@ -69,15 +69,26 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
-        "keeled overlapping snake-like scales",
-        "rounded conical snout with loose jaw hinge",
-        "deep crescent tail fluke",
-        "four short paddle flippers",
-        "conical recurved gripping teeth",
-        "13m elongated barrel-bodied marine lizard",
+        "four short paddle flippers with defined digit structure",
+        "deep crescent tail fluke for thrust propulsion",
+        "conical recurved gripping teeth in loose jaw hinge",
+        "keeled overlapping snake-like scales across body",
+        "rounded conical snout, palatal pterygoid teeth visible",
+        "elongated barrel-bodied marine lizard",
     ],
 
-    recommended_stylize=(75, 125, 250),
+    bias_corrections=[
+        "crescent tail fluke NOT straight lizard tail",
+        "four paddle flippers NOT fish fins",
+        "snake-like scaled body NOT smooth dolphin skin",
+        "loose-hinged jaw NOT fixed crocodile jaw",
+    ],
+
+    coloration_phrase="dark countershaded dorsal, pale underbelly, killer-whale-like marine palette",
+
+    scale_anchor="13 meters long, 5-tonne apex marine lizard",
+
+    recommended_stylize=(50, 75, 150),
 
     known_failures=[
         "crocodile head — MJ renders crocodilian snout; Mosasaurus has a rounded monitor-lizard-like snout",

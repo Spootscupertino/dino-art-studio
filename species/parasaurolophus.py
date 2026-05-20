@@ -75,15 +75,26 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
-        "long backward-sweeping hollow tubular crest",
-        "broad flat duck-billed beak",
-        "pebbly uniform polygonal scales",
-        "robust hadrosaur body deep tail",
-        "facultative biped browsing on all fours",
-        "9.5m long herd animal",
+        "long backward-sweeping hollow tubular cranial crest",
+        "broad flat duck-billed beak with no front teeth",
+        "pebbly uniform polygonal scales across body",
+        "robust hadrosaur body with deep muscular tail",
+        "facultative biped, browses on all fours",
+        "leaf-shaped batteries of grinding cheek teeth",
     ],
 
-    recommended_stylize=(75, 125, 250),
+    bias_corrections=[
+        "hollow tubular crest NOT solid spike",
+        "duck-billed beak NOT lizard mouth",
+        "polygonal scales NOT smooth skin",
+        "deep muscular tail NOT thin whip tail",
+    ],
+
+    coloration_phrase="drab tawny-brown body with possibly patterned crest, hadrosaur naturalistic palette",
+
+    scale_anchor="9.5 meters long, 3-tonne herd hadrosaur",
+
+    recommended_stylize=(50, 75, 150),
 
     known_failures=[
         "upward crest — crest sweeps BACKWARD over neck, not pointing upward",

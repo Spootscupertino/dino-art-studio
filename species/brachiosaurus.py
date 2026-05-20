@@ -71,15 +71,26 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
-        "giraffe-proportioned sauropod forequarters higher than rear",
-        "extremely long steep-angled neck",
-        "arched nasal crest above eyes",
-        "columnar elephant-like legs",
-        "small spatulate-toothed head",
-        "22m long 56-tonne giant",
+        "forequarters higher than rear, giraffe-proportioned sauropod",
+        "extremely long steep-angled neck held high",
+        "arched bony nasal crest above the eyes",
+        "columnar elephant-like legs supporting body",
+        "small spatulate-toothed head at neck tip",
+        "long counterbalancing tail held horizontal",
     ],
 
-    recommended_stylize=(100, 175, 400),
+    bias_corrections=[
+        "forequarters higher than rear NOT level-backed sauropod",
+        "arched nasal crest above eyes NOT smooth head",
+        "columnar legs NOT bent-elbow theropod stance",
+        "thick elephant skin NOT dragon scales",
+    ],
+
+    coloration_phrase="drab grey-brown elephant-like hide, naturalistic giant herbivore palette",
+
+    scale_anchor="22 meters long, 13m tall, 56-tonne titanosauriform giant",
+
+    recommended_stylize=(75, 100, 200),
 
     known_failures=[
         "level back — forequarters must be HIGHER than hindquarters (giraffe proportions)",

@@ -75,15 +75,26 @@ ANATOMY = SpeciesAnatomy(
     ],
 
     mj_shorthand=[
-        "fully feathered turkey-sized raptor",
-        "sickle claw on raised second toe",
-        "long narrow feathered snout",
-        "feathered wing-like arms folded at rest",
-        "long rigid bony-rod tail",
-        "desert-camouflage plumage",
+        "sickle claw on raised second toe held off ground",
+        "feathered wing-like arms folded inward at rest, three clawed fingers",
+        "long narrow feathered snout, small serrated teeth",
+        "fully feathered body with pennaceous wing feathers",
+        "long rigid bony-rod tail held stiff",
+        "low-slung digitigrade biped",
     ],
 
-    recommended_stylize=(50, 100, 175),
+    bias_corrections=[
+        "turkey-sized NOT human-sized monster",
+        "fully feathered NOT scaly reptilian",
+        "sickle claw raised off ground NOT dragging",
+        "palms inward NOT pronated downward",
+    ],
+
+    coloration_phrase="tawny sandy desert plumage with disruptive dark patterning, drab ground-bird palette",
+
+    scale_anchor="2 meters long, 50cm hip height, 15kg turkey-sized",
+
+    recommended_stylize=(50, 75, 150),
 
     known_failures=[
         "scaly Velociraptor — MJ defaults to Jurassic Park scaly version; must specify feathered",

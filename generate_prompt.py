@@ -1359,14 +1359,14 @@ MOUTH_TEETH_HERBIVORE = (
 # "fully aquatic, body partially submerged" on canvas/portrait/environmental
 # modes. Surface-state modes (`shoreline`, `surface_break`) override below.
 HABITAT_INTERACTION = {
-    "terrestrial": (
-        "feet fully weight-bearing, individual toe pads compressing into soil, "
-        "claws on each toe clearly visible, track impressions left behind animal, "
-        "dust drifting at footfall, ground compression around foot edges"
-    ),
+    # Session 22: terrestrial block trimmed from 6 phrases to 1. Previous
+    # version duplicated shorthand[0] claw/foot language and pulled MJ
+    # toward feet-focused framing. One phrase preserves grounding without
+    # eating the attention budget.
+    "terrestrial": "feet planted on ground, weight visible in stance",
     "marine":      "fully submerged",
     "aerial":      "body suspended in open sky",
-    "arthropod":   "massive body weight pressing into ground",
+    "arthropod":   "body weight pressing into ground",
     "plant":       "rooted in soil",
 }
 
@@ -2879,6 +2879,154 @@ def _estimate_clip_tokens(text: str) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Lean prompt — anatomy-first, no camera/mood/condition complexity
+# ---------------------------------------------------------------------------
+
+def _lean_naturalism(habitat: str, anatomy) -> str:
+    """Pick a naturalism anchor that matches the species' actual integument.
+
+    Avoids the bug of putting "scales catching sunlight" on a feathered raptor
+    or "feathers catching wind" on a pycnofiber-covered pterosaur.
+    """
+    if habitat == "plant":
+        return "living plant tissue in natural ecosystem"
+    if habitat == "arthropod":
+        return "chitin plates catching light, living wild arthropod"
+    if habitat == "marine":
+        return "wet skin catching light, living wild animal"
+    if habitat == "aerial":
+        # Pterosaurs have pycnofibers, not feathers — Sordes confirmed 1971
+        return "pycnofiber fuzz catching wind, living wild pterosaur"
+
+    # Terrestrial — derive from integument
+    cov = ""
+    if anatomy and anatomy.integument:
+        cov = (anatomy.integument.primary_covering or "").lower()
+    if "feather" in cov and "predominantly scaly" not in cov:
+        return "feathers catching sunlight, living wild animal"
+    if "filament" in cov and "scal" not in cov:
+        return "filaments catching sunlight, living wild animal"
+    if "armor" in cov or "osteoderm" in cov:
+        return "armored hide catching light, living wild animal"
+    return "individual scales catching sunlight, living wild animal"
+
+
+def make_lean_prompt(
+    species: dict,
+    anatomy,           # SpeciesAnatomy or None
+    habitat: str,
+    mj_style: str = "raw",
+    stylize: int = 100,
+    chaos: int = 0,
+    quality: float = 1.0,
+) -> str:
+    """Anatomy-first prompt with explicit pop-culture bias corrections.
+
+    Token order (priority weighted — MJ weights early tokens most heavily):
+        1. Bias corrections     ("two-fingered NOT three-fingered")
+        2. Problem anatomy      (claws/teeth/flippers — shorthand[0])
+        3. Species + scale      ("12m Tyrannosaurus rex")
+        4. Body anatomy         (shorthand[1-3])
+        5. Coloration           (drab naturalistic palette)
+        6. Behavior             (one phrase)
+        7. Environment          (first phrase only)
+        8. Naturalism anchor    (living animal in wild)
+
+    Hard cap: ~70 words prose. Every token competes for MJ attention budget.
+    """
+    parts = []
+
+    # ── 1. BIAS CORRECTIONS — first tokens fight MJ's pop-culture defaults ──
+    # Cap at 4. Beyond that, dilution outweighs the signal. Per-species lists
+    # should be ordered by leverage (most critical first).
+    if anatomy and anatomy.bias_corrections:
+        parts.extend(anatomy.bias_corrections[:4])
+
+    # ── 2. PROBLEM ANATOMY — the feature MJ most often gets wrong ───────────
+    if anatomy and anatomy.mj_shorthand:
+        sh = anatomy.mj_shorthand
+        extremity = sh[0]
+        EXTREMITY_KW = ("claw", "flipper", "arm", "sickle", "talon", "wing", "fin", "teeth", "tooth", "beak")
+        if any(kw in extremity.lower() for kw in EXTREMITY_KW):
+            parts.append(f"{extremity}, sharply defined")
+        else:
+            parts.append(extremity)
+
+    # ── 3. SPECIES + SCALE ANCHOR ────────────────────────────────────────────
+    species_token = species["name"]
+    if anatomy and anatomy.scale_anchor:
+        species_token = f"{species['name']}, {anatomy.scale_anchor}"
+    parts.append(species_token)
+
+    # ── 4. BODY ANATOMY (shorthand[1:4]) ─────────────────────────────────────
+    if anatomy and anatomy.mj_shorthand:
+        parts.extend(anatomy.mj_shorthand[1:4])
+
+    # ── 5. COLORATION — drab naturalistic palette, anti-rainbow ─────────────
+    if anatomy and anatomy.coloration_phrase:
+        parts.append(anatomy.coloration_phrase)
+
+    # ── 6. BEHAVIOR — one phrase, diet/habitat-appropriate ──────────────────
+    diet = species["diet"] or ""
+    if habitat == "marine":
+        behavior = "cruising"
+    elif habitat == "aerial":
+        behavior = "gliding, wings extended"
+    elif habitat == "plant":
+        behavior = "growing in natural habitat"
+    elif habitat == "arthropod":
+        behavior = "alert, on natural substrate"
+    else:
+        DIET_BEHAVIOR = {
+            "Carnivore":     "standing alert in natural habitat",
+            "Herbivore":     "grazing in natural habitat",
+            "Piscivore":     "hunting at water edge",
+            "Omnivore":      "foraging in natural habitat",
+            "Filter feeder": "cruising open water",
+        }
+        behavior = DIET_BEHAVIOR.get(diet, "in natural habitat")
+    parts.append(behavior)
+
+    # ── 7. ENVIRONMENT — first phrase only ──────────────────────────────────
+    period = species["period"] or "Other"
+    if habitat in ("marine", "aerial"):
+        env_key = f"{habitat}_{period}"
+        env_full = ENVIRONMENTS.get(env_key, ENVIRONMENTS.get(f"{habitat}_Other", ENVIRONMENTS["Other"]))
+    else:
+        env_full = ENVIRONMENTS.get(period, ENVIRONMENTS["Other"])
+    parts.append(env_full.split(", ")[0])
+
+    # ── 8. NATURALISM ANCHOR — integument-aware, no "scales" on feathered species ──
+    naturalism = _lean_naturalism(habitat, anatomy)
+    parts.append(naturalism)
+
+    # Deduplicate exact repeated clauses (rare but possible if bias_corrections
+    # overlap with shorthand wording)
+    seen, deduped = set(), []
+    for p in parts:
+        if not p:
+            continue
+        key = p.strip().lower()
+        if key not in seen:
+            seen.add(key)
+            deduped.append(p)
+    prose = ", ".join(deduped)
+
+    # ── FLAGS ────────────────────────────────────────────────────────────────
+    neg = build_negative_prompt(habitat)
+    if anatomy:
+        anatomy_neg = build_anatomy_negative(anatomy)
+        if anatomy_neg:
+            neg = neg + ", " + anatomy_neg
+
+    flags = f"--no {neg} --style {mj_style} --stylize {stylize} --q {quality:g}"
+    if chaos > 0:
+        flags += f" --chaos {chaos}"
+
+    return f"{prose} {flags}"
+
+
+# ---------------------------------------------------------------------------
 # Prompt assembly
 # ---------------------------------------------------------------------------
 
@@ -2985,10 +3133,30 @@ def assemble_prompt(
         if anatomy_text:
             subject_parts.append(anatomy_text)
 
-        # ── T-rex Signature Features ──────────────────────────────────────────
-        # Emphasized claws + detailed teeth are non-negotiable T-rex identity
-        if species["name"] == "Tyrannosaurus rex":
-            subject_parts.append(build_trex_anatomy_addon())
+        # Session 22: T-rex signature addon removed — duplicates shorthand[0:2]
+        # (claws and teeth are already the first two anatomy phrases). The
+        # bias_corrections field on the anatomy module now carries the
+        # explicit "two-fingered NOT three-fingered" leverage instead.
+
+        # ── BIAS CORRECTIONS — fight MJ's pop-culture defaults ──────────────
+        # Session 22: inject explicit "X NOT Y" corrections that contradict
+        # MJ's training-data assumptions. These get priority placement at
+        # the START of subject_parts so MJ reads them first.
+        if anatomy.bias_corrections and not wide_mode and not is_group:
+            # Cap at 3 in full mode — full mode has more context-setting
+            # tokens after this so we can't afford 4 corrections like lean.
+            corrections = anatomy.bias_corrections[:3]
+            # Prepend before the species name + anatomy block so MJ commits
+            # to the corrections before defaulting to the pop-culture form.
+            subject_parts = corrections + subject_parts
+
+        # ── SCALE ANCHOR — concrete size reference ──────────────────────────
+        if anatomy.scale_anchor and not wide_mode and not is_group:
+            subject_parts.append(anatomy.scale_anchor)
+
+        # ── COLORATION — drab naturalistic palette, anti-rainbow ────────────
+        if anatomy.coloration_phrase and not wide_mode and not is_group:
+            subject_parts.append(anatomy.coloration_phrase)
 
         # ── Add LLaVA anatomy analysis from winning images ──────────────────
         # This reinforces what the anatomy module said with real-world examples
@@ -3048,20 +3216,9 @@ def assemble_prompt(
         pass  # anatomy module handles wide mode detail level
     diet = species["diet"] or ""
 
-    # ── EXTREMITY + JAW EMPHASIS ────────────────────────────────────────────
-    # User priority: hands, feet, toes, claws, jaw line, teeth, saliva, breath
-    # are the make-or-break details for predator realism. Inject a dedicated
-    # emphasis line for terrestrial carnivores in close/mid framing so MJ
-    # spends attention budget on the parts that win or lose the image.
-    diet_for_emphasis = species["diet"] or ""
-    if (not wide_mode and not is_group
-            and habitat == "terrestrial"
-            and diet_for_emphasis in ("Carnivore", "Piscivore")):
-        subject_parts.append(
-            "claws on hands and feet sharply defined, individual toe pads visible, "
-            "jaw line sharply etched, teeth tip detail crisp, "
-            "saliva strands between jaws, breath condensation at nostrils"
-        )
+    # Session 22: Extremity emphasis block removed — duplicates shorthand[0]
+    # (which is now ordered to be the extremity feature first: claws, sickle
+    # claw, flippers). Bias corrections carry the "sharply defined" leverage.
 
     # Behavior — FIRST PHRASE ONLY (Session 10). Action verbs were the main
     # source of "narrative clutter" the user flagged: "jaw working on prey,
@@ -3084,19 +3241,12 @@ def assemble_prompt(
     # and was the single biggest source of redundant action language. Mood is
     # still selected (drives context-reactive suggestions) and saved as a tag.
 
-    # Session 19: Living-animal naturalism phrase — extracted from user's reptile
-    # reference photos. Describes the visual QUALITIES of real wildlife photography
-    # (specular scale highlights, warm directional light, organic imperfection)
-    # rather than naming cameras/magazines which cause staged specimen bias.
-    # Only injected for close/mid modes where surface detail is resolvable.
+    # Session 19/22: Living-animal naturalism phrase. Routed through
+    # _lean_naturalism() so feathered species get "feathers catching sunlight"
+    # and pterosaurs get "pycnofiber fuzz catching wind" instead of the
+    # default "scales catching sunlight" — which was wrong for ~10 species.
     if not wide_mode and not is_group and habitat not in ("plant",):
-        if habitat == "arthropod":
-            naturalism = "individual chitin plates catching light, organic imperfection, living animal"
-        elif habitat == "marine":
-            naturalism = "wet skin catching light, water particles, living animal"
-        else:
-            naturalism = "individual scales catching sunlight, warm natural light, living animal"
-        subject_parts.append(naturalism)
+        subject_parts.append(_lean_naturalism(habitat, anatomy))
 
     # Session 11: style_param["value"] and HABITAT_REALISM are NOT injected
     # into the prose. The DB-stored style rows contain the full realism stack
@@ -3142,12 +3292,10 @@ def assemble_prompt(
             and (species["diet"] or "") in ("Carnivore", "Piscivore", "Herbivore")
         )
         if _is_large_terrestrial and behavior_param["name"] in _movement_behaviors:
-            interaction = (
-                "heavy footfall impact on damp soil, dust puffing from each step, "
-                "individual toe-pad impressions clearly visible behind animal, "
-                "claws scoring lines into soil at each step, "
-                "displaced earth around toe impressions, ground compression visible at footfall"
-            )
+            # Session 22: trimmed from 5 phrases to 2. The previous block ate
+            # ~20 words of attention budget that pulled MJ toward feet-focused
+            # framing even in portrait modes. Two phrases is enough signal.
+            interaction = "heavy footfall impact, claws scoring soil at each step"
         else:
             interaction = HABITAT_INTERACTION.get(habitat, HABITAT_INTERACTION["terrestrial"])
 
@@ -4355,6 +4503,123 @@ def get_winner_anatomy_hints(species: str) -> str:
     return ""
 
 
+def list_failures_main(species_name: str) -> None:
+    """Audit mode: show all bias-fighting data for a species before generating.
+
+    Useful for understanding what MJ will get wrong without explicit correction —
+    review this BEFORE a prompt run to know what to inspect in the output.
+    """
+    anatomy = get_anatomy(species_name)
+    if not anatomy:
+        print(f"\n{err('✗')} No anatomy module found for '{species_name}'")
+        print(f"  {dim('Check spelling — names are case-sensitive (Tyrannosaurus rex, Velociraptor, etc.)')}\n")
+        return
+
+    print(f"\n{C.BOLD_CYAN}{'═' * 70}{C.RESET}")
+    print(f"  {C.BOLD_CYAN}BIAS AUDIT — {species_name}{C.RESET}")
+    print(f"{C.BOLD_CYAN}{'═' * 70}{C.RESET}\n")
+
+    if anatomy.bias_corrections:
+        print(f"  {hdr('POP-CULTURE BIAS CORRECTIONS')} {dim('(injected as first prompt tokens)')}")
+        for c in anatomy.bias_corrections:
+            print(f"    {C.BOLD_GREEN}→{C.RESET}  {C.BRIGHT_WHITE}{c}{C.RESET}")
+        print()
+    else:
+        print(f"  {warn('⚠')}  {C.YELLOW}No bias_corrections defined — falling back to known_failures only{C.RESET}\n")
+
+    if anatomy.known_failures:
+        print(f"  {hdr('KNOWN MJ FAILURE MODES')} {dim('(audit your output for these)')}")
+        for f in anatomy.known_failures:
+            print(f"    {C.YELLOW}⚠{C.RESET}  {C.WHITE}{f}{C.RESET}")
+        print()
+
+    if anatomy.mj_shorthand:
+        print(f"  {hdr('MJ SHORTHAND')} {dim('(priority-ordered anatomy tokens)')}")
+        for i, sh in enumerate(anatomy.mj_shorthand):
+            marker = f"{C.BOLD_GREEN}[0]{C.RESET}" if i == 0 else f"{C.DIM}[{i}]{C.RESET}"
+            print(f"    {marker}  {C.WHITE}{sh}{C.RESET}")
+        print()
+
+    if anatomy.scale_anchor:
+        print(f"  {hdr('SCALE ANCHOR')}  {C.WHITE}{anatomy.scale_anchor}{C.RESET}\n")
+
+    if anatomy.coloration_phrase:
+        print(f"  {hdr('COLORATION')}    {C.WHITE}{anatomy.coloration_phrase}{C.RESET}\n")
+
+    if anatomy.recommended_stylize:
+        s_low, s_def, s_high = anatomy.recommended_stylize
+        print(f"  {hdr('STYLIZE RANGE')} "
+              f"{C.BOLD_GREEN}{s_low}{C.RESET} (accuracy) / "
+              f"{C.WHITE}{s_def}{C.RESET} (balanced) / "
+              f"{C.YELLOW}{s_high}{C.RESET} (artistic)\n")
+
+    print(f"{C.BOLD_CYAN}{'═' * 70}{C.RESET}")
+    print(f"  {dim(f'Generate a prompt for this species:  python generate_prompt.py --lean')}")
+    print(f"{C.BOLD_CYAN}{'═' * 70}{C.RESET}\n")
+
+
+def lean_main(args) -> None:
+    """Lean mode: habitat → species → anatomy-first prompt. No camera/mood/condition."""
+    conn = connect(args.db)
+
+    print(f"\n{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
+    print(f"  {C.BOLD_CYAN}LEAN MODE — anatomy-first prompt builder{C.RESET}")
+    print(f"  {C.DIM}No camera · No mood · No condition · MJ handles framing{C.RESET}")
+    print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}\n")
+
+    habitat = select_habitat()
+    species = pick_species(conn, habitat)
+    science = fetch_species_science(conn, species["id"])
+    notes   = fetch_research_notes(conn, species["id"])
+    display_science_brief(species, science, notes)
+
+    anatomy = get_anatomy(species["name"])
+
+    # Stylize: use low end of species range for maximum literal accuracy
+    if anatomy and anatomy.recommended_stylize:
+        s_low, s_default, s_high = anatomy.recommended_stylize
+        stylize = args.stylize if args.stylize is not None else s_low
+        print(f"  {ok('STYLIZE')} {C.WHITE}--stylize {stylize}{C.RESET}  "
+              f"{dim(f'(lean: low end of species range {s_low}–{s_high})')}\n")
+    else:
+        stylize = args.stylize if args.stylize is not None else 150
+
+    # Known failure modes reminder
+    if anatomy and anatomy.known_failures:
+        sp_name = species["name"]
+        print(f"  {hdr(f'KNOWN FAILURE MODES — {sp_name}')} (watch for these)")
+        for fail in anatomy.known_failures:
+            print(f"    {C.YELLOW}⚠{C.RESET}  {C.WHITE}{fail}{C.RESET}")
+        print()
+
+    prompt_text = make_lean_prompt(
+        species, anatomy, habitat,
+        mj_style=args.style,
+        stylize=stylize,
+        chaos=args.chaos,
+        quality=args.quality,
+    )
+
+    print(f"\n{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
+    print(f"  {C.BOLD_CYAN}LEAN PROMPT{C.RESET}")
+    print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}\n")
+    print(f"  {C.BRIGHT_WHITE}{prompt_text}{C.RESET}\n")
+    print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
+
+    # Fix prompts — still useful after getting a lean base image
+    feet_fix = make_feet_fix_prompt(species, args.style, stylize=min(stylize, 100))
+    mouth_fix = make_mouth_fix_prompt(species, args.style, stylize=min(stylize, 100))
+
+    if feet_fix:
+        print(f"\n  {hdr('EXTREMITY FIX — Vary Region over claws/flippers/wings')}")
+        print(f"  {C.BRIGHT_WHITE}{feet_fix}{C.RESET}\n")
+    if mouth_fix:
+        print(f"\n  {hdr('MOUTH/TEETH FIX — Vary Region over jaw area')}")
+        print(f"  {C.BRIGHT_WHITE}{mouth_fix}{C.RESET}\n")
+
+    print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}\n")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Interactively build a Midjourney dinosaur art prompt."
@@ -4368,6 +4633,8 @@ def main() -> None:
     parser.add_argument("--quality",  type=float, default=1.0,  choices=[0.25, 0.5, 1.0], help="--q (default: 1.0)")
     parser.add_argument("--sref",     type=str,   default=None, metavar="URL", help="Style reference image URL appended as --sref")
     parser.add_argument("--cref",     type=str,   default=None, metavar="URL", help="Character reference image URL appended as --cref")
+    parser.add_argument("--lean",     action="store_true", help="Anatomy-first lean mode: skip camera/mood/condition, let MJ handle framing (recommended for accuracy)")
+    parser.add_argument("--list-failures", type=str, default=None, metavar="SPECIES", help="Show known MJ failure modes and bias corrections for a species, then exit")
     # A/B testing (Session 17)
     parser.add_argument("--ab-test",    action="store_true", help="Enter A/B testing mode")
     parser.add_argument("--ab-score",   type=int,  default=None, metavar="ID", help="Score an existing A/B test by ID")
@@ -4375,6 +4642,16 @@ def main() -> None:
     # Winners library
     parser.add_argument("--use-winner", type=str, default=None, metavar="SPECIES", help="Load a previous high-scoring prompt for this species")
     args = parser.parse_args()
+
+    # Route to failure-mode audit if --list-failures is set
+    if args.list_failures:
+        list_failures_main(args.list_failures)
+        return
+
+    # Route to lean mode if --lean flag is set
+    if args.lean:
+        lean_main(args)
+        return
 
     # Route to A/B testing mode if any A/B flag is set
     if args.ab_test or args.ab_score or args.ab_history:
@@ -4438,19 +4715,22 @@ def main() -> None:
             args.chaos = int(optuna_params["chaos"])
             print(f"  {ok('AUTO-APPLIED')} {dim('[chaos]')} {C.WHITE}--chaos {args.chaos}{C.RESET}")
 
-    # --- Per-species stylize recommendation (Session 17) ---
+    # --- Per-species stylize recommendation (Session 17, updated Session 22) ---
+    # Session 22: Default biased toward accuracy. The "low" end of the species
+    # range is now the auto-applied value — higher stylize lets MJ drift into
+    # artistic interpretation, which is exactly what fights scientific accuracy.
+    # User can still override with --stylize. Loud display shows the range.
     anatomy = get_anatomy(species["name"])
     if anatomy and anatomy.recommended_stylize:
         s_low, s_default, s_high = anatomy.recommended_stylize
         if args.stylize is None:
-            # No user override — use species-recommended default
-            args.stylize = s_default
-            print(f"  {ok('AUTO-APPLIED')} {dim('[stylize]')} {C.WHITE}--stylize {s_default}{C.RESET}")
-            print(f"    {dim(f'Species range: {s_low} (low) / {s_default} (default) / {s_high} (high)')}")
+            args.stylize = s_low
+            print(f"  {ok('AUTO-APPLIED')} {dim('[stylize]')} {C.WHITE}--stylize {s_low}{C.RESET}  {dim('(accuracy bias)')}")
+            print(f"    {dim(f'Species range: {s_low} (accuracy) / {s_default} (balanced) / {s_high} (artistic)')}")
         else:
-            print(f"  {dim(f'User override: --stylize {args.stylize}  (species default: {s_default}, range {s_low}–{s_high})')}")
+            print(f"  {dim(f'User override: --stylize {args.stylize}  (species range: {s_low}/{s_default}/{s_high})')}")
     elif args.stylize is None:
-        args.stylize = 100  # global fallback
+        args.stylize = 75  # global fallback — lowered from 100 to bias accuracy
 
     # --- Display known failure modes (Session 17) ---
     if anatomy and anatomy.known_failures:
