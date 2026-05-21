@@ -88,9 +88,37 @@ def parse_args(argv):
     return positional, with_images, cam
 
 
+def _menu_pick(label: str, options: list, descriptions: list = None, allow_default: bool = True, default_label: str = None) -> str:
+    """Numbered-menu picker. Returns the chosen option (or None if user accepts default)."""
+    print(f"\n  Pick a {label}:", file=sys.stderr)
+    if allow_default and default_label:
+        print(f"     0  {default_label}", file=sys.stderr)
+    for i, opt in enumerate(options, start=1):
+        if descriptions:
+            print(f"    {i:>2}  {opt:12s} — {descriptions[i-1]}", file=sys.stderr)
+        else:
+            print(f"    {i:>2}  {opt}", file=sys.stderr)
+    try:
+        choice = input("\n  > ").strip()
+    except (EOFError, KeyboardInterrupt):
+        print(file=sys.stderr)
+        sys.exit(0)
+    print(file=sys.stderr)
+    if not choice or (allow_default and choice == "0"):
+        return None
+    try:
+        idx = int(choice)
+        if 1 <= idx <= len(options):
+            return options[idx - 1]
+    except ValueError:
+        if choice in options:
+            return choice
+    print(f"!! invalid choice {choice!r}", file=sys.stderr)
+    sys.exit(6)
+
+
 def main() -> int:
     positional, with_images, cam = parse_args(sys.argv[1:])
-    species = positional[0] if positional else "Tyrannosaurus rex"
 
     if cam == "list":
         print("Available --cam presets:", file=sys.stderr)
@@ -98,47 +126,46 @@ def main() -> int:
             print(f"  {name:10s}  {phrase}", file=sys.stderr)
         return 0
 
-    # Interactive picker: when no --cam given AND stderr is a real terminal,
-    # show a numbered menu and let the user pick. Skipped automatically in
-    # pipelines/scripts so non-interactive use still works.
-    if cam is None and sys.stderr.isatty() and sys.stdin.isatty():
-        print("\n  Pick a camera angle for this prompt:", file=sys.stderr)
-        print(f"     0  default broadside (full ref grip — composition locked)", file=sys.stderr)
-        names = list(CAMERAS.keys())
-        for i, name in enumerate(names, start=1):
-            phrase = CAMERAS[name]
-            short = phrase.split(",")[0]
-            print(f"    {i:>2}  {name:10s} — {short}", file=sys.stderr)
-        try:
-            choice = input("\n  > ").strip()
-        except (EOFError, KeyboardInterrupt):
-            print(file=sys.stderr)
-            return 0
-        if choice and choice != "0":
-            try:
-                idx = int(choice)
-                if 1 <= idx <= len(names):
-                    cam = names[idx - 1]
-                else:
-                    print(f"!! choice {choice!r} out of range (0–{len(names)})", file=sys.stderr)
-                    return 6
-            except ValueError:
-                if choice in CAMERAS:
-                    cam = choice
-                else:
-                    print(f"!! invalid choice {choice!r}", file=sys.stderr)
-                    return 6
-        print(file=sys.stderr)
-
-    if cam is not None and cam not in CAMERAS:
-        print(f"!! unknown --cam {cam!r}. Use --cam list to see options.", file=sys.stderr)
-        return 6
-
     locked_path  = ROOT / "refs" / "locked_refs.json"
     pool_path    = ROOT / "sref_urls.json"
     prompts_path = ROOT / "refs" / "locked_prompts.json"
 
     locked_all = json.loads(locked_path.read_text())
+    available_species = [s for s in locked_all.keys() if not s.startswith("_")]
+
+    interactive = sys.stderr.isatty() and sys.stdin.isatty()
+
+    # Species picker (skipped if user passed it on the command line, or non-interactive)
+    if positional:
+        species = positional[0]
+    elif interactive and len(available_species) >= 1:
+        picked = _menu_pick(
+            "species",
+            available_species,
+            allow_default=True,
+            default_label=f"{available_species[0]} (default)",
+        )
+        species = picked or available_species[0]
+    else:
+        species = available_species[0] if available_species else "Tyrannosaurus rex"
+
+    # Camera picker (skipped if user passed --cam, or non-interactive)
+    if cam is None and interactive:
+        cam_names = list(CAMERAS.keys())
+        cam_descs = [CAMERAS[n].split(",")[0] for n in cam_names]
+        picked = _menu_pick(
+            "camera angle",
+            cam_names,
+            descriptions=cam_descs,
+            allow_default=True,
+            default_label="default broadside (full ref grip — composition locked)",
+        )
+        cam = picked  # None if default
+
+    if cam is not None and cam not in CAMERAS:
+        print(f"!! unknown --cam {cam!r}. Use --cam list to see options.", file=sys.stderr)
+        return 6
+
     if species not in locked_all:
         print(f"!! no locked ref set for {species!r} in {locked_path}", file=sys.stderr)
         return 2
