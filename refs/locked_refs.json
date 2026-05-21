@@ -1,27 +1,38 @@
 {
-  "_doc": "Per-species locked --sref set. The prompt generator must use exactly these refs (in order) for the named species, ignoring the broader sref_urls.json pool. Refresh CDN tokens at session start via upload_gallery_refs.py.",
+  "_doc": "Per-species locked ref set. Each ref carries a `slot` that determines how print_locked_prompt.py routes it into the MJ prompt:\n  - image: prepended URL before the prose (subject/composition influence)\n  - sref:  appended under --sref (style/texture influence)\n  - oref:  appended under --oref (subject preservation, v7+, ONE max)\nThe `params` block sets weights (iw / sw / ow). Refresh CDN tokens at session start via upload_gallery_refs.py.",
   "Tyrannosaurus rex": {
     "count": 5,
+    "params": { "iw": 1.5, "sw": 200, "ow": 400 },
     "refs": [
       {
         "purpose": "full body proportions / side profile",
+        "slot": "image",
         "label": "gallery_best/paleoart/tyrannosaurus_wikimedia_paleo_art_side_profile.png"
       },
       {
-        "purpose": "interior mouth / teeth macro",
-        "label": "gallery_best/biomech_mouth/spootscupertino_A_cinematic_macro_shot_of_the_interior_mouth__9c1213c1-54c7-4b39-9a9a-049f4fc4fc52_2.png"
-      },
-      {
-        "purpose": "frontal skull / binocular eye anchor",
-        "label": "gallery_best/corrected_mj/spootscupertino_A_frontal_binocular_view_portrait_of_a_Tyrannos_45c56d6b-84a4-4cb8-88c7-881bbc89e443.png"
-      },
-      {
-        "purpose": "forelimb anatomy / two-finger anchor",
+        "purpose": "two-finger forelimb anchor (photoreal)",
+        "slot": "image",
         "label": "gallery_best/v5_forelimb_hand/tyrannosaurus_two_finger_arm_a.png"
       },
       {
-        "purpose": "hindfoot / claw close-up",
+        "purpose": "interior mouth / teeth macro (style)",
+        "slot": "sref",
+        "label": "gallery_best/biomech_mouth/spootscupertino_A_cinematic_macro_shot_of_the_interior_mouth__9c1213c1-54c7-4b39-9a9a-049f4fc4fc52_2.png"
+      },
+      {
+        "purpose": "frontal skull / binocular eye texture (style)",
+        "slot": "sref",
+        "label": "gallery_best/corrected_mj/spootscupertino_A_frontal_binocular_view_portrait_of_a_Tyrannos_45c56d6b-84a4-4cb8-88c7-881bbc89e443.png"
+      },
+      {
+        "purpose": "hindfoot / claw close-up (style)",
+        "slot": "sref",
         "label": "gallery_best/v5_hindfoot_claw/spootscupertino_Hyper-realistic_close-up_of_Tyrannosaurus_rex_9ffb8e4d-4f37-4c38-ab60-7584eb19c3b0_2.png"
+      },
+      {
+        "purpose": "whole T. rex subject preservation (omni)",
+        "slot": "oref",
+        "label": "gallery_best/paleoart/tyrannosaurus_wikimedia_paleo_art_side_profile.png"
       }
     ]
   }
