@@ -98,6 +98,38 @@ def main() -> int:
             print(f"  {name:10s}  {phrase}", file=sys.stderr)
         return 0
 
+    # Interactive picker: when no --cam given AND stderr is a real terminal,
+    # show a numbered menu and let the user pick. Skipped automatically in
+    # pipelines/scripts so non-interactive use still works.
+    if cam is None and sys.stderr.isatty() and sys.stdin.isatty():
+        print("\n  Pick a camera angle for this prompt:", file=sys.stderr)
+        print(f"     0  default broadside (full ref grip — composition locked)", file=sys.stderr)
+        names = list(CAMERAS.keys())
+        for i, name in enumerate(names, start=1):
+            phrase = CAMERAS[name]
+            short = phrase.split(",")[0]
+            print(f"    {i:>2}  {name:10s} — {short}", file=sys.stderr)
+        try:
+            choice = input("\n  > ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print(file=sys.stderr)
+            return 0
+        if choice and choice != "0":
+            try:
+                idx = int(choice)
+                if 1 <= idx <= len(names):
+                    cam = names[idx - 1]
+                else:
+                    print(f"!! choice {choice!r} out of range (0–{len(names)})", file=sys.stderr)
+                    return 6
+            except ValueError:
+                if choice in CAMERAS:
+                    cam = choice
+                else:
+                    print(f"!! invalid choice {choice!r}", file=sys.stderr)
+                    return 6
+        print(file=sys.stderr)
+
     if cam is not None and cam not in CAMERAS:
         print(f"!! unknown --cam {cam!r}. Use --cam list to see options.", file=sys.stderr)
         return 6
