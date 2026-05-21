@@ -10,9 +10,17 @@ alias history="python3 $DINO_DIR/unified_feedback.py --history"
 alias trends="python3 $DINO_DIR/unified_feedback.py --trends"
 alias generate="python3 $DINO_DIR/generate_prompt.py"
 
-# `prompt`        — print the locked T. rex MJ prompt (5 refs + locked params)
-# `prompt | pbcopy` — copy it straight to the clipboard
-# `prompt "Mosasaurus"` — once another species is added to refs/locked_refs.json
+# `prompt`                        — locked T. rex prompt (text only; drag refs in MJ web)
+# `prompt | pbcopy`               — copy straight to clipboard
+# `prompt --with-images`          — include image-prompt URLs inline (Discord workflow)
+# `prompt --cam wormseye`         — inject a camera angle; auto-relaxes composition refs
+# `prompt --cam list`             — show all camera presets
+# `prompt "Mosasaurus"`           — once species is added to refs/locked_refs.json
+# `prompt "Mosasaurus" --cam pov` — species + camera together
 prompt() {
-    python3 "$DINO_DIR/tools/print_locked_prompt.py" "${1:-Tyrannosaurus rex}"
+    if [ $# -eq 0 ]; then
+        python3 "$DINO_DIR/tools/print_locked_prompt.py" "Tyrannosaurus rex"
+    else
+        python3 "$DINO_DIR/tools/print_locked_prompt.py" "$@"
+    fi
 }
