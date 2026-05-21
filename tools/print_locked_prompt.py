@@ -11,9 +11,14 @@ Each ref carries a `slot` that routes it into the prompt:
 `params` in locked_refs.json sets --iw / --sw / --ow. The base prose lives in
 refs/locked_prompts.json and must already include --style / --stylize / --q etc.
 
+Default behavior emits TEXT ONLY (no leading image URLs) for MJ web, where
+image prompts must be drag-dropped from the saved panel into the prompt bar.
+Pass --with-images for the Discord workflow where pasted URLs auto-attach.
+
 Usage:
-    python3 tools/print_locked_prompt.py                       # defaults to Tyrannosaurus rex
+    python3 tools/print_locked_prompt.py                                 # text only (MJ web)
     python3 tools/print_locked_prompt.py "Tyrannosaurus rex"
+    python3 tools/print_locked_prompt.py --with-images                   # include image-prompt URLs (Discord)
     python3 tools/print_locked_prompt.py "Tyrannosaurus rex" | pbcopy
 
 Exits non-zero with a clear message if any locked label is missing from the
@@ -43,7 +48,10 @@ DEFAULT_PROMPTS = {
 
 
 def main() -> int:
-    species = sys.argv[1] if len(sys.argv) > 1 else "Tyrannosaurus rex"
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    with_images = "--with-images" in flags
+    species = args[0] if args else "Tyrannosaurus rex"
 
     locked_path  = ROOT / "refs" / "locked_refs.json"
     pool_path    = ROOT / "sref_urls.json"
@@ -99,7 +107,7 @@ def main() -> int:
         return 3
 
     parts = []
-    if image_urls:
+    if with_images and image_urls:
         parts.append(" ".join(image_urls))
     parts.append(base)
     if sref_urls:
@@ -110,10 +118,19 @@ def main() -> int:
         parts.append(f"--oref {oref_urls[0]}")
         if "ow" in params:
             parts.append(f"--ow {params['ow']}")
-    if "iw" in params and image_urls:
+    if with_images and image_urls and "iw" in params:
         parts.append(f"--iw {params['iw']}")
 
     print(" ".join(parts))
+
+    if not with_images and image_urls:
+        print(file=sys.stderr)
+        print(f"# {len(image_urls)} image prompt(s) NOT included — drag these from MJ saved panel:",
+              file=sys.stderr)
+        for r in locked:
+            if r.get("slot", "image") == "image":
+                print(f"#   - {r['purpose']}: {Path(r['label']).name}", file=sys.stderr)
+        print("# (use --with-images to include URLs inline for Discord workflow)", file=sys.stderr)
     return 0
 
 
