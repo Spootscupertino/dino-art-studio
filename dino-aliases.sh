@@ -16,3 +16,13 @@ alias generate="python3 $DINO_DIR/generate_prompt.py"
 prompt() {
     python3 "$DINO_DIR/tools/print_locked_prompt.py" "${1:-Tyrannosaurus rex}"
 }
+
+# `refs`        — open the full 1,065-image reference library in Finder (all species)
+# `refs trex`   — open the curated T. rex refs (organized by body part)
+refs() {
+    if [ "$1" = "trex" ]; then
+        open "$DINO_DIR/assets/gallery/flux/training_refs/tyrannosaurus"
+    else
+        open "$DINO_DIR/reference_images"
+    fi
+}
