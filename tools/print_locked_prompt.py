@@ -15,16 +15,10 @@ Default behavior emits TEXT ONLY (no leading image URLs) for MJ web, where
 image prompts must be drag-dropped from the saved panel into the prompt bar.
 Pass --with-images for the Discord workflow where pasted URLs auto-attach.
 
-Pass --cam <angle> to inject a camera/perspective phrase AND auto-suppress
-composition-locking refs (image prompts + --oref), so the camera text actually
-gets room to work. Style refs (--sref) stay on for texture/color continuity.
-
 Usage:
     python3 tools/print_locked_prompt.py                                 # text only (MJ web)
     python3 tools/print_locked_prompt.py "Tyrannosaurus rex"
     python3 tools/print_locked_prompt.py --with-images                   # include image-prompt URLs (Discord)
-    python3 tools/print_locked_prompt.py --cam wormseye                  # low-angle hero, refs relaxed
-    python3 tools/print_locked_prompt.py --cam list                      # show all camera presets
     python3 tools/print_locked_prompt.py "Tyrannosaurus rex" | pbcopy
 
 Exits non-zero with a clear message if any locked label is missing from the
@@ -37,22 +31,6 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-
-# Camera presets. Each phrase is injected at the front of the base prompt and
-# triggers suppression of composition-locking refs (image-prompt + oref).
-CAMERAS = {
-    "wormseye":  "extreme low angle worm's-eye view from ground level, dinosaur towering massive overhead, sky visible behind silhouette, dramatic upward perspective, 24mm lens",
-    "hero":      "low hero shot, camera at knee height tilted up, dinosaur looming over viewer, 35mm lens, cinematic",
-    "drone":     "aerial drone overhead top-down shot, dinosaur small in vast landscape, 24mm lens, scale dominates",
-    "dutch":     "dutch tilt angle, off-kilter horizon, kinetic unease, 50mm lens",
-    "tele":      "tight telephoto compression, 600mm lens, flattened perspective, subject isolated against compressed bokeh background",
-    "wide":      "ultra-wide establishing shot, 14mm lens, dinosaur small in frame, vast landscape dominates, cinematic scale",
-    "pov":       "first-person POV from prey eye-level, dinosaur charging head-on toward camera, motion blur at edges",
-    "tracking":  "panning tracking shot, sharp dinosaur mid-stride, motion-blurred background streaks, 200mm pan",
-    "back":      "rear view from directly behind dinosaur, tail and back of head visible, looking out at environment beyond",
-    "macro":     "extreme macro close-up, single anatomical surface fills frame, texture dominant, 100mm macro lens, razor-thin depth of field",
-    "profile":   "classic broadside side profile, full body lateral view, magazine cover composition",
-}
 
 DEFAULT_PROMPTS = {
     "Tyrannosaurus rex": (
@@ -69,103 +47,17 @@ DEFAULT_PROMPTS = {
 }
 
 
-def parse_args(argv):
-    """Tiny manual parser. Supports positional species, --with-images, --cam <name>."""
-    positional, with_images, cam = [], False, None
-    it = iter(argv)
-    for tok in it:
-        if tok == "--with-images":
-            with_images = True
-        elif tok == "--cam":
-            cam = next(it, None)
-        elif tok.startswith("--cam="):
-            cam = tok.split("=", 1)[1]
-        elif tok.startswith("--"):
-            print(f"!! unknown flag {tok!r}", file=sys.stderr)
-            sys.exit(2)
-        else:
-            positional.append(tok)
-    return positional, with_images, cam
-
-
-def _menu_pick(label: str, options: list, descriptions: list = None, allow_default: bool = True, default_label: str = None) -> str:
-    """Numbered-menu picker. Returns the chosen option (or None if user accepts default)."""
-    print(f"\n  Pick a {label}:", file=sys.stderr)
-    if allow_default and default_label:
-        print(f"     0  {default_label}", file=sys.stderr)
-    for i, opt in enumerate(options, start=1):
-        if descriptions:
-            print(f"    {i:>2}  {opt:12s} — {descriptions[i-1]}", file=sys.stderr)
-        else:
-            print(f"    {i:>2}  {opt}", file=sys.stderr)
-    try:
-        choice = input("\n  > ").strip()
-    except (EOFError, KeyboardInterrupt):
-        print(file=sys.stderr)
-        sys.exit(0)
-    print(file=sys.stderr)
-    if not choice or (allow_default and choice == "0"):
-        return None
-    try:
-        idx = int(choice)
-        if 1 <= idx <= len(options):
-            return options[idx - 1]
-    except ValueError:
-        if choice in options:
-            return choice
-    print(f"!! invalid choice {choice!r}", file=sys.stderr)
-    sys.exit(6)
-
-
 def main() -> int:
-    positional, with_images, cam = parse_args(sys.argv[1:])
-
-    if cam == "list":
-        print("Available --cam presets:", file=sys.stderr)
-        for name, phrase in CAMERAS.items():
-            print(f"  {name:10s}  {phrase}", file=sys.stderr)
-        return 0
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    with_images = "--with-images" in flags
+    species = args[0] if args else "Tyrannosaurus rex"
 
     locked_path  = ROOT / "refs" / "locked_refs.json"
     pool_path    = ROOT / "sref_urls.json"
     prompts_path = ROOT / "refs" / "locked_prompts.json"
 
     locked_all = json.loads(locked_path.read_text())
-    available_species = [s for s in locked_all.keys() if not s.startswith("_")]
-
-    interactive = sys.stderr.isatty() and sys.stdin.isatty()
-
-    # Species picker (skipped if user passed it on the command line, or non-interactive)
-    if positional:
-        species = positional[0]
-    elif interactive and len(available_species) >= 1:
-        picked = _menu_pick(
-            "species",
-            available_species,
-            allow_default=True,
-            default_label=f"{available_species[0]} (default)",
-        )
-        species = picked or available_species[0]
-    else:
-        species = available_species[0] if available_species else "Tyrannosaurus rex"
-
-    # Camera picker (skipped if user passed --cam, or non-interactive)
-    if cam is None and interactive:
-        cam_names = list(CAMERAS.keys())
-        cam_descs = [CAMERAS[n].split(",")[0] for n in cam_names]
-        picked = _menu_pick(
-            "camera angle",
-            cam_names,
-            descriptions=cam_descs,
-            allow_default=True,
-            default_label="default broadside (full ref grip — composition locked)",
-        )
-        cam = picked  # None if default
-
-    if cam is not None and cam not in CAMERAS:
-        print(f"!! unknown --cam {cam!r}. Use --cam list to see options.", file=sys.stderr)
-        return 6
-
     if species not in locked_all:
         print(f"!! no locked ref set for {species!r} in {locked_path}", file=sys.stderr)
         return 2
@@ -177,20 +69,13 @@ def main() -> int:
     pool = json.loads(pool_path.read_text()).get(species, [])
     by_label = {e["label"]: e["url"] for e in pool}
 
-    # When --cam is set (and isn't "profile"), suppress composition-locking refs
-    # so the camera phrase actually has room to influence framing.
-    suppress_composition = cam is not None and cam != "profile"
-
     image_urls, sref_urls, oref_urls = [], [], []
-    missing, suppressed = [], []
+    missing = []
     for r in locked:
         slot = r.get("slot", "image")
         url  = by_label.get(r["label"])
         if not url:
             missing.append(r["label"])
-            continue
-        if suppress_composition and slot in ("image", "oref"):
-            suppressed.append(r)
             continue
         if slot == "image":
             image_urls.append(url)
@@ -221,10 +106,6 @@ def main() -> int:
               f"or DEFAULT_PROMPTS in {Path(__file__).name})", file=sys.stderr)
         return 3
 
-    # Inject camera phrase at the very front of the base prose.
-    if cam:
-        base = CAMERAS[cam] + ", " + base
-
     parts = []
     if with_images and image_urls:
         parts.append(" ".join(image_urls))
@@ -242,23 +123,14 @@ def main() -> int:
 
     print(" ".join(parts))
 
-    # Stderr help: drag-drop reminder + suppression notice.
-    notes = []
     if not with_images and image_urls:
-        notes.append(f"# {len(image_urls)} image prompt(s) NOT included — drag from MJ saved panel:")
-        for r in locked:
-            if r.get("slot", "image") == "image" and by_label.get(r["label"]) in image_urls:
-                notes.append(f"#   - {r['purpose']}: {Path(r['label']).name}")
-        notes.append("# (use --with-images to include URLs inline for Discord workflow)")
-    if suppressed:
-        notes.append(f"# --cam {cam}: suppressed {len(suppressed)} composition-locking ref(s):")
-        for r in suppressed:
-            notes.append(f"#   - [{r.get('slot')}] {r['purpose']}")
-        notes.append("# (style --sref refs kept for texture/color continuity)")
-    if notes:
         print(file=sys.stderr)
-        for line in notes:
-            print(line, file=sys.stderr)
+        print(f"# {len(image_urls)} image prompt(s) NOT included — drag these from MJ saved panel:",
+              file=sys.stderr)
+        for r in locked:
+            if r.get("slot", "image") == "image":
+                print(f"#   - {r['purpose']}: {Path(r['label']).name}", file=sys.stderr)
+        print("# (use --with-images to include URLs inline for Discord workflow)", file=sys.stderr)
     return 0
 
 

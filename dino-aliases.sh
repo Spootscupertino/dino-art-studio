@@ -10,20 +10,9 @@ alias history="python3 $DINO_DIR/unified_feedback.py --history"
 alias trends="python3 $DINO_DIR/unified_feedback.py --trends"
 alias generate="python3 $DINO_DIR/generate_prompt.py"
 
-# `prompt`                        — locked T. rex prompt (prints to terminal + auto-copies to clipboard)
-# `prompt --with-images`          — include image-prompt URLs inline (Discord workflow)
-# `prompt --cam wormseye`         — inject a camera angle; auto-relaxes composition refs
-# `prompt --cam list`             — show all camera presets
-# `prompt "Mosasaurus"`           — once species is added to refs/locked_refs.json
-# `prompt "Mosasaurus" --cam pov` — species + camera together
-# `pp`                            — short alias for `prompt`
+# `prompt`        — print the locked T. rex MJ prompt (5 refs + locked params)
+# `prompt | pbcopy` — copy it straight to the clipboard
+# `prompt "Mosasaurus"` — once another species is added to refs/locked_refs.json
 prompt() {
-    local args=("Tyrannosaurus rex")
-    if [ $# -gt 0 ]; then
-        args=("$@")
-    fi
-    python3 "$DINO_DIR/tools/print_locked_prompt.py" "${args[@]}" | tee >(pbcopy >/dev/null)
-    echo
-    echo "✓ copied to clipboard"
+    python3 "$DINO_DIR/tools/print_locked_prompt.py" "${1:-Tyrannosaurus rex}"
 }
-alias pp=prompt
