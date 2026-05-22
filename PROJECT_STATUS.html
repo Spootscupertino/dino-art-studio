@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jurassinkart — Project Status</title>
+<style>
+  :root{
+    --teal:#1ec8c8; --teal-deep:#0e8f9a; --blue:#2b6cff;
+    --blue-deep:#143a8c; --ink:#0a1626; --panel:#0f2138; --panel2:#13294a;
+    --line:#244168; --txt:#dbe9f7; --muted:#8fa8c6; --gold:#f4b740; --good:#34d399;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:radial-gradient(1200px 700px at 70% -10%,#16335c 0%,var(--ink) 55%);
+    color:var(--txt); line-height:1.5; padding:48px 24px; min-height:100vh;
+  }
+  .wrap{max-width:1100px;margin:0 auto}
+  header{text-align:center;margin-bottom:40px}
+  .kicker{letter-spacing:.32em;text-transform:uppercase;font-size:12px;color:var(--teal);font-weight:700}
+  h1{font-size:46px;font-weight:800;margin:8px 0 6px;
+     background:linear-gradient(90deg,var(--teal),#5ea0ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);font-size:16px}
+  .date{color:var(--muted);font-size:13px;margin-top:6px}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+        border-radius:16px;padding:22px 24px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  .card h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:14px;font-weight:700}
+  .col-12{grid-column:span 12} .col-8{grid-column:span 8} .col-6{grid-column:span 6}
+  .col-4{grid-column:span 4} .col-7{grid-column:span 7} .col-5{grid-column:span 5}
+  @media(max-width:820px){.col-8,.col-6,.col-4,.col-7,.col-5{grid-column:span 12}}
+  .win{display:flex;align-items:center;gap:14px}
+  .badge{background:rgba(52,211,153,.14);border:1px solid rgba(52,211,153,.4);color:var(--good);
+         font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  ul{list-style:none} li{padding:6px 0;display:flex;gap:10px;align-items:flex-start}
+  li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--teal);margin-top:8px;flex:none}
+  .bar{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+  .bar .row{display:grid;grid-template-columns:130px 1fr 48px;align-items:center;gap:10px;font-size:13px}
+  .track{height:11px;background:#0a1a30;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+  .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--teal-deep),var(--teal))}
+  .num{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+  .total{font-size:40px;font-weight:800;color:#fff} .total small{font-size:14px;color:var(--muted);font-weight:500}
+  .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:820px){.slots{grid-template-columns:1fr}}
+  .slot{border:1px solid var(--line);border-radius:14px;padding:16px;background:#0c1d34;position:relative;overflow:hidden}
+  .slot::before{content:"";position:absolute;inset:0 auto auto 0;width:100%;height:3px}
+  .slot.s1::before{background:var(--teal)} .slot.s2::before{background:#5ea0ff} .slot.s3::before{background:var(--gold)}
+  .slot .tag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .slot .flag{font-family:ui-monospace,Menlo,monospace;font-size:15px;font-weight:700;color:#fff;margin:4px 0 8px}
+  .slot .desc{font-size:13px;color:var(--txt)} .slot .feed{font-size:12px;color:var(--teal);margin-top:10px}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+  .step{background:#0c1d34;border:1px solid var(--line);border-radius:9px;padding:7px 11px;font-family:ui-monospace,Menlo,monospace}
+  .arrow{color:var(--teal);font-weight:700}
+  .next li::before{background:var(--gold)}
+  code{background:#0a1a30;border:1px solid var(--line);border-radius:6px;padding:2px 7px;font-size:13px;color:#bfe6ff}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:36px}
+  .strike{color:var(--muted);text-decoration:line-through;opacity:.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Jurassinkart · Generation Engine</div>
+    <h1>T. rex Is Dialed In</h1>
+    <div class="sub">Reference-driven Midjourney pipeline — anatomy locked, workflow simplified</div>
+    <div class="date">Status as of 2026-05-22 · Session 25</div>
+  </header>
+
+  <div class="grid">
+
+    <div class="card col-7">
+      <h2>The Win This Session</h2>
+      <div class="win" style="margin-bottom:10px">
+        <span class="badge">SOLVED</span>
+        <strong style="font-size:17px">Two-finger hands now hold reliably</strong>
+      </div>
+      <ul>
+        <li>Swapped the abstract bone-and-flesh diagram for a <strong>photoreal two-finger arm</strong> screenshot — MJ could finally read the finger count.</li>
+        <li>Moved refs from <strong>--sref (style only)</strong> to a <strong>3-slot distribution</strong> so they grip anatomy, not just palette.</li>
+        <li>Added a <strong>HAND FIX</strong> Vary-Region prompt to <code>generate_prompt.py</code> (didactyl for tyrannosaurids, tridactyl for other theropods).</li>
+        <li>Captured a <strong>hero frontal snarl</strong> shot — gallery-anchor candidate.</li>
+      </ul>
+    </div>
+
+    <div class="card col-5">
+      <h2>Reference Library</h2>
+      <div class="total">1,065 <small>licensed reference images</small></div>
+      <div style="font-size:12px;color:var(--muted);margin:4px 0 12px">in <code>reference_images/</code></div>
+      <div class="bar">
+        <div class="row"><span>paleoart</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="num">232</span></div>
+        <div class="row"><span>skeletal</span><div class="track"><div class="fill" style="width:99%"></div></div><span class="num">229</span></div>
+        <div class="row"><span>komodo</span><div class="track"><div class="fill" style="width:32%"></div></div><span class="num">74</span></div>
+        <div class="row"><span>crocodile</span><div class="track"><div class="fill" style="width:30%"></div></div><span class="num">70</span></div>
+        <div class="row"><span>marine</span><div class="track"><div class="fill" style="width:28%"></div></div><span class="num">65</span></div>
+        <div class="row"><span>+ 11 more</span><div class="track"><div class="fill" style="width:170%;max-width:100%"></div></div><span class="num">395</span></div>
+      </div>
+    </div>
+
+    <div class="card col-12">
+      <h2>The Strategy — Maximize All 3 MJ Reference Slots</h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px">Every species gets a curated triad. Each slot does a different job — stop overlapping them.</p>
+      <div class="slots">
+        <div class="slot s1">
+          <div class="tag">Slot 1 · Reference Image</div>
+          <div class="flag">drag-drop / image prompt</div>
+          <div class="desc"><strong>Subject & composition.</strong> What the animal is and how it's posed. 1–2 max — more = collage bleed.</div>
+          <div class="feed">FEED IT → best full-body paleoart side profile + a clean skeletal mount</div>
+        </div>
+        <div class="slot s2">
+          <div class="tag">Slot 2 · Style</div>
+          <div class="flag">--sref</div>
+          <div class="desc"><strong>Texture, palette, light.</strong> Skin feel, teeth color, claw sheen. Ignores pose — stack 3–4 freely.</div>
+          <div class="feed">FEED IT → komodo / crocodile hide, teeth & claw macros, eye close-ups</div>
+        </div>
+        <div class="slot s3">
+          <div class="tag">Slot 3 · Omni</div>
+          <div class="flag">--oref &nbsp;(ONE only)</div>
+          <div class="desc"><strong>Subject preservation.</strong> Locks the one canonical body plan. Must be photoreal — illustrations corrupt it.</div>
+          <div class="feed">FEED IT → the single best photoreal full-body restoration per species</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card col-7">
+      <h2>Workflow — Simplified</h2>
+      <div class="flow" style="margin-bottom:14px">
+        <span class="step">prompt</span><span class="arrow">→</span>
+        <span class="step">⌘V text into MJ web</span><span class="arrow">→</span>
+        <span class="step">drag refs from saved panel</span><span class="arrow">→</span>
+        <span class="step">generate</span>
+      </div>
+      <ul>
+        <li><strong>MJ saves uploaded refs</strong> — drag straight from the saved panel, no re-uploading.</li>
+        <li class="strike">Discord CDN upload dance — no longer required for image prompts</li>
+        <li><code>--sref</code> / <code>--oref</code> URLs still ride inside the text prompt (MJ parses those fine).</li>
+      </ul>
+    </div>
+
+    <div class="card col-5">
+      <h2>Next Up</h2>
+      <ul class="next">
+        <li>Curate the T. rex <strong>triad</strong> from the 1,065-image library (1 image · 3–4 sref · 1 oref).</li>
+        <li>Decide: keep Discord URLs for sref/oref, or migrate those to MJ-saved too.</li>
+        <li>Lock a <strong>second species</strong> (Triceratops? Mosasaurus?) using the same triad recipe.</li>
+        <li>Wire winning hero shots into the <strong>Printify → site</strong> pipeline.</li>
+      </ul>
+    </div>
+
+  </div>
+  <footer>Jurassinkart · jurassinkart.com · generated by Claude · main @ Session 25</footer>
+</div>
+</body>
+</html>
