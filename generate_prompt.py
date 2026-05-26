@@ -332,6 +332,14 @@ MARINE_MOOD_BY_LIGHTING = {
     "blue_hour":           ["dusk_descent",     "quiet_power",        "serene",            "ambush_still",       "resting_on_bottom"],
 }
 
+# Curated mood pool — clade-driven (Session 26). Mood is now the TOP of the
+# chain (lighting is handled by MJ + reference images, no longer a mood driver).
+# Tight ~10 set; diet reorders which lead. Behavior follows mood via *_BY_MOOD.
+MARINE_MOOD = [
+    "menacing", "hunting_focus", "ambush_still", "burst_acceleration", "eye_contact",
+    "surfacing_breath", "cruising_calm", "deep_patrol", "post_feed_drift", "curiosity_approach",
+]
+
 MARINE_BEHAVIOR_BY_MOOD = {
     "hunting_focus":      ["hunting_dive",      "jaw_snap_strike",    "chase_pursuit",     "feeding_underwater", "breaching_surface"],
     "ambush_still":       ["hovering_still",    "bottom_glide",       "resting_on_seafloor","slow_patrol",       "bubble_trail"],
@@ -423,14 +431,9 @@ MARINE_INVALID_COMBOS = [
     # Still behaviors ↔ active moods
     ("behavior", "hovering_still",       "mood",     "burst_acceleration","hovering still — contradicts burst acceleration"),
     ("behavior", "jaw_snap_strike",      "mood",     "post_feed_drift",   "jaw strike — contradicts post-feed passive drift"),
-    # Surface behaviors ↔ deep lighting
-    ("behavior", "breaching_surface",    "lighting", "deep_water_fade",   "breaching surface — deep fade light contradicts"),
-    ("behavior", "breaching_surface",    "lighting", "bioluminescent",    "breaching surface — bioluminescent is deep"),
-    ("behavior", "spy_hopping",          "lighting", "deep_water_fade",   "spy hop at surface — deep fade light contradicts"),
-    ("behavior", "spy_hopping",          "lighting", "bioluminescent",    "spy hop at surface — bioluminescent is deep"),
-    # Seafloor behaviors ↔ surface lighting
-    ("behavior", "resting_on_seafloor",  "lighting", "surface_dapple",   "on seafloor — surface dapple light contradicts"),
-    ("behavior", "deep_sinking",         "lighting", "surface_dapple",   "sinking deep — surface dapple light contradicts"),
+    # Session 26: lighting-keyed blocks removed — lighting is no longer a
+    # user-facing dimension, so blocking a behavior on a hidden lighting pick
+    # would grey it out for an invisible reason.
 ]
 
 # Mode-specific blocks — output_mode → category → {name: reason}
@@ -480,12 +483,13 @@ def get_marine_suggestions(category: str, context: dict) -> list:
         return MARINE_LIGHTING_BY_SPECIES.get(species_name, [])
 
     if category == "mood":
-        base = list(MARINE_MOOD_BY_LIGHTING.get(lighting, []))
-        if diet == "Carnivore" and base:
-            priority = [m for m in ["hunting_focus", "menacing", "ambush_still", "territorial_patrol", "burst_acceleration"] if m in base]
-            rest = [m for m in base if m not in priority]
-            base = priority + rest
-        return base[:5]
+        base = list(MARINE_MOOD)
+        if diet == "Carnivore":
+            priority = ["hunting_focus", "menacing", "ambush_still", "burst_acceleration", "eye_contact"]
+        else:
+            priority = ["cruising_calm", "surfacing_breath", "eye_contact", "curiosity_approach", "deep_patrol"]
+        base = [m for m in priority if m in base] + [m for m in base if m not in priority]
+        return base[:10]
 
     if category == "behavior":
         return MARINE_BEHAVIOR_BY_MOOD.get(mood, [])
@@ -583,6 +587,12 @@ TERRESTRIAL_MOOD_BY_LIGHTING = {
     "high_noon_flat":    ["heat_rest",        "feeding_focus",     "quiet_power",        "alert_scan",        "drinking"],
 }
 
+# Curated mood pool — clade-driven (Session 26). See MARINE_MOOD note.
+TERRESTRIAL_MOOD = [
+    "menacing", "eye_contact", "post_kill_pause", "alert_scan", "mid_stride",
+    "feeding_focus", "territorial_hold", "scent_tracking", "drinking", "dawn_waking",
+]
+
 TERRESTRIAL_BEHAVIOR_BY_MOOD = {
     "heat_rest":             ["basking_flat",      "resting_alert",     "post_rain_stillness","standing_still",    "mud_wallow"],
     "serene":                ["resting_alert",     "standing_still",    "post_rain_stillness","basking_flat",      "feeding"],
@@ -675,11 +685,8 @@ TERRESTRIAL_INVALID_COMBOS = [
     ("behavior", "basking_flat",     "mood",    "menacing",          "basking flat — contradicts menacing mood"),
     ("behavior", "basking_flat",     "mood",    "mid_stride",        "basking flat — contradicts mid-stride"),
     ("behavior", "basking_flat",     "mood",    "territorial_hold",  "basking flat — too passive for territorial hold"),
-    ("behavior", "basking_flat",     "lighting","moonlit",           "basking is solar thermoregulation — moonlit (night) contradicts"),
-    ("behavior", "basking_flat",     "lighting","twilight_fade",     "basking is solar thermoregulation — twilight too dim"),
-    ("behavior", "basking_flat",     "lighting","forest_floor_shade","basking needs direct light — deep shade contradicts"),
-    ("behavior", "basking_flat",     "weather", "monsoon_heavy",     "basking flat — heavy rain contradicts"),
-    ("behavior", "basking_flat",     "weather", "storm_approaching", "basking flat — approaching storm contradicts"),
+    # Session 26: basking lighting/weather blocks removed (lighting + weather
+    # no longer user-facing — see MARINE_INVALID_COMBOS note).
     # Carcass context ↔ incompatible moods
     ("behavior", "carcass_standing", "mood",    "heat_rest",         "standing over carcass — not passive heat resting"),
     ("behavior", "carcass_standing", "mood",    "serene",            "standing over carcass — not serene"),
@@ -689,11 +696,7 @@ TERRESTRIAL_INVALID_COMBOS = [
     # Dust rolling ↔ incompatible context
     ("behavior", "dust_rolling",     "mood",    "menacing",          "dust rolling is self-care — not menacing"),
     ("behavior", "dust_rolling",     "mood",    "scent_tracking",    "rolling in dust — destroys scent trail"),
-    ("behavior", "dust_rolling",     "weather", "monsoon_heavy",     "dust rolling — heavy rain contradicts"),
-    ("behavior", "dust_rolling",     "weather", "drizzle_steady",    "dust rolling — wet ground contradicts"),
-    # Water drinking ↔ dry extreme weather
-    ("behavior", "drinking_at_water","weather", "dust_storm",        "drinking at water — dust storm contradicts"),
-    ("behavior", "drinking_at_water","weather", "wildfire_smoke",    "drinking at water — wildfire smoke is compatible, but water not open in fire"),
+    # Session 26: weather-keyed blocks removed (weather no longer user-facing).
 ]
 
 TERRESTRIAL_MODE_COMBO_BLOCKS = {
@@ -725,12 +728,13 @@ def get_terrestrial_suggestions(category: str, context: dict) -> list:
         return TERRESTRIAL_LIGHTING_BY_SPECIES.get(species_name, [])
 
     if category == "mood":
-        base = list(TERRESTRIAL_MOOD_BY_LIGHTING.get(lighting, []))
-        if diet == "Carnivore" and base:
-            priority = [m for m in ["menacing", "post_kill_pause", "feeding_focus", "territorial_hold", "quiet_power"] if m in base]
-            rest = [m for m in base if m not in priority]
-            base = priority + rest
-        return base[:5]
+        base = list(TERRESTRIAL_MOOD)
+        if diet == "Carnivore":
+            priority = ["menacing", "post_kill_pause", "territorial_hold", "feeding_focus", "alert_scan"]
+        else:
+            priority = ["feeding_focus", "alert_scan", "drinking", "mid_stride", "eye_contact"]
+        base = [m for m in priority if m in base] + [m for m in base if m not in priority]
+        return base[:10]
 
     if category == "behavior":
         return TERRESTRIAL_BEHAVIOR_BY_MOOD.get(mood, [])
@@ -825,6 +829,12 @@ AERIAL_MOOD_BY_LIGHTING = {
     "horizon_glow":   ["dusk_roost_approach","dawn_launch",   "effortless_cruise", "serene",            "thermal_drift"],
     "reflected_ground":["hunting_scan",  "glide_descent",    "quiet_power",       "effortless_cruise", "thermal_drift"],
 }
+
+# Curated mood pool — clade-driven (Session 26). See MARINE_MOOD note.
+AERIAL_MOOD = [
+    "menacing", "hunting_scan", "eye_contact", "feeding_return", "territorial_display",
+    "thermal_drift", "effortless_cruise", "perched_alert", "dawn_launch", "wind_buffet",
+]
 
 AERIAL_BEHAVIOR_BY_MOOD = {
     "thermal_drift":      ["thermal_soaring",  "glide_coast",      "banking_turn",      "updraft_hover",     "level_cruise"],
@@ -987,12 +997,13 @@ def get_aerial_suggestions(category: str, context: dict) -> list:
         return AERIAL_LIGHTING_BY_SPECIES.get(species_name, [])
 
     if category == "mood":
-        base = list(AERIAL_MOOD_BY_LIGHTING.get(lighting, []))
-        if diet == "Carnivore" and base:
-            priority = [m for m in ["menacing", "hunting_scan", "territorial_display", "quiet_power", "glide_descent"] if m in base]
-            rest = [m for m in base if m not in priority]
-            base = priority + rest
-        return base[:5]
+        base = list(AERIAL_MOOD)
+        if diet in ("Carnivore", "Piscivore"):
+            priority = ["hunting_scan", "menacing", "feeding_return", "territorial_display", "eye_contact"]
+        else:
+            priority = ["thermal_drift", "effortless_cruise", "eye_contact", "perched_alert", "dawn_launch"]
+        base = [m for m in priority if m in base] + [m for m in base if m not in priority]
+        return base[:10]
 
     if category == "behavior":
         return AERIAL_BEHAVIOR_BY_MOOD.get(mood, [])
@@ -1435,59 +1446,52 @@ CANVAS_PRINT = ""
 # Vertebrate extremity errors — only relevant to clades with toes/fingers/claws
 # osteoderms live here (not in fossil block) because they are a vertebrate skin
 # feature; arthropods/plants don't have them so should never see them in --no.
+# Session 26: NEG_* blocks trimmed hard. MJ v8.1's Prompt Shortener fires at
+# >1300 chars and silently condenses overruns — our old 71-term --no clause
+# (~1180 chars) blew past that, so MJ was picking which negatives survived, not
+# us. Keep only the highest-leverage blockers per category so the full prompt
+# lands under the limit and the --no we send is the --no that's honored.
+# Anatomy "X NOT Y" corrections already ride up front in the positive prompt
+# (bias_corrections), which is v8.1's preferred plain-English negative.
 NEG_VERTEBRATE_ANATOMY = (
-    "fused digits, merged toes, webbed feet, blob hands, extra fingers, "
-    "missing claws, undefined claw tips, floating toes, amputated digits, "
-    "incorrect toe count, melted feet, smooth footpad with no digit separation, "
-    "smeared claws, indistinct talons, CGI smoothness on extremities, "
-    "osteoderms, osteoderm"
+    "fused digits, extra fingers, missing claws, melted feet, smeared claws, osteoderms"
 )
 
 # Arthropod-specific anatomy errors — segmented chitin, jointed legs, mandibles
 NEG_ARTHROPOD_ANATOMY = (
-    "fused leg segments, missing limb joints, smooth chitin with no segmentation, "
-    "mammalian limbs, vertebrate hands, fingers, toes, claws, talons, footpads, "
-    "rubbery skin, fleshy limbs, melted exoskeleton"
+    "fused leg segments, smooth chitin, mammalian limbs, fingers, rubbery skin"
 )
 
 # Studio / controlled environment blockers — universal to all clades
+# (museum is covered by the fossil block; black/white bg merged to "plain backdrop")
 NEG_STUDIO = (
-    "studio background, seamless backdrop, portrait lighting, gradient background, "
-    "grey background, controlled lighting, specimen photography, museum display, "
-    "exhibit lighting, black background, white background, studio flash, "
-    "specimen mount, display case, diorama, natural history exhibit"
+    "studio background, controlled lighting, plain backdrop"
 )
 
 # Fossil / skeletal blockers — for vertebrate clades (skeleton/bones apply)
 NEG_FOSSIL_VERTEBRATE = (
-    "fossil, fossilized, skeleton, skeletal, bones, bone structure, excavation, "
-    "petrified, paleontology specimen, museum specimen, rock matrix, sediment, "
-    "dinosaur fossil, fossil record, prehistoric bones, mineralized, stone cast"
+    "fossil, skeleton, bones, museum specimen, petrified"
 )
 
 # Fossil blockers for arthropods — drop "skeleton/bones" (no internal skeleton)
 NEG_FOSSIL_ARTHROPOD = (
-    "fossil, fossilized, petrified, paleontology specimen, museum specimen, "
-    "rock matrix, sediment, mineralized, stone cast, amber inclusion"
+    "fossil, petrified, museum specimen, amber inclusion"
 )
 
 # Fossil blockers for plants — drop "skeleton/bones/osteoderms" (not applicable),
 # keep "petrified / fossil" since petrified plants are a real failure mode
 NEG_FOSSIL_PLANT = (
-    "fossil, fossilized, petrified, paleontology specimen, museum specimen, "
-    "rock matrix, mineralized, stone cast, dried herbarium specimen, pressed leaf"
+    "fossil, petrified, museum specimen, pressed leaf"
 )
 
 # Indoor / built environment blockers — universal
 NEG_INDOOR = (
-    "indoors, interior, building, warehouse, arena, concrete floor"
+    "indoors, building"
 )
 
 # CGI / digital environment blockers — universal
 NEG_CGI = (
-    "digital matte painting, rendered background, CGI environment, concept art, "
-    "illustration, painted background, 3D render, Unreal Engine, volumetric god rays, "
-    "hyper-saturated, fantasy landscape, perfect symmetry, smooth gradient sky"
+    "CGI, 3D render, illustration, concept art, hyper-saturated, fantasy landscape"
 )
 
 
@@ -2422,6 +2426,39 @@ def select_perspective() -> str:
         print(f"  {err(f'Please enter a number between 1 and {len(keys)}, or press Enter.')}")
 
 
+# MJ version flag tokens. v8 token unverified against MJ's exact syntax — adjust
+# here if MJ rejects "--v 8.1".
+MJ_VERSION_FLAG = {"v7": "--v 7", "v8": "--v 8.1"}
+
+
+def select_version() -> str:
+    """Ask which Midjourney version this prompt targets. Returns 'v7' or 'v8'.
+
+    Two-stage pipeline (see project memory): v7 is the anatomy foundry — --oref
+    locks correct morphology (two-finger hands). v8 is the realism + HD finisher
+    — fed v7-made correct images as image-prompts; it has no omni/character ref.
+    """
+    OPTIONS = [
+        ("v7", "v7 — anatomy foundry",
+         "--oref locks correct anatomy (two-finger hands). Build your reference images here."),
+        ("v8", "v8 — realism + HD finisher",
+         "feed v7-made correct images back in (image-prompt + --iw); adds realism + native 2K HD."),
+    ]
+    print(f"\n  {hdr('Select Midjourney version')}")
+    print(f"  {C.DIM}" + "─" * 60 + C.RESET)
+    for i, (key, label, desc) in enumerate(OPTIONS, 1):
+        print(f"  {C.DIM}{i:>2}.{C.RESET}  {C.BRIGHT_WHITE}{label}{C.RESET}")
+        print(f"      {dim(desc)}")
+    print()
+    while True:
+        raw = input(f"  {C.BOLD_CYAN}Choose 1–{len(OPTIONS)}:{C.RESET} ").strip()
+        if raw.isdigit() and 1 <= int(raw) <= len(OPTIONS):
+            key, label, _ = OPTIONS[int(raw) - 1]
+            print(f"  {ok('✓')} {ok(label)}\n")
+            return key
+        print(f"  {err(f'Please enter a number between 1 and {len(OPTIONS)}.')}")
+
+
 def select_canvas_placement() -> tuple[str, str]:
     """Ask how the animal is positioned in frame.
     Returns (composition_phrase, space_side).
@@ -2563,10 +2600,21 @@ def _pick_grouped(label, rows, display_fn, groups):
 
 
 def pick_parameter(conn: sqlite3.Connection, category: str, name_only: bool = False, habitat: str = None,
-                   suggestions=None, blocked=None, suggest_label: str = ""):
+                   suggestions=None, blocked=None, suggest_label: str = "",
+                   restrict_to_suggestions: bool = False):
     rows = fetch_parameters_by_category(conn, category, habitat=habitat)
     if not rows:
         sys.exit(f"No {habitat or ''} parameters found for category '{category}'. Run setup_db.py.")
+
+    # Session 26: walk the menu down to the curated/followed set. When
+    # restrict_to_suggestions is on and we have suggestions, show ONLY those
+    # rows (in suggestion order) instead of the full DB list — keeps mood ~10,
+    # behavior to what follows the mood, condition to the species set.
+    if restrict_to_suggestions and suggestions:
+        by_name = {r["name"]: r for r in rows}
+        narrowed = [by_name[n] for n in suggestions if n in by_name]
+        if narrowed:
+            rows = narrowed
 
     label = f"Select {category.upper()}"
 
@@ -2714,9 +2762,11 @@ def make_environment_fix_prompt(species, environment: str, weather_param, lighti
     else:
         ground = "ground texture, soil and rock detail, sparse prehistoric vegetation in background"
 
+    # Session 26: lighting/weather no longer injected — MJ + the reference image
+    # drive light and atmosphere. Params kept in the signature for call-site
+    # compatibility but intentionally unused here.
     core = (
         f"{environment}, {ground}, "
-        f"{lighting_param['value']}, {weather_param['value']}, "
         "real photographed sky with atmospheric haze at horizon, "
         "telephoto background bokeh, muted natural colour, film grain, "
         "no animal in frame, habitat only"
@@ -3069,7 +3119,9 @@ def make_lean_prompt(
         if anatomy_neg:
             neg = neg + ", " + anatomy_neg
 
-    flags = f"--no {neg} --style {mj_style} --stylize {stylize} --q {quality:g}"
+    # Session 26: --q dropped — not a v8.1 parameter (HD is the default output,
+    # no quality flag). quality kwarg kept in signature for call-site compat.
+    flags = f"--no {neg} --style {mj_style} --stylize {stylize}"
     if chaos > 0:
         flags += f" --chaos {chaos}"
 
@@ -3374,14 +3426,18 @@ def assemble_prompt(
     marine_underwater = habitat == "marine" and output_mode not in ("shoreline", "surface_break")
     horizon_phrase = "" if marine_underwater else ", horizon visible"
     if wide_mode:
-        # Session 13: Wide-scale framing block — forceful landscape-dominant
-        # language for premium canvas prints. Subject must read as a small
-        # element within a vast prehistoric world.
-        wide_comp = ("ultra-wide angle, vast sweeping landscape, "
-                     "single animal small but clearly visible in frame, "
-                     "large negative space, deep layered depth, "
-                     "epic sense of scale, landscape dominant")
-        environment = f"{environment}, {wide_comp}{horizon_phrase}"
+        # Session 26: front-load the establishing-shot framing. Previously this
+        # block was appended AFTER the subject, so MJ locked onto a hero-sized
+        # animal from the early "massive ... giant skull" subject tokens and
+        # ignored the buried framing. Now a lead phrase goes FIRST (see assembly
+        # below) and the subject is demoted. "clearly visible" was also dropped —
+        # it told MJ to keep the animal large/resolvable, the opposite of intent.
+        wide_lead = (
+            f"ultra-wide establishing shot, a single {species['name']} tiny and "
+            "distant in the frame, dwarfed by a vast sweeping prehistoric landscape, "
+            "landscape dominates the frame, large empty negative space, "
+            f"epic sense of scale, deep layered depth{horizon_phrase}"
+        )
     elif comp_template == "PLACEMENT":
         subject_phrase, space_side = placement
         # Session 11: "animal centred, symmetrical" stripped — was biasing
@@ -3398,12 +3454,11 @@ def assemble_prompt(
     elif comp_template:
         environment = f"{environment}, {comp_template}"
 
-    # ── SECTION 4: LIGHTING ───────────────────────────────────────────────────
-    # ONE lead phrase of lighting only. DB values often pile on 4+ descriptors
-    # ("light fading with depth, animal lit from above, dark water below,
-    # natural light gradient") which dilute MJ attention. Weather is NOT
-    # injected — almost always duplicates lighting. Both stay in tags / branching.
-    lighting = lighting_param["value"].split(", ")[0]
+    # ── SECTION 4: LIGHTING — REMOVED (Session 26) ────────────────────────────
+    # Lighting is no longer injected into the prompt. With drag-in reference
+    # images, MJ handles light/atmosphere far better than prose ever did, and
+    # forcing a lighting phrase fought the reference. lighting_param still flows
+    # through for tags/DB metadata only — it never reaches the prose now.
 
     # ── SECTION 5: CAMERA ─────────────────────────────────────────────────────
     # Session 11: camera brands and lens specs stripped from active output —
@@ -3413,6 +3468,9 @@ def assemble_prompt(
     # prints. Without it, MJ defaults to mid-range framing every time.
     if wide_mode:
         camera = "shot on ultra-wide 16mm lens, deep depth of field, everything in focus"
+        # Scrub scale-up words — "massive"/"giant" pull MJ toward a big in-frame
+        # subject, fighting the "tiny and distant" intent of a wide establishing shot.
+        subject = subject.replace("massive ", "").replace("giant ", "")
     else:
         camera = ""
 
@@ -3426,13 +3484,18 @@ def assemble_prompt(
     if output_mode == "aerial_overhead" and not perspective_lead:
         perspective_lead = CAMERA_PERSPECTIVES["drone_overhead"]["lead"]
 
-    if perspective_lead:
-        # Perspective-first assembly: angle → subject → environment → details → lighting
-        sections = [perspective_lead, subject, camera, environment, interaction, lighting]
-    elif wide_mode:
-        sections = [subject, camera, environment, lighting, interaction]
+    if wide_mode:
+        # Framing leads, subject demoted — so the "tiny in frame" intent wins on
+        # MJ's early-token weighting instead of the hero-subject description.
+        if perspective_lead:
+            sections = [perspective_lead, wide_lead, environment, subject, camera, interaction]
+        else:
+            sections = [wide_lead, environment, subject, camera, interaction]
+    elif perspective_lead:
+        # Perspective-first assembly: angle → subject → environment → details
+        sections = [perspective_lead, subject, camera, environment, interaction]
     else:
-        sections = [subject, interaction, environment, lighting, camera]
+        sections = [subject, interaction, environment, camera]
     if canvas_print:
         sections.append(CANVAS_PRINT)
 
@@ -3486,7 +3549,9 @@ def assemble_prompt(
         anatomy_neg = build_anatomy_negative(anatomy)
         if anatomy_neg:
             neg = neg + ", " + anatomy_neg
-    flags = f"--no {neg} --style {mj_style} --stylize {stylize} --q {quality:g}"
+    # Session 26: --q dropped — not a v8.1 parameter (HD is the default output,
+    # no quality flag). quality kwarg kept in signature for call-site compat.
+    flags = f"--no {neg} --style {mj_style} --stylize {stylize}"
     if chaos > 0:
         flags += f" --chaos {chaos}"
     return f"{prose} {flags}"
@@ -3608,20 +3673,21 @@ SREF_FILE = Path(__file__).parent / "sref_urls.json"
 PALEOART_FILE = Path(__file__).parent / "paleoart_refs.json"
 
 # ---------------------------------------------------------------------------
-# Reference system: 3-layer approach (Session 23)
+# Reference system (Session 26 — version-aware)
 # ---------------------------------------------------------------------------
-#   Layer 1 — --sref (wildlife photos): photographic style, lighting, texture
-#   Layer 2 — --cref (paleoart renditions): what the animal LOOKS LIKE alive
-#   Layer 3 — --cref fallback (skeletal diagrams): body proportions if no paleoart
+#   --sref (wildlife photos): photographic STYLE/lighting/texture — both v7 & v8
+#   --oref (paleoart, V7 ONLY): morphology/identity lock — "what it looks like
+#          alive" — this is the anatomy foundry that nails the two-finger hands
+#   v8 morphology: no oref/cref flag exists — you drag a v7-made correct image
+#          in as an image-prompt with --iw (handled in the version flag tail)
 #
-# The key insight: --sref copies VISUAL STYLE, --cref copies LIKENESS.
-# Wildlife --sref → "real National Geographic photography" feel
-# Paleoart --cref → correct morphology (NOT a crocodile, NOT a shark)
-# Skeletal --cref → body proportions fallback when paleoart unavailable
+# SKELETAL REFS REMOVED ENTIRELY (Session 26): they made MJ render fossilized /
+# bony output — they only confuse it. Morphology now comes from paleoart (v7
+# oref) or v7-made image prompts (v8). --cref is dead in both v7 and v8.
 MAX_SREF_URLS = 2   # wildlife photo refs for --sref (style guide)
-MAX_CREF_URLS = 1   # paleoart or skeletal ref for --cref (likeness/morphology)
-DEFAULT_CW = 10     # unused in MJ v7 but kept for reference
+MAX_OREF_URLS = 1   # paleoart ref for --oref (v7 morphology lock)
 DEFAULT_SW = 20     # --sw (style weight): subtle photographic feel
+DEFAULT_OW = 200    # --ow (omni weight): strong morphology enforcement (v7)
 
 # ---------------------------------------------------------------------------
 # Habitat → allowed ref categories (strict filtering)
@@ -3637,13 +3703,13 @@ HABITAT_ALLOWED_CATEGORIES = {
     "plant":       {"paleo_plant"},
 }
 
-# Categories EXCLUDED from --sref selection — skeletal and paleoart should NOT
-# be used as style refs (makes output look like a fossil or a painting).
+# Categories EXCLUDED from --sref selection — paleoart is morphology (→ --oref),
+# and skeletal is removed entirely (made output look fossilized). Neither is a
+# valid style ref.
 SREF_EXCLUDED_CATEGORIES = {"skeletal", "paleoart"}
 
-# Categories used for --cref (likeness): paleoart preferred, skeletal fallback
-CREF_PALEOART_CATEGORY = "paleoart"
-CREF_SKELETAL_CATEGORY = "skeletal"
+# Category used for --oref morphology (v7). Skeletal is no longer collected.
+OREF_PALEOART_CATEGORY = "paleoart"
 
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
@@ -3759,44 +3825,38 @@ def _extract_category(label):
 
 
 def select_refs(species_name, output_mode, habitat, lighting_name):
-    """Context-aware wildlife --sref selection (Session 22 overhaul).
+    """Context-aware reference selection (Session 26 — version-aware).
 
-    Session 22 lesson:
-      --sref copies VISUAL STYLE → skeletal photos made outputs look fossilized
-      --cref copies LIKENESS     → shark photos made Mosasaurus look like a shark
+    Returns (sref_urls, morph_urls, morph_source) where:
+      sref_urls:   wildlife photo URLs for --sref (STYLE — both v7 and v8)
+      morph_urls:  paleoart URLs for --oref (MORPHOLOGY lock — v7 only)
+      morph_source: "paleoart" or "" (provenance label for display)
 
-    New approach:  wildlife photos → --sref ONLY (photographic style guide).
-    Skeletal refs excluded entirely — anatomy encoded in text prompts.
-    --cref removed — too literal for cross-species reference.
-
-    Returns (sref_urls, cref_urls, cw_weight) where:
-      sref_urls: list of URL strings for --sref (wildlife style refs)
-      cref_urls: always [] (--cref disabled)
-      cw_weight: int (kept for backward compat, unused)
+    Skeletal refs are dropped entirely (they made MJ render fossilized output).
+    --cref is dead in both v7 and v8. In v8 there is no oref/cref flag — the
+    morphology reference is a v7-made correct image dragged in as an image-prompt
+    (see the version flag tail), so morph_urls is informational there.
     """
     all_urls = load_sref_urls()
     species_entries = all_urls.get(species_name, [])
     if not species_entries:
-        return [], [], DEFAULT_CW
+        return [], [], ""
 
     # Strict habitat filtering: only allowed categories pass through
     allowed = HABITAT_ALLOWED_CATEGORIES.get(habitat, HABITAT_ALLOWED_CATEGORIES["terrestrial"])
 
     # Build category → [url_entries] index, filtered by habitat + exclusions
-    cat_index = {}         # wildlife refs (for --sref)
-    paleoart_entries = []  # paleoart refs (for --cref, preferred)
-    skeletal_entries = []  # skeletal refs (for --cref, fallback)
+    cat_index = {}         # wildlife refs (for --sref style)
+    paleoart_entries = []  # paleoart refs (for --oref morphology, v7)
     for entry in species_entries:
         if isinstance(entry, dict):
             cat = _extract_category(entry.get("label", ""))
         else:
             cat = ""
-        if cat == CREF_PALEOART_CATEGORY:
-            paleoart_entries.append(entry)  # collect for --cref (preferred)
+        if cat == OREF_PALEOART_CATEGORY:
+            paleoart_entries.append(entry)  # collect for --oref (v7 morphology)
             continue
-        if cat == CREF_SKELETAL_CATEGORY:
-            skeletal_entries.append(entry)  # collect for --cref (fallback)
-            continue
+        # Session 26: skeletal refs dropped on the floor — never collected.
         if cat in SREF_EXCLUDED_CATEGORIES:
             continue
         if cat in BIRD_CATEGORIES:
@@ -3885,24 +3945,18 @@ def select_refs(species_name, output_mode, habitat, lighting_name):
 
     sref_urls = _pick_from_cats(sref_priority, MAX_SREF_URLS)
 
-    # --cref: paleoart (preferred) or skeletal (fallback) for likeness/morphology
-    # Paleoart shows the animal ALIVE with correct morphology.
-    # All refs must be Discord CDN URLs (MJ rejects Wikimedia direct URLs).
-    cref_urls = []
-    cref_source = ""
-    if MAX_CREF_URLS > 0:
-        if paleoart_entries:
-            # Paleoart from sref_urls.json (already on Discord CDN)
-            picked = random.sample(paleoart_entries, min(MAX_CREF_URLS, len(paleoart_entries)))
-            cref_urls = [e["url"] if isinstance(e, dict) else e for e in picked]
-            cref_source = "paleoart"
-        elif skeletal_entries:
-            # Skeletal fallback from sref_urls.json (already on Discord CDN)
-            picked = random.sample(skeletal_entries, min(MAX_CREF_URLS, len(skeletal_entries)))
-            cref_urls = [e["url"] if isinstance(e, dict) else e for e in picked]
-            cref_source = "skeletal"
+    # --oref morphology ref (v7 only): paleoart shows the animal ALIVE with
+    # correct morphology — this is what locks the two-finger hands. Skeletal
+    # fallback removed (Session 26). All refs are Discord CDN URLs (MJ rejects
+    # Wikimedia direct URLs). Returns [] when no paleoart exists — graceful.
+    morph_urls = []
+    morph_source = ""
+    if MAX_OREF_URLS > 0 and paleoart_entries:
+        picked = random.sample(paleoart_entries, min(MAX_OREF_URLS, len(paleoart_entries)))
+        morph_urls = [e["url"] if isinstance(e, dict) else e for e in picked]
+        morph_source = "paleoart"
 
-    return sref_urls, cref_urls, cref_source
+    return sref_urls, morph_urls, morph_source
 
 
 # Back-compat wrapper for any callers still using the old API
@@ -3912,9 +3966,9 @@ def select_sref_urls(species_name, output_mode, habitat, lighting_name):
     return sref + cref
 
 
-def display_ref_selection(species_name, sref_urls, cref_urls, cref_source, species_entries):
-    """Print the auto-selected --sref and --cref URLs with labels."""
-    if not sref_urls and not cref_urls:
+def display_ref_selection(species_name, sref_urls, morph_urls, morph_source, species_entries, version="v7"):
+    """Print the auto-selected --sref and (v7) --oref URLs with labels."""
+    if not sref_urls and not morph_urls:
         return
 
     # Build url → label lookup
@@ -3923,7 +3977,6 @@ def display_ref_selection(species_name, sref_urls, cref_urls, cref_source, speci
         if isinstance(entry, dict):
             url_to_label[entry["url"]] = entry.get("label", "reference")
 
-    total_refs = len(species_entries)
     total_selected = len(sref_urls)
 
     print(f"\n  {hdr(f'REFERENCES — {species_name} (auto-selected)')}")
@@ -3937,23 +3990,21 @@ def display_ref_selection(species_name, sref_urls, cref_urls, cref_source, speci
             print(f"    {ok('+')} {C.BRIGHT_WHITE}{label}{C.RESET}")
             print(f"      {dim(short_url)}")
 
-    if cref_urls:
-        source_label = "paleoart rendition" if cref_source == "paleoart" else "skeletal anatomy"
-        print(f"  {C.WHITE}--cref ({source_label}):{C.RESET}")
-        for url in cref_urls:
-            label = url_to_label.get(url, "skeletal reference")
-            short_url = url[:50] + "..." if len(url) > 50 else url
-            print(f"    {ok('+')} {C.BRIGHT_WHITE}{label}{C.RESET}")
-            print(f"      {dim(short_url)}")
-
-    skel_count = len(cref_urls)
-    src = cref_source or "none"
-    print(f"  {dim(f'{total_selected} wildlife --sref (--sw {DEFAULT_SW}) + {skel_count} {src} --cref')}")
+    if morph_urls:
+        if version == "v7":
+            print(f"  {C.WHITE}--oref (paleoart morphology lock, --ow {DEFAULT_OW}):{C.RESET}")
+            for url in morph_urls:
+                label = url_to_label.get(url, "paleoart reference")
+                short_url = url[:50] + "..." if len(url) > 50 else url
+                print(f"    {ok('+')} {C.BRIGHT_WHITE}{label}{C.RESET}")
+                print(f"      {dim(short_url)}")
+        else:
+            print(f"  {dim('(v8: drag a v7-made correct image in as the image-prompt with --iw 1 — oref is v7-only)')}")
 
 
 def display_sref_selection(species_name, selected_urls, species_entries):
     """Legacy wrapper for display — used by A/B test path."""
-    display_ref_selection(species_name, selected_urls, [], DEFAULT_CW, species_entries)
+    display_ref_selection(species_name, selected_urls, [], "", species_entries)
 
 
 # ---------------------------------------------------------------------------
@@ -4738,7 +4789,10 @@ def main() -> None:
     print(f"  {C.BOLD_CYAN}DINOSAUR ART PROMPT GENERATOR{C.RESET}")
     print(f"{C.BOLD_CYAN}{'═' * 64}{C.RESET}")
 
-    # --- Habitat selection (first thing the user sees) ---
+    # --- MJ version (first choice — drives the whole flag profile) ---
+    version = select_version()
+
+    # --- Habitat selection ---
     habitat = select_habitat()
 
     # --- Mode selection (filtered by habitat) ---
@@ -4849,7 +4903,8 @@ def main() -> None:
         sug = get_suggestions(category, ctx)
         blk = get_blocked(category, ctx)
         return pick_parameter(conn, category, name_only=True, habitat=habitat,
-                              suggestions=sug, blocked=blk, suggest_label=slabel)
+                              suggestions=sug, blocked=blk, suggest_label=slabel,
+                              restrict_to_suggestions=True)
 
     # --- Lighting: auto-selected from suggestion system (Session 14) ---
     lighting_param = auto_pick_parameter(conn, "lighting", habitat, ctx)
@@ -4865,7 +4920,7 @@ def main() -> None:
         behavior_param  = {"id": 0, "name": "growing", "value": "natural growth posture"}
         print(f"  {dim('(mood/behavior/condition skipped for plants)')}\n")
     else:
-        mood_param = _cpick("mood", f"for {lighting_param['name'].replace('_', ' ')} lighting")
+        mood_param = _cpick("mood", f"for {species['name']}")
         ctx["mood"] = mood_param["name"]
 
         behavior_param = _cpick("behavior", f"for {mood_param['name'].replace('_', ' ')} mood")
@@ -4905,9 +4960,8 @@ def main() -> None:
     # --- Display all auto-applied scene settings together ---
     print(f"\n  {hdr('SCENE SETTINGS (auto-applied)')}")
     print(f"  {C.DIM}" + "─" * 60 + C.RESET)
-    print(f"    {ok('+')} {dim('[lighting]')} {C.WHITE}{lighting_param['name'].replace('_', ' ')}{C.RESET}")
-    print(f"    {ok('+')} {dim('[camera]')}   {C.WHITE}{camera_param['name'].replace('_', ' ')}{C.RESET}")
-    print(f"    {ok('+')} {dim('[weather]')}  {C.WHITE}{weather_param['name'].replace('_', ' ')}{C.RESET}")
+    print(f"    {ok('+')} {dim('[camera]')} {C.WHITE}{camera_param['name'].replace('_', ' ')}{C.RESET}")
+    print(f"    {dim('(lighting + weather handed to MJ / reference image)')}")
     print()
 
     # --- Build prompt ---
@@ -4930,6 +4984,12 @@ def main() -> None:
         interaction_type=interaction_type,
         perspective=perspective,
     )
+
+    # --- Version flag only (Session 26) ---
+    # References are dropped manually in MJ per shot, and --ow is set by feel —
+    # the generator does NOT auto-inject --sref/--oref or guess weights. It just
+    # tags the prompt with the target version so the paste is self-contained.
+    prompt_text = f"{prompt_text} {MJ_VERSION_FLAG[version]}"
 
     title = make_title(species, mood_param, output_mode=output_mode)
     tags  = make_tags(species, style_param, lighting_param, camera_param, mood_param,
