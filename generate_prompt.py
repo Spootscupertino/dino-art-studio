@@ -70,6 +70,74 @@ CAMERA_PERSPECTIVES = {
 }
 
 # ---------------------------------------------------------------------------
+# Epic scale — front-loaded vast/cinematic composition with a CRISP dramatic
+# sky (not hazy). Habitat-aware so marine/aerial scenes don't get a
+# "cumulonimbus over a floodplain" lead. Pairs with detail refs at low --iw:
+# the lead wins the composition, refs add skin detail. See the
+# project-epic-scale-recipe memory for the full rationale.
+# ---------------------------------------------------------------------------
+EPIC_SCALE_LEAD = {
+    "terrestrial": (
+        "epic cinematic wide shot, dramatic low hero angle, subjects dwarfed by a vast "
+        "sweeping prehistoric landscape stretching to a glowing distant horizon, towering "
+        "cumulonimbus thunderheads in a crisp clear sky, vivid golden rim-light on the cloud "
+        "edges, crepuscular god rays, deep blue fading to a glowing amber horizon, low raking "
+        "sun, long cast shadows, immense epic scale, sharp clarity"
+    ),
+    # Underwater — no sky; scale comes from open-water depth and surface god rays.
+    "marine": (
+        "epic cinematic underwater wide shot, vast open ocean receding into deep blue "
+        "distance, brilliant sun shafts and god rays cutting down through clear water from "
+        "the bright surface far above, dramatic volumetric light, fine particulate drifting "
+        "in the beams, immense sense of depth and scale, sharp clarity"
+    ),
+    # Marine surface (shoreline / breach) — gets the dramatic sky like terrestrial.
+    "marine_surface": (
+        "epic cinematic wide shot over a vast open prehistoric ocean stretching to a glowing "
+        "horizon, towering cumulonimbus thunderheads in a crisp clear sky, vivid golden "
+        "rim-light, crepuscular god rays breaking over the water, dramatic swell and spray, "
+        "immense scale, sharp clarity"
+    ),
+    "aerial": (
+        "epic cinematic wide shot, vast sweeping prehistoric landscape far below stretching "
+        "to a glowing distant horizon, towering cumulonimbus thunderheads in a crisp clear "
+        "sky, vivid golden rim-light on the cloud edges, crepuscular god rays, deep blue "
+        "fading to an amber horizon, immense altitude and scale, sharp clarity"
+    ),
+}
+EPIC_SCALE_LEAD_DEFAULT = (
+    "epic cinematic wide shot, vast sweeping prehistoric landscape stretching to a glowing "
+    "distant horizon, dramatic crisp sky, vivid golden light, crepuscular god rays, long "
+    "shadows, immense epic scale, sharp clarity"
+)
+
+
+def build_epic_negative(habitat: str) -> str:
+    """Lean, habitat-aware negative list for Epic-scale prompts.
+
+    Deliberately curated and short: MJ silently trims the tail of an over-long
+    --no list, so a focused list we control beats the full clade stack. Keeps
+    the sky crisp, blocks close-up framing, and guards hero-scale anatomy.
+    Body-plan blockers (crocodile/Komodo/sprawling lizard) are TERRESTRIAL only
+    — a mosasaur IS a marine lizard, so those would fight the real animal.
+    """
+    common = ("haze, mist, washed out, low contrast, flat lighting, dull overcast sky, "
+              "fused digits, extra fingers, "
+              "merged bodies, conjoined animals, same size animals, equal sized, "
+              "close-up, portrait, tight crop, face filling frame, "
+              "studio background, controlled lighting, CGI, 3D render, illustration, "
+              "fossil, skeleton, museum specimen")
+    if habitat == "terrestrial":
+        common += (", melted feet, malformed hands, crocodile, Komodo dragon, "
+                   "monitor lizard, sprawling lizard, splayed limbs, "
+                   "modern grass, lawn, modern forest")
+    elif habitat == "marine":
+        common += ", scuba diver, modern boat, ship, snorkeler"
+    elif habitat == "aerial":
+        common += ", airplane, modern bird, power lines, contrails"
+    return common
+
+# ---------------------------------------------------------------------------
 # Terminal color constants (ANSI escape codes)
 # ---------------------------------------------------------------------------
 
@@ -2426,6 +2494,27 @@ def select_perspective() -> str:
         print(f"  {err(f'Please enter a number between 1 and {len(keys)}, or press Enter.')}")
 
 
+def select_epic_scale() -> bool:
+    """Ask whether to apply the Epic-scale composition booster.
+
+    Front-loads a vast cinematic composition + crisp dramatic sky, drops
+    skin-level detail (refs supply that), and uses a lean negative list.
+    """
+    print(f"\n  {hdr('Epic scale')}")
+    print(f"  {C.DIM}" + "─" * 60 + C.RESET)
+    print(f"  {dim('Front-loads a vast cinematic composition + crisp dramatic sky,')}")
+    print(f"  {dim('drops skin-level prose detail, and keeps the negative list lean.')}")
+    print(f"  {dim('Pair with your detail refs at')} {opt('--iw 0.5')} {dim('or lower so the refs add')}")
+    print(f"  {dim('skin without flattening the epic composition.')}")
+    raw = input(f"\n  {C.BOLD_CYAN}Apply epic scale? [y/N]:{C.RESET} ").strip().lower()
+    on = raw in ("y", "yes")
+    if on:
+        print(f"  {ok('✓')} {ok('Epic scale ON')} {dim('— remember --iw 0.5 on your refs')}\n")
+    else:
+        print(f"  {ok('✓')} {ok('Epic scale off')}\n")
+    return on
+
+
 # MJ version flag tokens. v8 token unverified against MJ's exact syntax — adjust
 # here if MJ rejects "--v 8.1".
 MJ_VERSION_FLAG = {"v7": "--v 7", "v8": "--v 8.1"}
@@ -3155,6 +3244,7 @@ def assemble_prompt(
     secondary_species: dict = None,         # Session 17: multi-subject scene support
     interaction_type: str = None,           # Session 17: predator_prey interaction type
     perspective: str = "default",           # Session 21: camera angle override
+    epic_scale: bool = False,               # Epic-scale composition + crisp-sky booster
 ) -> str:
     mode_cfg     = OUTPUT_MODES.get(output_mode, OUTPUT_MODES["portrait"])
     full_body    = mode_cfg["full_body"]
@@ -3178,7 +3268,9 @@ def assemble_prompt(
     # frame" assembly, so drone_overhead still fills the frame head-to-tail.
     aerial_persp = perspective in {"drone_overhead", "drone_angled", "epic_aerial"} \
         or output_mode == "aerial_overhead"
-    suppress_detail = wide_mode or aerial_persp
+    # Epic scale is also a wide/cinematic framing: drop skin-level prose detail
+    # (refs supply it at low --iw) but keep hero-sized subject language.
+    suppress_detail = wide_mode or aerial_persp or epic_scale
 
     # ── SECTION 1: SUBJECT ───────────────────────────────────────────────────
     # Anatomy, pose, skin, mouth, behavior, condition, mood.
@@ -3231,7 +3323,7 @@ def assemble_prompt(
     # Group herd forces "wide" — can't resolve detail on 3 animals, and
     # extra anatomy tokens fight the group composition instruction.
     CLOSE_MODES = {"portrait", "extreme_closeup", "eye_contact", "jaws_detail", "action_freeze"}
-    if wide_mode or is_group or aerial_persp:
+    if wide_mode or is_group or aerial_persp or epic_scale:
         anatomy_mode = "wide"
     elif output_mode in CLOSE_MODES:
         anatomy_mode = "close"
@@ -3253,7 +3345,10 @@ def assemble_prompt(
         # Session 22: inject explicit "X NOT Y" corrections that contradict
         # MJ's training-data assumptions. These get priority placement at
         # the START of subject_parts so MJ reads them first.
-        if anatomy.bias_corrections and not suppress_detail and not is_group:
+        # Epic scale keeps these (e.g. "two-fingered NOT three-fingered"): they're
+        # cheap correctness anchors, not zoom-pulling texture, and matter at the
+        # hero scale that refs restore.
+        if anatomy.bias_corrections and not is_group and (not suppress_detail or epic_scale):
             # Cap at 3 in full mode — full mode has more context-setting
             # tokens after this so we can't afford 4 corrections like lean.
             corrections = anatomy.bias_corrections[:3]
@@ -3498,6 +3593,23 @@ def assemble_prompt(
     if output_mode == "aerial_overhead" and not perspective_lead:
         perspective_lead = CAMERA_PERSPECTIVES["drone_overhead"]["lead"]
 
+    # Epic-scale booster: pick the habitat-aware vast/crisp-sky lead. For an
+    # underwater scene, swap the default "murky water" contact phrase for clear
+    # water + light beams — otherwise it contradicts the god-ray lead.
+    epic_lead = ""
+    if epic_scale:
+        if habitat == "marine" and output_mode not in ("shoreline", "surface_break"):
+            epic_lead = EPIC_SCALE_LEAD["marine"]
+            interaction = ("clear open water, fine particulate drifting in the light beams, "
+                           "bodies gliding through the water")
+            # The lead defines the water; the habitat env string ("grey-green water,
+            # sediment") would contradict its "clear deep blue" — drop it here.
+            environment = ""
+        elif habitat == "marine":
+            epic_lead = EPIC_SCALE_LEAD["marine_surface"]
+        else:
+            epic_lead = EPIC_SCALE_LEAD.get(habitat, EPIC_SCALE_LEAD_DEFAULT)
+
     if wide_mode:
         # Framing leads, subject demoted — so the "tiny in frame" intent wins on
         # MJ's early-token weighting instead of the hero-subject description.
@@ -3510,6 +3622,10 @@ def assemble_prompt(
         sections = [perspective_lead, subject, camera, environment, interaction]
     else:
         sections = [subject, interaction, environment, camera]
+    # Epic lead goes FIRST of all — MJ commits to the vast composition + crisp
+    # sky before any subject/angle detail can pull the camera in.
+    if epic_lead:
+        sections = [epic_lead] + sections
     if canvas_print:
         sections.append(CANVAS_PRINT)
 
@@ -3526,7 +3642,12 @@ def assemble_prompt(
     # ── MJ FLAGS ──────────────────────────────────────────────────────────────
     # Clade-aware negative prompt — plants don't get vertebrate digit blockers,
     # arthropods don't get talon/footpad blockers, etc.
-    if output_mode == "perched":
+    if epic_scale:
+        # Lean, curated, habitat-aware list. Skips the full clade stack AND the
+        # wide/overhead/merge/anatomy append blocks below — a focused list we
+        # control beats a long one MJ silently trims past its length limit.
+        neg = build_epic_negative(habitat)
+    elif output_mode == "perched":
         # Perched mode: skip the aerial habitat extras (which block "folded wings"
         # and grounded poses — both wanted in a perched shot). Build base + clade
         # anatomy/studio/fossil/indoor/CGI without the habitat-specific overlay.
@@ -3541,7 +3662,7 @@ def assemble_prompt(
         neg = build_negative_prompt(habitat)
     # Session 13: wide modes get additional negative prompt blockers to
     # prevent MJ from drifting back toward portrait/close-up composition.
-    if wide_mode:
+    if not epic_scale and wide_mode:
         wide_neg = (", close-up, portrait, headshot, tight crop, macro, "
                     "face filling frame, telephoto compression, "
                     "shallow depth of field, bokeh background, "
@@ -3550,7 +3671,7 @@ def assemble_prompt(
     # Overhead full-body perspective: zoomed-in reference images bias MJ toward
     # close-up, eye-level framing that overrides the "bird's-eye" text. Block
     # that framing explicitly so the refs and the angle directive agree.
-    if perspective in ("drone_overhead", "drone_angled", "epic_aerial") or output_mode == "aerial_overhead":
+    if not epic_scale and (perspective in ("drone_overhead", "drone_angled", "epic_aerial") or output_mode == "aerial_overhead"):
         overhead_neg = (", close-up, portrait, headshot, tight crop, cropped body, "
                         "partial body, body cut off, face filling frame, "
                         "side view, profile view, eye-level shot, low angle")
@@ -3569,7 +3690,7 @@ def assemble_prompt(
         neg = neg + overhead_neg + bodyplan_neg
     # Session 19: predator_prey mode — prevent MJ from merging bodies
     # and from rendering both species at equal size.
-    if output_mode == "predator_prey":
+    if not epic_scale and output_mode == "predator_prey":
         merge_neg = (", merged bodies, conjoined animals, fused creatures, "
                      "overlapping bodies, chimera, hybrid animal, "
                      "two-headed, morphing, blended anatomy, "
@@ -3579,7 +3700,7 @@ def assemble_prompt(
     # Session 15: species anatomy module — banned flora (e.g. "grass" for
     # Jurassic species) injected into negative prompt to prevent MJ from
     # adding anachronistic vegetation.
-    if anatomy:
+    if not epic_scale and anatomy:
         anatomy_neg = build_anatomy_negative(anatomy)
         if anatomy_neg:
             neg = neg + ", " + anatomy_neg
@@ -4836,6 +4957,9 @@ def main() -> None:
     # --- Camera perspective (angle override — any mode) ---
     perspective = select_perspective()
 
+    # --- Epic scale (vast cinematic composition + crisp sky booster) ---
+    epic_scale = select_epic_scale()
+
     placement: tuple[str, str] = ("", "")
     if mode_cfg["needs_placement"]:
         placement = select_canvas_placement()
@@ -5017,6 +5141,7 @@ def main() -> None:
         secondary_species=secondary_species,
         interaction_type=interaction_type,
         perspective=perspective,
+        epic_scale=epic_scale,
     )
 
     # --- Version flag only (Session 26) ---
