@@ -44,8 +44,8 @@ CAMERA_PERSPECTIVES = {
         "lead":    "",
     },
     "drone_overhead": {
-        "display": "Drone / bird's-eye — straight down",
-        "lead":    "drone photograph looking straight down from 30m altitude, top-down bird's-eye view, no horizon, dorsal surface of animal visible",
+        "display": "Drone / bird's-eye — straight down (full body)",
+        "lead":    "aerial drone photograph looking straight down from directly overhead, true top-down bird's-eye view, the ENTIRE animal seen from above head to tail, the whole body fully contained inside the frame with open ground all around it, complete dorsal silhouette visible, flat ground fills the frame, no horizon, shot from high altitude on a wide lens",
     },
     "drone_angled": {
         "display": "Drone / elevated 45° — angled down",
@@ -3171,6 +3171,15 @@ def assemble_prompt(
     wide_mode = placement_wide or output_mode in WIDE_MODES
     multi_species_mode = bool(placement) and placement[0] == "multi_species"
 
+    # Aerial / overhead framings can't resolve skin-level detail. If the prompt
+    # still asks for "individual scales", "bite scars", etc., MJ zooms back in to
+    # satisfy that language — overriding the angle. So we suppress micro-anatomy
+    # for these perspectives (like wide_mode does) WITHOUT forcing the "tiny in
+    # frame" assembly, so drone_overhead still fills the frame head-to-tail.
+    aerial_persp = perspective in {"drone_overhead", "drone_angled", "epic_aerial"} \
+        or output_mode == "aerial_overhead"
+    suppress_detail = wide_mode or aerial_persp
+
     # ── SECTION 1: SUBJECT ───────────────────────────────────────────────────
     # Anatomy, pose, skin, mouth, behavior, condition, mood.
     # Richest section — MJ weights early tokens most heavily.
@@ -3222,7 +3231,7 @@ def assemble_prompt(
     # Group herd forces "wide" — can't resolve detail on 3 animals, and
     # extra anatomy tokens fight the group composition instruction.
     CLOSE_MODES = {"portrait", "extreme_closeup", "eye_contact", "jaws_detail", "action_freeze"}
-    if wide_mode or is_group:
+    if wide_mode or is_group or aerial_persp:
         anatomy_mode = "wide"
     elif output_mode in CLOSE_MODES:
         anatomy_mode = "close"
@@ -3244,7 +3253,7 @@ def assemble_prompt(
         # Session 22: inject explicit "X NOT Y" corrections that contradict
         # MJ's training-data assumptions. These get priority placement at
         # the START of subject_parts so MJ reads them first.
-        if anatomy.bias_corrections and not wide_mode and not is_group:
+        if anatomy.bias_corrections and not suppress_detail and not is_group:
             # Cap at 3 in full mode — full mode has more context-setting
             # tokens after this so we can't afford 4 corrections like lean.
             corrections = anatomy.bias_corrections[:3]
@@ -3257,14 +3266,18 @@ def assemble_prompt(
             subject_parts.append(anatomy.scale_anchor)
 
         # ── COLORATION — drab naturalistic palette, anti-rainbow ────────────
-        if anatomy.coloration_phrase and not wide_mode and not is_group:
+        # Suppressed in aerial/wide framings: coloration phrases often name a
+        # real animal as a palette anchor (e.g. "Komodo-dragon palette"), and
+        # from overhead — where the silhouette is weak — MJ latches onto that
+        # name and renders the actual animal instead of the dinosaur.
+        if anatomy.coloration_phrase and not suppress_detail and not is_group:
             subject_parts.append(anatomy.coloration_phrase)
 
         # ── Add LLaVA anatomy analysis from winning images ──────────────────
         # This reinforces what the anatomy module said with real-world examples
         # from successful generations
         winner_hints = get_winner_anatomy_hints(species["name"])
-        if winner_hints and not wide_mode:
+        if winner_hints and not suppress_detail:
             subject_parts.append(f"[Verified anatomy: {winner_hints}]")
 
         if not wide_mode:
@@ -3331,10 +3344,11 @@ def assemble_prompt(
     beh_phrase = _clip_clean(beh_phrase)
     subject_parts.append(beh_phrase)
 
-    # Condition — skip entirely in wide modes (unresolvable at distance).
-    # Otherwise first 2 phrases only (Session 10).
+    # Condition — skip entirely in wide / aerial framings (unresolvable at
+    # distance; bite scars etc. drag MJ back to a close-up). Otherwise first 2
+    # phrases only (Session 10).
     # Session 17 CLIP audit: clean prose connectors from condition phrases.
-    if not wide_mode:
+    if not suppress_detail:
         cond_phrases = condition_param["value"].split(", ")[:2]
         condition_short = ", ".join(_clip_clean(p) for p in cond_phrases)
         subject_parts.append(condition_short)
@@ -3347,7 +3361,7 @@ def assemble_prompt(
     # _lean_naturalism() so feathered species get "feathers catching sunlight"
     # and pterosaurs get "pycnofiber fuzz catching wind" instead of the
     # default "scales catching sunlight" — which was wrong for ~10 species.
-    if not wide_mode and not is_group and habitat not in ("plant",):
+    if not suppress_detail and not is_group and habitat not in ("plant",):
         subject_parts.append(_lean_naturalism(habitat, anatomy))
 
     # Session 11: style_param["value"] and HABITAT_REALISM are NOT injected
@@ -3533,6 +3547,26 @@ def assemble_prompt(
                     "shallow depth of field, bokeh background, "
                     "detail shot, extreme close-up")
         neg = neg + wide_neg
+    # Overhead full-body perspective: zoomed-in reference images bias MJ toward
+    # close-up, eye-level framing that overrides the "bird's-eye" text. Block
+    # that framing explicitly so the refs and the angle directive agree.
+    if perspective in ("drone_overhead", "drone_angled", "epic_aerial") or output_mode == "aerial_overhead":
+        overhead_neg = (", close-up, portrait, headshot, tight crop, cropped body, "
+                        "partial body, body cut off, face filling frame, "
+                        "side view, profile view, eye-level shot, low angle")
+        # True straight-down only: no sky/horizon should appear. Angled and epic
+        # aerial KEEP the horizon and sky — the glowing horizon band is exactly
+        # what makes those shots feel vast and epic.
+        if perspective == "drone_overhead" or output_mode == "aerial_overhead":
+            overhead_neg += ", horizon visible, sky visible"
+        # Top-down reptiles default to a sprawling-lizard read in MJ. Block the
+        # wrong body plan — safe for all dinosaurs (none had a sprawling gait),
+        # but deliberately NOT banning "four legs"/"quadruped" so overhead shots
+        # of Triceratops, sauropods, ankylosaurs still work.
+        bodyplan_neg = (", crocodile, alligator, monitor lizard, Komodo dragon, "
+                        "iguana, sprawling lizard, sprawling reptile, splayed limbs, "
+                        "belly flat on ground, lying down, basking reptile")
+        neg = neg + overhead_neg + bodyplan_neg
     # Session 19: predator_prey mode — prevent MJ from merging bodies
     # and from rendering both species at equal size.
     if output_mode == "predator_prey":
