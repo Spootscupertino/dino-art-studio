@@ -203,6 +203,21 @@ What each LoRA actually trained on, reconstructed from Replicate training run in
 
 ---
 
+## Plan of Attack — "Ten 10s, then discovery, then LoRA" (2026-05-27)
+
+**Where we landed:** the MJ generator now reliably produces 9/10 epic scenes. We cracked the vast/cinematic look this session — front-load composition + a *crisp* (not hazy) sky, scale from depth + distant pterosaurs, and detail refs at low `--iw` so refs season the skin without flattening the composition. Built into the generator as the **Epic-scale toggle** (`select_epic_scale`, habitat-aware so marine/mosasaur gets underwater god rays, not floodplain clouds).
+
+**Why we can't hit 10s yet, and the sequence to fix it.** LoRA is the eventual path to *reliable* 10s but it's deferred — we can launch 9s now for the website/posters/Google recognition, finish a select few to 10 in Photoshop, and come back to LoRA later (arriving with a curated two-finger-rex corpus built via V7 omni reference). Store reality: ~50 products, 1 sale; site plugged into Google ~early May 2026.
+
+1. **Finishing pipeline (Photoshop) — the real 9→10 lever, do FIRST.** We only need a few great images, and we own the Adobe suite. Build a repeatable Finishing Checklist: fix hands/feet (inpaint or PS patch), clean animal-merge contact zones, upscale to print res, dodge/burn for depth, grade toward the crisp-epic look, sharpen, export. Finish ~10 of the best nines.
+2. **Lean the generator.** Stay under MJ's 1300-char Prompt Shortener so *we* control the prompt. A/B the full negative stack vs a ~12-token lean list; delete every `--no` term and `X NOT Y` correction that doesn't change v8.1 output. `build_epic_negative()` is the lean prototype — extend it to the default path.
+3. **Feedback flywheel (cheap).** Log every keeper into `winners.json` *with settings* (prompt + refs + `--iw` + `--stylize` + species + look). Double duty: reveals which settings make winners, and becomes the curated LoRA dataset — so keep license + a caption note per image now.
+4. **Aesthetic range.** Don't ship 10 identical golden-hour standoffs. Span time of day / weather / species / hero-vs-vast framing / mood — more Google query surface and a gallery with a point of view.
+
+**Then — discovery.** 1 sale / 50 products is a discoverability problem as much as an art one. When the 10 ship, pair them with listing quality + the Google integration (titles, tags, descriptions, alt text, structured data).
+
+---
+
 ## Infrastructure
 
 - **Machine:** Mac mini M1, Terminal, Python 3.9.6
