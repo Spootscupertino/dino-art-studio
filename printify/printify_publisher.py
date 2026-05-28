@@ -74,6 +74,7 @@ def _needs_approval(image_path: Path) -> bool:
     return not image_path.with_suffix(image_path.suffix + ".approved").exists()
 
 POSTER_SIZES = ["12x18", "18x24", "24x36"]
+POSTER_SIZES_H = ["18x12", "24x18", "36x24"]  # landscape (blueprint 284)
 CANVAS_SIZES = ["16x20", "18x24", "24x36"]
 MUG_SIZES = ["11oz_mug", "15oz_mug"]
 
@@ -401,10 +402,16 @@ def plan_publish(image_rel: str, feed_entry: Dict[str, Any], cfg: Dict[str, Any]
     description = feed_entry.get("description") or ""
     keywords = feed_entry.get("keywords") or []
 
+    # Orientation handoff: a landscape image needs a landscape poster blueprint
+    # (284 "Matte Horizontal Posters") or Printify letterboxes it onto a portrait
+    # sheet. Detect from the gallery entry's dimensions.
+    is_landscape = int(feed_entry.get("width", 0)) > int(feed_entry.get("height", 0))
+
     plan = {
         "image": image_rel,
         "category": category,
         "enabled_kinds": enabled_kinds,
+        "orientation": "landscape" if is_landscape else "portrait",
         "title": title,
         "uploads": [{"endpoint": "POST /uploads/images.json", "file": image_rel}],
         "products": [],
@@ -417,7 +424,12 @@ def plan_publish(image_rel: str, feed_entry: Dict[str, Any], cfg: Dict[str, Any]
     ]:
         if kind not in enabled_kinds:
             continue
-        kcfg = products_cfg.get(kind, {})
+        cfg_key = kind
+        # Swap to the horizontal poster config for landscape art when available.
+        if kind == "poster" and is_landscape and products_cfg.get("poster_horizontal", {}).get("blueprint_id"):
+            cfg_key = "poster_horizontal"
+            sizes = POSTER_SIZES_H
+        kcfg = products_cfg.get(cfg_key, {})
         if not kcfg.get("blueprint_id"):
             plan["products"].append({"kind": kind, "status": "SKIPPED — config missing (run --bootstrap-config)"})
             continue
@@ -433,6 +445,8 @@ def plan_publish(image_rel: str, feed_entry: Dict[str, Any], cfg: Dict[str, Any]
         ctx, label = KIND_CONTEXT[kind]
         plan["products"].append({
             "kind": kind,
+            "config_key": cfg_key,
+            "sizes": sizes,
             "endpoint": f"POST /shops/{cfg.get('shop_id')}/products.json",
             "blueprint_id": kcfg["blueprint_id"],
             "print_provider_id": kcfg["print_provider_id"],
@@ -630,8 +644,11 @@ def cmd_publish(args) -> int:
                 continue
             kind = prod_plan["kind"]
             # Pick the largest variant size as the representative fit target.
-            sizes_for_kind = {"wrapped_canvas": CANVAS_SIZES, "mug": MUG_SIZES}.get(kind, POSTER_SIZES)
-            rep_size = sizes_for_kind[-1]  # e.g. "24x36" or "15oz_mug"
+            # Use the plan's own sizes so landscape posters fit to 36x24, not 24x36.
+            sizes_for_kind = prod_plan.get("sizes") or (
+                {"wrapped_canvas": CANVAS_SIZES, "mug": MUG_SIZES}.get(kind, POSTER_SIZES)
+            )
+            rep_size = sizes_for_kind[-1]  # e.g. "36x24" or "15oz_mug"
 
             image_id, fit_info = _upload_with_fit(abs_path, rep_size)
             fit_log[kind] = fit_info

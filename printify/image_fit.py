@@ -31,6 +31,9 @@ from typing import Any, Dict, Optional, Tuple
 
 try:
     from PIL import Image, ImageFilter  # type: ignore
+    # Our print masters are large by design (e.g. 18000x12000 @ 300 DPI). They're
+    # our own trusted files, so disable PIL's decompression-bomb guard.
+    Image.MAX_IMAGE_PIXELS = None
     _PIL_AVAILABLE = True
 except ImportError:
     _PIL_AVAILABLE = False
@@ -48,6 +51,10 @@ PRINT_SIZES: Dict[str, Tuple[float, float]] = {
     "18x24": (18.0, 24.0),
     "24x36": (24.0, 36.0),
     "16x20": (16.0, 20.0),
+    # Landscape poster sizes (blueprint 284, Matte Horizontal Posters).
+    "18x12": (18.0, 12.0),
+    "24x18": (24.0, 18.0),
+    "36x24": (36.0, 24.0),
     "11oz_mug": (8.5, 3.6),   # landscape mug wrap
     "15oz_mug": (8.5, 4.0),   # landscape mug wrap
 }
@@ -288,15 +295,23 @@ def prepare_for_print(
         )
 
     print_w_in, print_h_in = PRINT_SIZES[print_size_str]
+
+    img = Image.open(src_path)
+    src_w, src_h = img.size
+
+    # Orientation match: print sizes are catalogued portrait (W<=H), but a
+    # landscape source should produce a landscape print, not a cropped portrait
+    # one. Swap the print dimensions to follow the source orientation so a 3:2
+    # landscape fits a 36x24 poster with no crop instead of being sliced to 24x36.
+    if (src_w >= src_h) != (print_w_in >= print_h_in):
+        print_w_in, print_h_in = print_h_in, print_w_in
+
     # Target pixel dimensions at target_dpi (default 300 — Printify's recommended
     # print resolution). Output is JPEG q92, so even a 24x36 @ 300 DPI
     # (10800x7200) stays well within Printify's upload limit. DPI_FLOOR remains
     # the reject threshold below which we refuse to publish.
     target_w_px = int(print_w_in * target_dpi)
     target_h_px = int(print_h_in * target_dpi)
-
-    img = Image.open(src_path)
-    src_w, src_h = img.size
 
     dpi_before = effective_dpi(src_w, src_h, print_w_in, print_h_in)
     meta: Dict[str, Any] = {
