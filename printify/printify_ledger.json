@@ -1045,6 +1045,118 @@
           "output_size": "3600x5400"
         }
       }
+    },
+    "predators/tyrannosaurus-rex-triceratops-duel-river-delta.png": {
+      "published_at": "2026-05-28T20:27:44.131528+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a18a52c6b650ce2880b5107",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a189d6fa53e13f7196cbea5",
+            "24x18": "6a18a51a05220da09921a7f1",
+            "36x24": "6a18a4ee2e60c220f4d2959f"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a18a53d2e85056c51042c45",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18a536d322087079de73a8",
+            "15oz_mug": "6a18a53c09772620c11e877d"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/Desktop/Jurassinkart/Printify/trex-triceratops_large_size.png",
+          "print_size": "18x12",
+          "source_size": "18000x12000",
+          "effective_dpi_before": 1000.0,
+          "effective_dpi_after": 1000.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "10800x7200"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/Desktop/Jurassinkart/Printify/trex-triceratops_large_size.png",
+          "print_size": "24x18",
+          "source_size": "18000x12000",
+          "effective_dpi_before": 750.0,
+          "effective_dpi_after": 750.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "14400x10800"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/Desktop/Jurassinkart/Printify/trex-triceratops_large_size.png",
+          "print_size": "36x24",
+          "source_size": "18000x12000",
+          "effective_dpi_before": 500.0,
+          "effective_dpi_after": 500.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "18000x12000"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/Desktop/Jurassinkart/Printify/trex-triceratops_large_size.png",
+          "print_size": "11oz_mug",
+          "source_size": "18000x12000",
+          "effective_dpi_before": 3333.3,
+          "effective_dpi_after": 3333.3,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2160"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/Desktop/Jurassinkart/Printify/trex-triceratops_large_size.png",
+          "print_size": "15oz_mug",
+          "source_size": "18000x12000",
+          "effective_dpi_before": 3000.0,
+          "effective_dpi_after": 3000.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2400"
+        }
+      }
     }
   }
 }
