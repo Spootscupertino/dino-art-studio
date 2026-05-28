@@ -41,7 +41,10 @@ except ImportError:
 # ---------- constants ----------
 
 DPI_FLOOR = 150          # minimum acceptable effective DPI
-DPI_PREFERRED = 300      # log a notice below this even if above floor
+DPI_PREFERRED = 300      # Printify's nominal requirement; log a notice below this
+DPI_TARGET = 600         # upload target — 2x Printify's requirement so its quality
+                         # check clears comfortably (capped at the master's pixels,
+                         # never upscaled).
 EDGE_SAMPLE_FRACTION = 0.05  # retained for any future use
 
 # Map size keys to (width_inches, height_inches).
@@ -278,7 +281,7 @@ def prepare_for_print(
     src_path: str,
     print_size_str: str,
     dpi_floor: float = DPI_FLOOR,
-    target_dpi: float = DPI_PREFERRED,
+    target_dpi: float = DPI_TARGET,
 ) -> Optional[Tuple[str, Dict[str, Any]]]:
     """Prepare src_path for a given print size. Returns (temp_png_path, metadata) or None.
 
@@ -306,12 +309,20 @@ def prepare_for_print(
     if (src_w >= src_h) != (print_w_in >= print_h_in):
         print_w_in, print_h_in = print_h_in, print_w_in
 
-    # Target pixel dimensions at target_dpi (default 300 — Printify's recommended
-    # print resolution). Output is JPEG q92, so even a 24x36 @ 300 DPI
-    # (10800x7200) stays well within Printify's upload limit. DPI_FLOOR remains
+    # Target pixel dimensions at target_dpi (default 600 — 2x Printify's 300 DPI
+    # requirement, so its quality check clears with headroom). DPI_FLOOR remains
     # the reject threshold below which we refuse to publish.
     target_w_px = int(print_w_in * target_dpi)
     target_h_px = int(print_h_in * target_dpi)
+
+    # Never upscale: if the target exceeds what the master can supply for this
+    # aspect (scale-to-fill), shrink the target to the master's limit. So a
+    # 36x24 from an 18000x12000 master lands at 18000x12000 (500 DPI), not an
+    # upscaled 21600x14400 (600 DPI). Still well above the 300 DPI requirement.
+    fill_scale = max(target_w_px / src_w, target_h_px / src_h)
+    if fill_scale > 1.0:
+        target_w_px = int(target_w_px / fill_scale)
+        target_h_px = int(target_h_px / fill_scale)
 
     dpi_before = effective_dpi(src_w, src_h, print_w_in, print_h_in)
     meta: Dict[str, Any] = {
