@@ -11,13 +11,7 @@ products:
       - { id: 43138, size: 12x18, retail_cents: 2500, shipping_cents: 0, source_product_id: 69f4bba0c5dce11a420eb9aa }
       - { id: 43144, size: 18x24, retail_cents: 2200, shipping_cents: 0, source_product_id: 69f4bba0c5dce11a420eb9aa }
       - { id: 43150, size: 24x36, retail_cents: 4000, shipping_cents: 0, source_product_id: 69f4bba0c5dce11a420eb9aa }
-  wrapped_canvas:
-    blueprint_id: 937
-    print_provider_id: 105
-    variants:
-      - { id: 82231, size: 16x20, retail_cents: 4700, shipping_cents: 0, source_product_id: 69f4bba6005bc962f702d3da }
-      - { id: 82232, size: 18x24, retail_cents: 4500, shipping_cents: 0, source_product_id: 69f4bba6005bc962f702d3da }
-      - { id: 82235, size: 24x36, retail_cents: 8200, shipping_cents: 0, source_product_id: 69f4bba6005bc962f702d3da }
+  # wrapped_canvas retired 2026-05-28 — store ships posters + mugs only (phone cases TBD).
   mug:
     blueprint_id: 478
     print_provider_id: 99

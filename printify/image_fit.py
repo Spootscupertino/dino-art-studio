@@ -271,6 +271,7 @@ def prepare_for_print(
     src_path: str,
     print_size_str: str,
     dpi_floor: float = DPI_FLOOR,
+    target_dpi: float = DPI_PREFERRED,
 ) -> Optional[Tuple[str, Dict[str, Any]]]:
     """Prepare src_path for a given print size. Returns (temp_png_path, metadata) or None.
 
@@ -287,10 +288,12 @@ def prepare_for_print(
         )
 
     print_w_in, print_h_in = PRINT_SIZES[print_size_str]
-    # Target pixel dimensions at DPI_FLOOR (150) — keeps base64 upload under ~15 MB.
-    # 300 DPI would produce 7200×10800 px PNGs that exceed Printify's POST limit.
-    target_w_px = int(print_w_in * DPI_FLOOR)
-    target_h_px = int(print_h_in * DPI_FLOOR)
+    # Target pixel dimensions at target_dpi (default 300 — Printify's recommended
+    # print resolution). Output is JPEG q92, so even a 24x36 @ 300 DPI
+    # (10800x7200) stays well within Printify's upload limit. DPI_FLOOR remains
+    # the reject threshold below which we refuse to publish.
+    target_w_px = int(print_w_in * target_dpi)
+    target_h_px = int(print_h_in * target_dpi)
 
     img = Image.open(src_path)
     src_w, src_h = img.size
@@ -346,7 +349,7 @@ def prepare_for_print(
     # Save as JPEG (much smaller than PNG for base64 upload; 95% quality is
     # indistinguishable from lossless at print viewing distances).
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
-    fitted.convert("RGB").save(tmp.name, format="JPEG", quality=95, optimize=True)
+    fitted.convert("RGB").save(tmp.name, format="JPEG", quality=92, optimize=True)
     tmp.close()
 
     print(

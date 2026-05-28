@@ -166,6 +166,9 @@ const itemListSchema = {
                 <span class="card-cue">View &amp; shop &nbsp;→</span>
               </figcaption>
             </a>
+            {product.caption && (
+              <figcaption class="gallery-caption">{product.caption}</figcaption>
+            )}
             <figcaption class="visually-hidden">
               {product.title} — {product.scientific_name}, {product.era}. {product.description}
             </figcaption>
@@ -426,6 +429,16 @@ const itemListSchema = {
     font-size: 0.95rem;
     color: #c9b988;
     letter-spacing: 0.04em;
+  }
+
+  .gallery-caption {
+    margin: 10px 4px 0;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #a89e89;
+    letter-spacing: 0.01em;
   }
 
   .visually-hidden {

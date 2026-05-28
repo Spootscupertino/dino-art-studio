@@ -250,6 +250,26 @@ def _read_sidecar(image_path: Path) -> str:
     return ""
 
 
+def _read_meta_override(image_path: Path) -> dict:
+    """Per-image SEO override sidecar: <image>.meta.json.
+
+    For curated hero pieces (esp. multi-species scenes the single-species
+    auto-deriver can't caption well), drop a JSON file next to the image with
+    any of: title, scientific_name, era, alt, description, keywords. These keys
+    override the derived values on every sync, so they never get clobbered.
+    Auto-derived images that have no sidecar are unaffected.
+    """
+    meta_path = image_path.with_suffix(image_path.suffix + ".meta.json")
+    if not meta_path.exists():
+        return {}
+    try:
+        data = json.loads(meta_path.read_text("utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"WARNING: ignoring malformed {meta_path.name}: {e}", file=sys.stderr)
+        return {}
+
+
 def build_entry(rel_path: str, category: str, dims: tuple, entry_type: str, existing=None) -> dict:
     sp, meta = species_for(rel_path, (existing or {}).get("title", ""))
     title = (existing or {}).get("title") or derive_title(rel_path)
@@ -271,6 +291,12 @@ def build_entry(rel_path: str, category: str, dims: tuple, entry_type: str, exis
     }
     if custom_note:
         entry["custom_note"] = custom_note
+    # Per-image override wins over auto-derivation (curated hero pieces).
+    # `caption` is an optional visible one-liner rendered under the image (SEO).
+    override = _read_meta_override(ASSETS_DIR / rel_path)
+    for key in ("title", "scientific_name", "era", "alt", "description", "keywords", "caption"):
+        if key in override and override[key]:
+            entry[key] = override[key]
     return entry
 
 

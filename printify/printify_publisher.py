@@ -78,11 +78,12 @@ CANVAS_SIZES = ["16x20", "18x24", "24x36"]
 MUG_SIZES = ["11oz_mug", "15oz_mug"]
 
 # Which product kinds to create per gallery category.
+# Canvas retired 2026-05-28 — store now ships posters + mugs (phone cases TBD).
 CATEGORY_PRODUCTS: Dict[str, List[str]] = {
-    "horizontal": ["poster", "wrapped_canvas", "mug"],
-    "vertical": ["poster", "wrapped_canvas"],
+    "horizontal": ["poster", "mug"],
+    "vertical": ["poster", "mug"],
 }
-DEFAULT_PRODUCTS: List[str] = ["poster", "wrapped_canvas"]
+DEFAULT_PRODUCTS: List[str] = ["poster", "mug"]
 
 KIND_CONTEXT = {
     "poster": ("Dinosaur Wall Art", "Fine Art Print"),
@@ -606,7 +607,17 @@ def cmd_publish(args) -> int:
             continue
 
         # ---------- LIVE PATH ----------
-        abs_path = GALLERY_DIR / rel
+        # Upload source defaults to the gallery file, but --print-file lets a
+        # high-res master (kept outside git) feed Printify while the gallery
+        # holds only a small web copy.
+        if args.print_file:
+            abs_path = Path(args.print_file).resolve()
+            if not abs_path.exists():
+                print(f"[error] --print-file not found: {abs_path}", file=sys.stderr)
+                return 2
+            print(f"[print-file] uploading master {abs_path.name} (not the gallery web copy)")
+        else:
+            abs_path = GALLERY_DIR / rel
 
         # Use the first print size across all product kinds for the shared upload.
         # Each product kind may get a differently-fitted version; we upload once
@@ -646,17 +657,22 @@ def cmd_publish(args) -> int:
             if shipping_profile_id:
                 payload["shipping_template_id"] = shipping_profile_id
             created = api.create_product(cfg["shop_id"], payload)
-            api.publish_product(
-                cfg["shop_id"],
-                created["id"],
-                shipping_profile_id=shipping_profile_id,
-            )
+            if args.draft:
+                print(f"  [draft] created {kind} product {created['id']} — "
+                      f"NOT pushed to Etsy (review in Printify dashboard)")
+            else:
+                api.publish_product(
+                    cfg["shop_id"],
+                    created["id"],
+                    shipping_profile_id=shipping_profile_id,
+                )
             product_results.append({
                 "kind": kind,
                 "product_id": created["id"],
                 "external_url": (created.get("external") or {}).get("handle"),
                 "variants": prod_plan["variants"],
                 "image_id": image_id,
+                "draft": bool(args.draft),
             })
 
         ledger.setdefault("entries", {})[ledger_key(rel)] = {
@@ -675,8 +691,16 @@ def main(argv: Optional[List[str]] = None) -> int:
                     help="Default. Print plan without API writes.")
     ap.add_argument("--live", action="store_true",
                     help="Actually create + publish products. Required for real writes.")
+    ap.add_argument("--draft", action="store_true",
+                    help="With --live: create products in Printify but DO NOT push to Etsy. "
+                         "Leaves them as drafts for manual review/publish in the Printify dashboard.")
     ap.add_argument("--image", type=str, default=None,
-                    help="Target a single image (absolute or gallery-relative path).")
+                    help="Target a single image (absolute or gallery-relative path). "
+                         "Identifies the product (metadata + ledger key).")
+    ap.add_argument("--print-file", type=str, default=None,
+                    help="Override the upload source with a high-res print master "
+                         "(outside git). Use when the gallery holds a small web copy "
+                         "but Printify needs the full 300-DPI master. Requires --image.")
     ap.add_argument("--bootstrap-config", action="store_true",
                     help="Inspect existing shop, derive config, write printify_config.yaml.")
     ap.add_argument("--list-shipping", action="store_true",
