@@ -441,6 +441,7 @@ def plan_publish(image_rel: str, feed_entry: Dict[str, Any], cfg: Dict[str, Any]
                 "id": v["id"],
                 "price": v["retail_cents"],
                 "is_enabled": True,
+                "size": v["size"],
             })
         ctx, label = KIND_CONTEXT[kind]
         plan["products"].append({
@@ -643,33 +644,40 @@ def cmd_publish(args) -> int:
             if prod_plan.get("status", "").startswith("SKIPPED"):
                 continue
             kind = prod_plan["kind"]
-            # Pick the largest variant size as the representative fit target.
-            # Use the plan's own sizes so landscape posters fit to 36x24, not 24x36.
-            sizes_for_kind = prod_plan.get("sizes") or (
-                {"wrapped_canvas": CANVAS_SIZES, "mug": MUG_SIZES}.get(kind, POSTER_SIZES)
-            )
-            rep_size = sizes_for_kind[-1]  # e.g. "36x24" or "15oz_mug"
+            # Fit + upload one image per distinct print size so every variant's
+            # aspect ratio is filled exactly (e.g. 3:2 art vs a 4:3 24x18 poster
+            # would otherwise letterbox). Dedup uploads by size.
+            size_to_image: Dict[str, str] = {}
+            print_areas = []
+            for v in prod_plan["variants"]:
+                size = v["size"]
+                if size not in size_to_image:
+                    img_id, fit_info = _upload_with_fit(abs_path, size)
+                    size_to_image[size] = img_id
+                    fit_log[f"{kind}:{size}"] = fit_info
+                print_areas.append({
+                    "variant_ids": [v["id"]],
+                    "placeholders": [{
+                        "position": "front",
+                        "images": [{
+                            "id": size_to_image[size],
+                            "x": 0.5, "y": 0.5, "scale": 1.0, "angle": 0,
+                        }],
+                    }],
+                })
 
-            image_id, fit_info = _upload_with_fit(abs_path, rep_size)
-            fit_log[kind] = fit_info
-
+            clean_variants = [
+                {"id": v["id"], "price": v["price"], "is_enabled": v["is_enabled"]}
+                for v in prod_plan["variants"]
+            ]
             payload = {
                 "title": prod_plan["title"],
                 "description": prod_plan["description"],
                 "blueprint_id": prod_plan["blueprint_id"],
                 "print_provider_id": prod_plan["print_provider_id"],
                 "tags": prod_plan["tags"],
-                "variants": prod_plan["variants"],
-                "print_areas": [{
-                    "variant_ids": [v["id"] for v in prod_plan["variants"]],
-                    "placeholders": [{
-                        "position": "front",
-                        "images": [{
-                            "id": image_id,
-                            "x": 0.5, "y": 0.5, "scale": 1.0, "angle": 0,
-                        }],
-                    }],
-                }],
+                "variants": clean_variants,
+                "print_areas": print_areas,
             }
             if shipping_profile_id:
                 payload["shipping_template_id"] = shipping_profile_id
@@ -688,7 +696,7 @@ def cmd_publish(args) -> int:
                 "product_id": created["id"],
                 "external_url": (created.get("external") or {}).get("handle"),
                 "variants": prod_plan["variants"],
-                "image_id": image_id,
+                "image_ids_by_size": size_to_image,
                 "draft": bool(args.draft),
             })
 
