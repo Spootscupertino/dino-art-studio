@@ -7,17 +7,25 @@ Usage:
   python3 tools/slug_rename.py [dir1 dir2 ...]
   With no args: renames in all gallery category folders.
 """
+import json
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 GALLERY_DIR = ROOT / "site" / "src" / "assets" / "gallery"
+PRODUCTS_JSON = ROOT / "site" / "src" / "data" / "products.json"
 
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 
 UUID_PATTERN = re.compile(r"_[a-f0-9]{8,}(-[a-f0-9-]+)?$")
 _SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{2,59}$")
+
+# Midjourney CDN drops land as "httpss.mj.run<hash>-..." — opaque hashes with no
+# species token, so the descriptive-word path below produces a junk slug (or, when
+# the derived slug equals the original stem, silently no-ops). For these we derive
+# the slug from the curated products.json title instead.
+MJ_CDN_RE = re.compile(r"\bmj\.run|httpss?\.mj\.", re.IGNORECASE)
 
 FILLER = {
     "spootscupertino", "the", "of", "with", "and", "a", "an", "in", "on",
@@ -43,13 +51,44 @@ _SPECIES_KEYS = sorted([
 ], key=len, reverse=True)
 
 
-def _make_seo_slug(path: Path) -> str:
+def _slugify(text: str) -> str:
+    """Turn arbitrary text (e.g. a products.json title) into a clean SEO slug."""
+    words = re.split(r"[^a-z0-9]+", text.lower())
+    words = [w for w in words if w and w not in FILLER and not re.fullmatch(r"\d+", w)]
+    slug = "-".join(words[:6])
+    return re.sub(r"-+", "-", slug).strip("-")
+
+
+def _load_titles() -> dict:
+    """Map basename -> title from products.json (curated titles for MJ-CDN drops)."""
+    titles = {}
+    if PRODUCTS_JSON.exists():
+        try:
+            for entry in json.loads(PRODUCTS_JSON.read_text("utf-8")):
+                fname, title = entry.get("filename"), entry.get("title")
+                if fname and title:
+                    titles[Path(fname).name] = title
+        except (json.JSONDecodeError, OSError):
+            pass
+    return titles
+
+
+def _make_seo_slug(path: Path, titles: dict | None = None) -> str:
+    titles = titles or {}
+    # Split on dots too — MJ CDN names like "httpss.mj.run" would otherwise stay a
+    # single opaque token and yield a slug identical to the raw stem (a silent no-op).
     stem = UUID_PATTERN.sub("", path.stem)
-    words = re.split(r"[_\-\s]+", stem.lower())
+    words = re.split(r"[_\-\s.]+", stem.lower())
     descriptive = [w for w in words if w and w not in FILLER and not re.fullmatch(r"\d+", w)]
 
     haystack = " ".join(descriptive)
     sp = next((k for k in _SPECIES_KEYS if k in haystack), None)
+
+    # MJ-CDN drops carry no species token; derive from the curated title instead.
+    if not sp and (MJ_CDN_RE.search(path.name) or path.name in titles):
+        title_slug = _slugify(titles.get(path.name, ""))
+        if _SLUG_RE.match(title_slug):
+            return title_slug
 
     if sp:
         sp_words = sp.split()
@@ -63,7 +102,7 @@ def _make_seo_slug(path: Path) -> str:
     return slug or "prehistoric-art"
 
 
-def rename_slugs(folder: Path) -> int:
+def rename_slugs(folder: Path, titles: dict | None = None) -> int:
     """Rename non-slug image files in folder. Returns count renamed."""
     renamed = 0
     for p in sorted(folder.iterdir()):
@@ -73,7 +112,7 @@ def rename_slugs(folder: Path) -> int:
             continue
         if _SLUG_RE.match(p.stem):
             continue
-        slug = _make_seo_slug(p)
+        slug = _make_seo_slug(p, titles)
         new_name = slug + p.suffix.lower()
         new_path = folder / new_name
         counter = 1
@@ -94,10 +133,11 @@ def main():
     else:
         dirs = sorted(d for d in GALLERY_DIR.iterdir() if d.is_dir() and not d.name.startswith("."))
 
+    titles = _load_titles()
     total = 0
     for d in dirs:
         if d.is_dir():
-            n = rename_slugs(d)
+            n = rename_slugs(d, titles)
             total += n
     if total:
         print(f"slug_rename: {total} file(s) renamed")
