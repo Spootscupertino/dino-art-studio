@@ -3580,6 +3580,230 @@
           "output_size": "5100x2400"
         }
       }
+    },
+    "herbivores/triceratops-tyrannasaurs-square-off.png": {
+      "published_at": "2026-05-31T18:56:54.933431+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c84644525ffd57310f017",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c8457a749c0663350866f",
+            "24x18": "6a1c845d65c7cdb0ca4e1353",
+            "36x24": "6a1c8457a749c0663350866f"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c8471a2f3e94ff40dd4a4",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a1c846c109e19aba9d5e6b0",
+            "15oz_mug": "6a1c8470d9ecb51cf21950ec"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/triceratops-tyrannasaurs-square-off.png",
+          "print_size": "18x12",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 600.0,
+          "effective_dpi_after": 600.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "10800x7200"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/triceratops-tyrannasaurs-square-off.png",
+          "print_size": "24x18",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 450.0,
+          "effective_dpi_after": 450.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "9600x7200"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/triceratops-tyrannasaurs-square-off.png",
+          "print_size": "36x24",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 300.0,
+          "effective_dpi_after": 300.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "10800x7200"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/triceratops-tyrannasaurs-square-off.png",
+          "print_size": "11oz_mug",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 2000.0,
+          "effective_dpi_after": 2000.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2160"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/triceratops-tyrannasaurs-square-off.png",
+          "print_size": "15oz_mug",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 1800.0,
+          "effective_dpi_after": 1800.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2400"
+        }
+      }
+    },
+    "marine/mosasaurus-mosasaur-snapping-jaws.png": {
+      "published_at": "2026-05-31T19:30:06.546307+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c8c224c996ba2b100ad2a",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 3000,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c8c16e56e476c8b04abbd",
+            "24x18": "6a1c8c1c5b6b33bc8f8d4b51",
+            "36x24": "6a1c8c16e56e476c8b04abbd"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c8c328e5b9b44da09e66c",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a1c8c2d313b12fd37bba3ed",
+            "15oz_mug": "6a1c8c312dab6f79ea69b109"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/mosasaurus-mosasaur-snapping-jaws.png",
+          "print_size": "18x12",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 600.0,
+          "effective_dpi_after": 600.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "10800x7200"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/mosasaurus-mosasaur-snapping-jaws.png",
+          "print_size": "24x18",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 450.0,
+          "effective_dpi_after": 450.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "9600x7200"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/mosasaurus-mosasaur-snapping-jaws.png",
+          "print_size": "36x24",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 300.0,
+          "effective_dpi_after": 300.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "10800x7200"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/mosasaurus-mosasaur-snapping-jaws.png",
+          "print_size": "11oz_mug",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 2000.0,
+          "effective_dpi_after": 2000.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2160"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/mosasaurus-mosasaur-snapping-jaws.png",
+          "print_size": "15oz_mug",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 1800.0,
+          "effective_dpi_after": 1800.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2400"
+        }
+      }
     }
   }
 }

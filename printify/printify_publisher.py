@@ -29,6 +29,7 @@ import argparse
 import json
 import os
 import sys
+import time
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -488,6 +489,40 @@ def cmd_bootstrap_config(_args) -> int:
     return 0
 
 
+def _wait_for_complete_image(path: Path, retries: int = 5, delay: float = 2.0) -> bool:
+    """Block until ``path`` is a fully-written, decodable PNG.
+
+    The launchd watcher fires the moment a winner lands in the gallery, but the
+    52MB print-master may still be mid-write from the upscale step. Reading it
+    then yields a truncated file that Printify rejects with 400/10300. We poll
+    the file: it must (a) stop growing and (b) fully decode with truncation
+    detection ON. Returns True once stable, False if it never settles.
+    """
+    try:
+        from PIL import Image, ImageFile
+    except ImportError:
+        return True  # Pillow absent — let the normal path handle it.
+
+    prev_size = -1
+    for attempt in range(retries):
+        try:
+            size = path.stat().st_size
+        except OSError:
+            size = -1
+        if size > 0 and size == prev_size:
+            ImageFile.LOAD_TRUNCATED_IMAGES = False
+            try:
+                with Image.open(path) as im:
+                    im.load()
+                return True
+            except Exception as exc:
+                print(f"[wait] {path.name} still truncated ({exc}); "
+                      f"retry {attempt + 1}/{retries}")
+        prev_size = size
+        time.sleep(delay)
+    return False
+
+
 def _upload_with_fit(abs_path: Path, print_size_str: str) -> tuple:
     """Prepare image for a specific print size and upload it.
 
@@ -652,6 +687,14 @@ def cmd_publish(args) -> int:
                 print(f"[master] uploading print master {master.name} (not the gallery web copy)")
             else:
                 abs_path = GALLERY_DIR / rel
+
+        # The master may still be mid-write when the watcher fires. Wait for it
+        # to fully settle before any fit/upload, or Printify rejects the
+        # truncated bytes with 400/10300.
+        if not _wait_for_complete_image(abs_path):
+            print(f"[error] {abs_path.name} never finished writing (still "
+                  f"truncated) — skipping publish for {rel}", file=sys.stderr)
+            continue
 
         # Use the first print size across all product kinds for the shared upload.
         # Each product kind may get a differently-fitted version; we upload once

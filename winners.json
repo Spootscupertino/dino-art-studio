@@ -82,12 +82,34 @@
     {
       "signal_type": "mj_composition",
       "source": "mj",
+      "prompt": "n/a",
+      "score": 9.75,
+      "session_id": 54,
+      "timestamp": "2026-05-31T12:22:44.613497",
+      "mj_flags": {},
+      "image_path": "/Users/ericeldridge/Downloads/spootscupertino_open_ocean_grey-green_water_light_filtering_f_c173f2c4-9e8c-4199-9778-3708a4cafa63_0.png"
+    },
+    {
+      "signal_type": "mj_composition",
+      "source": "mj",
       "prompt": "mosasaur",
       "score": 9.38,
       "session_id": 31,
       "timestamp": "2026-05-31T09:53:40.282321",
       "mj_flags": {},
       "image_path": "/Users/ericeldridge/Downloads/spootscupertino_open_ocean_grey-green_water_light_filtering_f_c173f2c4-9e8c-4199-9778-3708a4cafa63_0.png"
+    }
+  ],
+  "t rex and triceratops": [
+    {
+      "signal_type": "mj_composition",
+      "source": "mj",
+      "prompt": "n/a",
+      "score": 9.75,
+      "session_id": 47,
+      "timestamp": "2026-05-31T11:47:30.115843",
+      "mj_flags": {},
+      "image_path": "/Users/ericeldridge/Downloads/spootscupertino_httpss.mj.runfLBg_9H0R44_httpss.mj.runcOMHW1y_2fc8e374-e204-4105-b7e6-f8b33195620f_3.png"
     }
   ]
 }

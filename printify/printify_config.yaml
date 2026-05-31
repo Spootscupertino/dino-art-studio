@@ -9,7 +9,7 @@ products:
     print_provider_id: 99
     variants:
       - { id: 43138, size: 12x18, retail_cents: 2500, shipping_cents: 0, source_product_id: 69f4bba0c5dce11a420eb9aa }
-      - { id: 43144, size: 18x24, retail_cents: 2200, shipping_cents: 0, source_product_id: 69f4bba0c5dce11a420eb9aa }
+      - { id: 43144, size: 18x24, retail_cents: 3000, shipping_cents: 0, source_product_id: 69f4bba0c5dce11a420eb9aa }
       - { id: 43150, size: 24x36, retail_cents: 4000, shipping_cents: 0, source_product_id: 69f4bba0c5dce11a420eb9aa }
   # Landscape posters (blueprint 284 "Matte Horizontal Posters", same provider
   # 99 + prices as the vertical poster). Used automatically for landscape images.
@@ -18,7 +18,7 @@ products:
     print_provider_id: 99
     variants:
       - { id: 43166, size: 18x12, retail_cents: 2500, shipping_cents: 0 }
-      - { id: 43172, size: 24x18, retail_cents: 2200, shipping_cents: 0 }
+      - { id: 43172, size: 24x18, retail_cents: 3000, shipping_cents: 0 }
       - { id: 43178, size: 36x24, retail_cents: 4000, shipping_cents: 0 }
   # wrapped_canvas retired 2026-05-28 — store ships posters + mugs only (phone cases TBD).
   mug:
