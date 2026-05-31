@@ -1,142 +1,6 @@
 {
   "version": 1,
   "entries": {
-    "aerial/pteranodon-cretaceous-pterosaur-flight.png": {
-      "published_at": "2026-05-01T14:35:34.500171+00:00",
-      "products": [
-        {
-          "kind": "poster",
-          "product_id": "69f4ba30f18e6ff51e03691c",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 43138,
-              "price": 2500,
-              "is_enabled": true
-            },
-            {
-              "id": 43144,
-              "price": 2200,
-              "is_enabled": true
-            },
-            {
-              "id": 43150,
-              "price": 4000,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4ba2f1fcf4c3c691b26c5"
-        },
-        {
-          "kind": "wrapped_canvas",
-          "product_id": "69f4ba3486b2999c2c054bc4",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 82231,
-              "price": 4700,
-              "is_enabled": true
-            },
-            {
-              "id": 82232,
-              "price": 4500,
-              "is_enabled": true
-            },
-            {
-              "id": 82235,
-              "price": 8200,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4ba2f1fcf4c3c691b26c5"
-        }
-      ],
-      "image_fit": {
-        "poster": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pteranodon-cretaceous-pterosaur-flight.png",
-          "print_size": "24x36",
-          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pteranodon-cretaceous-pterosaur-flight.png @ 24x36"
-        },
-        "wrapped_canvas": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pteranodon-cretaceous-pterosaur-flight.png",
-          "print_size": "24x36",
-          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pteranodon-cretaceous-pterosaur-flight.png @ 24x36"
-        }
-      }
-    },
-    "flora_arthropods/cretaceous-blooming-magnolia-paleobotanical.png": {
-      "published_at": "2026-05-01T14:40:21.818709+00:00",
-      "products": [
-        {
-          "kind": "poster",
-          "product_id": "69f4bb49005bc962f702d387",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 43138,
-              "price": 2500,
-              "is_enabled": true
-            },
-            {
-              "id": 43144,
-              "price": 2200,
-              "is_enabled": true
-            },
-            {
-              "id": 43150,
-              "price": 4000,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bb48b81926b802539c8f"
-        },
-        {
-          "kind": "wrapped_canvas",
-          "product_id": "69f4bb5350e99c888b0b6db6",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 82231,
-              "price": 4700,
-              "is_enabled": true
-            },
-            {
-              "id": 82232,
-              "price": 4500,
-              "is_enabled": true
-            },
-            {
-              "id": 82235,
-              "price": 8200,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bb48b81926b802539c8f"
-        }
-      ],
-      "image_fit": {
-        "poster": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/cretaceous-blooming-magnolia-paleobotanical.png",
-          "print_size": "24x36",
-          "source_size": "2528x1696",
-          "effective_dpi_before": 105.3,
-          "effective_dpi_after": 210.7,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        },
-        "wrapped_canvas": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/cretaceous-blooming-magnolia-paleobotanical.png",
-          "print_size": "24x36",
-          "source_size": "2528x1696",
-          "effective_dpi_before": 105.3,
-          "effective_dpi_after": 210.7,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        }
-      }
-    },
     "flora_arthropods/lepidodendron-carboniferous-lycopsid-tree.png": {
       "published_at": "2026-05-01T14:40:40.215184+00:00",
       "products": [
@@ -326,79 +190,6 @@
         }
       }
     },
-    "herbivores/stegosaurus-plated-jurassic-herbivore.png": {
-      "published_at": "2026-05-01T14:41:26.842540+00:00",
-      "products": [
-        {
-          "kind": "poster",
-          "product_id": "69f4bb8d1cc4ed38fb0aaf4a",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 43138,
-              "price": 2500,
-              "is_enabled": true
-            },
-            {
-              "id": 43144,
-              "price": 2200,
-              "is_enabled": true
-            },
-            {
-              "id": 43150,
-              "price": 4000,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bb8ca225b736917e69c9"
-        },
-        {
-          "kind": "wrapped_canvas",
-          "product_id": "69f4bb94ef66d02ffe01d92a",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 82231,
-              "price": 4700,
-              "is_enabled": true
-            },
-            {
-              "id": 82232,
-              "price": 4500,
-              "is_enabled": true
-            },
-            {
-              "id": 82235,
-              "price": 8200,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bb8ca225b736917e69c9"
-        }
-      ],
-      "image_fit": {
-        "poster": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/stegosaurus-plated-jurassic-herbivore.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        },
-        "wrapped_canvas": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/stegosaurus-plated-jurassic-herbivore.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        }
-      }
-    },
     "herbivores/triceratops-frilled-ceratopsian-portrait.png": {
       "published_at": "2026-05-01T14:41:44.726535+00:00",
       "products": [
@@ -459,590 +250,6 @@
           "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-frilled-ceratopsian-portrait.png",
           "print_size": "24x36",
           "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-frilled-ceratopsian-portrait.png @ 24x36"
-        }
-      }
-    },
-    "herbivores/triceratops-three-horned-late-cretaceous.png": {
-      "published_at": "2026-05-01T14:41:58.550029+00:00",
-      "products": [
-        {
-          "kind": "poster",
-          "product_id": "69f4bbaec5dce11a420eb9c0",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 43138,
-              "price": 2500,
-              "is_enabled": true
-            },
-            {
-              "id": 43144,
-              "price": 2200,
-              "is_enabled": true
-            },
-            {
-              "id": 43150,
-              "price": 4000,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbad010970f1c02b58f3"
-        },
-        {
-          "kind": "wrapped_canvas",
-          "product_id": "69f4bbb5e27149c0590ad27f",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 82231,
-              "price": 4700,
-              "is_enabled": true
-            },
-            {
-              "id": 82232,
-              "price": 4500,
-              "is_enabled": true
-            },
-            {
-              "id": 82235,
-              "price": 8200,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbad010970f1c02b58f3"
-        }
-      ],
-      "image_fit": {
-        "poster": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-three-horned-late-cretaceous.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        },
-        "wrapped_canvas": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-three-horned-late-cretaceous.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        }
-      }
-    },
-    "marine/ammonite-mesozoic-spiral-cephalopod.png": {
-      "published_at": "2026-05-01T14:42:11.627586+00:00",
-      "products": [
-        {
-          "kind": "poster",
-          "product_id": "69f4bbbb50e99c888b0b6e0d",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 43138,
-              "price": 2500,
-              "is_enabled": true
-            },
-            {
-              "id": 43144,
-              "price": 2200,
-              "is_enabled": true
-            },
-            {
-              "id": 43150,
-              "price": 4000,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbbaaa14b0e0ac3ebb08"
-        },
-        {
-          "kind": "wrapped_canvas",
-          "product_id": "69f4bbc24d4f472f290ec398",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 82231,
-              "price": 4700,
-              "is_enabled": true
-            },
-            {
-              "id": 82232,
-              "price": 4500,
-              "is_enabled": true
-            },
-            {
-              "id": 82235,
-              "price": 8200,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbbaaa14b0e0ac3ebb08"
-        }
-      ],
-      "image_fit": {
-        "poster": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/ammonite-mesozoic-spiral-cephalopod.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        },
-        "wrapped_canvas": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/ammonite-mesozoic-spiral-cephalopod.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        }
-      }
-    },
-    "marine/liopleurodon-jurassic-pliosaur.png": {
-      "published_at": "2026-05-01T14:42:26.095367+00:00",
-      "products": [
-        {
-          "kind": "poster",
-          "product_id": "69f4bbc9f18e6ff51e036a04",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 43138,
-              "price": 2500,
-              "is_enabled": true
-            },
-            {
-              "id": 43144,
-              "price": 2200,
-              "is_enabled": true
-            },
-            {
-              "id": 43150,
-              "price": 4000,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbc87a7394879bdafec8"
-        },
-        {
-          "kind": "wrapped_canvas",
-          "product_id": "69f4bbd0f18e6ff51e036a07",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 82231,
-              "price": 4700,
-              "is_enabled": true
-            },
-            {
-              "id": 82232,
-              "price": 4500,
-              "is_enabled": true
-            },
-            {
-              "id": 82235,
-              "price": 8200,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbc87a7394879bdafec8"
-        }
-      ],
-      "image_fit": {
-        "poster": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/liopleurodon-jurassic-pliosaur.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        },
-        "wrapped_canvas": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/liopleurodon-jurassic-pliosaur.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        }
-      }
-    },
-    "predators/carnotaurus-horned-theropod-macro.png": {
-      "published_at": "2026-05-01T14:42:43.094331+00:00",
-      "products": [
-        {
-          "kind": "poster",
-          "product_id": "69f4bbd8005bc962f702d3ef",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 43138,
-              "price": 2500,
-              "is_enabled": true
-            },
-            {
-              "id": 43144,
-              "price": 2200,
-              "is_enabled": true
-            },
-            {
-              "id": 43150,
-              "price": 4000,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbd7f55b7942563f792a"
-        },
-        {
-          "kind": "wrapped_canvas",
-          "product_id": "69f4bbe1e27149c0590ad29b",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 82231,
-              "price": 4700,
-              "is_enabled": true
-            },
-            {
-              "id": 82232,
-              "price": 4500,
-              "is_enabled": true
-            },
-            {
-              "id": 82235,
-              "price": 8200,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbd7f55b7942563f792a"
-        }
-      ],
-      "image_fit": {
-        "poster": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/carnotaurus-horned-theropod-macro.png",
-          "print_size": "24x36",
-          "source_size": "2400x1920",
-          "effective_dpi_before": 100.0,
-          "effective_dpi_after": 200.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        },
-        "wrapped_canvas": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/carnotaurus-horned-theropod-macro.png",
-          "print_size": "24x36",
-          "source_size": "2400x1920",
-          "effective_dpi_before": 100.0,
-          "effective_dpi_after": 200.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        }
-      }
-    },
-    "predators/dilophosaurus-crested-jurassic-theropod.png": {
-      "published_at": "2026-05-01T14:42:58.884707+00:00",
-      "products": [
-        {
-          "kind": "poster",
-          "product_id": "69f4bbe8005bc962f702d3f6",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 43138,
-              "price": 2500,
-              "is_enabled": true
-            },
-            {
-              "id": 43144,
-              "price": 2200,
-              "is_enabled": true
-            },
-            {
-              "id": 43150,
-              "price": 4000,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbe72e9590257e26a7ab"
-        },
-        {
-          "kind": "wrapped_canvas",
-          "product_id": "69f4bbf0632e5c92270cfbc8",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 82231,
-              "price": 4700,
-              "is_enabled": true
-            },
-            {
-              "id": 82232,
-              "price": 4500,
-              "is_enabled": true
-            },
-            {
-              "id": 82235,
-              "price": 8200,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbe72e9590257e26a7ab"
-        }
-      ],
-      "image_fit": {
-        "poster": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/dilophosaurus-crested-jurassic-theropod.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        },
-        "wrapped_canvas": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/dilophosaurus-crested-jurassic-theropod.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        }
-      }
-    },
-    "predators/tyrannosaurus-rex-apex-predator-roar.png": {
-      "published_at": "2026-05-01T14:43:12.522919+00:00",
-      "products": [
-        {
-          "kind": "poster",
-          "product_id": "69f4bbf8005bc962f702d3fa",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 43138,
-              "price": 2500,
-              "is_enabled": true
-            },
-            {
-              "id": 43144,
-              "price": 2200,
-              "is_enabled": true
-            },
-            {
-              "id": 43150,
-              "price": 4000,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbf78665460ad4deb710"
-        },
-        {
-          "kind": "wrapped_canvas",
-          "product_id": "69f4bbfe56569083ae0bb766",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 82231,
-              "price": 4700,
-              "is_enabled": true
-            },
-            {
-              "id": 82232,
-              "price": 4500,
-              "is_enabled": true
-            },
-            {
-              "id": 82235,
-              "price": 8200,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bbf78665460ad4deb710"
-        }
-      ],
-      "image_fit": {
-        "poster": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-apex-predator-roar.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        },
-        "wrapped_canvas": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-apex-predator-roar.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        }
-      }
-    },
-    "predators/tyrannosaurus-rex-apex-predator-stalking.png": {
-      "published_at": "2026-05-01T14:43:26.102986+00:00",
-      "products": [
-        {
-          "kind": "poster",
-          "product_id": "69f4bc05005bc962f702d3ff",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 43138,
-              "price": 2500,
-              "is_enabled": true
-            },
-            {
-              "id": 43144,
-              "price": 2200,
-              "is_enabled": true
-            },
-            {
-              "id": 43150,
-              "price": 4000,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bc042e9590257e26a7ac"
-        },
-        {
-          "kind": "wrapped_canvas",
-          "product_id": "69f4bc0cf18e6ff51e036a17",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 82231,
-              "price": 4700,
-              "is_enabled": true
-            },
-            {
-              "id": 82232,
-              "price": 4500,
-              "is_enabled": true
-            },
-            {
-              "id": 82235,
-              "price": 8200,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bc042e9590257e26a7ac"
-        }
-      ],
-      "image_fit": {
-        "poster": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-apex-predator-stalking.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        },
-        "wrapped_canvas": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-apex-predator-stalking.png",
-          "print_size": "24x36",
-          "source_size": "2688x1792",
-          "effective_dpi_before": 112.0,
-          "effective_dpi_after": 224.0,
-          "upscale_method": "pil_lanczos_2x",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        }
-      }
-    },
-    "predators/velociraptor-feathered-cretaceous-raptor.png": {
-      "published_at": "2026-05-01T14:43:34.239246+00:00",
-      "products": [
-        {
-          "kind": "poster",
-          "product_id": "69f4bc10632e5c92270cfbcf",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 43138,
-              "price": 2500,
-              "is_enabled": true
-            },
-            {
-              "id": 43144,
-              "price": 2200,
-              "is_enabled": true
-            },
-            {
-              "id": 43150,
-              "price": 4000,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bc0ff360afd181ba7f42"
-        },
-        {
-          "kind": "wrapped_canvas",
-          "product_id": "69f4bc13db88631ee308f9e1",
-          "external_url": null,
-          "variants": [
-            {
-              "id": 82231,
-              "price": 4700,
-              "is_enabled": true
-            },
-            {
-              "id": 82232,
-              "price": 4500,
-              "is_enabled": true
-            },
-            {
-              "id": 82235,
-              "price": 8200,
-              "is_enabled": true
-            }
-          ],
-          "image_id": "69f4bc0ff360afd181ba7f42"
-        }
-      ],
-      "image_fit": {
-        "poster": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/velociraptor-feathered-cretaceous-raptor.png",
-          "print_size": "24x36",
-          "source_size": "4352x1088",
-          "effective_dpi_before": 181.3,
-          "effective_dpi_after": 181.3,
-          "upscale_method": "none",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
-        },
-        "wrapped_canvas": {
-          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/velociraptor-feathered-cretaceous-raptor.png",
-          "print_size": "24x36",
-          "source_size": "4352x1088",
-          "effective_dpi_before": 181.3,
-          "effective_dpi_after": 181.3,
-          "upscale_method": "none",
-          "decision": "pad_crop",
-          "output_size": "3600x5400"
         }
       }
     },
@@ -1152,6 +359,3222 @@
           "source_size": "18000x12000",
           "effective_dpi_before": 3000.0,
           "effective_dpi_after": 3000.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2400"
+        }
+      }
+    },
+    "aerial/pterosaur-gliding.png": {
+      "published_at": "2026-05-31T16:55:14.278751+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c67eca2f3e94ff40dc0b5",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c0a93795ff1940ba0fa8",
+            "24x18": "6a18c0ab1ddae6e07c429586",
+            "36x24": "6a18c0b7c1158a300e7bddb8"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c67f08bd4e7de7f0e8a93",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c0bc260381a771983e8b",
+            "15oz_mug": "6a18c0bde9ec3a36737428af"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pterosaur-gliding.png",
+          "print_size": "18x12",
+          "source_size": "3808x1280",
+          "effective_dpi_before": 211.6,
+          "effective_dpi_after": 211.6,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1920x1280"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pterosaur-gliding.png",
+          "print_size": "24x18",
+          "source_size": "3808x1280",
+          "effective_dpi_before": 158.7,
+          "effective_dpi_after": 158.7,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1706x1280"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pterosaur-gliding.png",
+          "print_size": "36x24",
+          "source_size": "3808x1280",
+          "effective_dpi_before": 105.8,
+          "effective_dpi_after": 211.6,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "1920x1280"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pterosaur-gliding.png",
+          "print_size": "11oz_mug",
+          "source_size": "3808x1280",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "3022x1280"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/aerial/pterosaur-gliding.png",
+          "print_size": "15oz_mug",
+          "source_size": "3808x1280",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2720x1280"
+        }
+      }
+    },
+    "flora_arthropods/glossopteris-large-fern.png": {
+      "published_at": "2026-05-31T16:56:24.418863+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c68344525ffd57310dc90",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c0dbd7072d23455d774f",
+            "24x18": "6a18c0ef45cc86bd21fa5a82",
+            "36x24": "6a18c1021ddae6e07c42958a"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c6837a2f3e94ff40dc0e2",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c10a2f38cf61448e23a0",
+            "15oz_mug": "6a18c10b5a539d11b40e75c9"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/glossopteris-large-fern.png",
+          "print_size": "18x12",
+          "source_size": "1344x896",
+          "effective_dpi_before": 74.7,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "1343x895"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/glossopteris-large-fern.png",
+          "print_size": "24x18",
+          "source_size": "1344x896",
+          "effective_dpi_before": 56.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "1194x896"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/glossopteris-large-fern.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/glossopteris-large-fern.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/glossopteris-large-fern.png",
+          "print_size": "11oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 248.9,
+          "effective_dpi_after": 248.9,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x569"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/glossopteris-large-fern.png",
+          "print_size": "15oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 224.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x632"
+        }
+      }
+    },
+    "flora_arthropods/lepidodendron-massive-tree.png": {
+      "published_at": "2026-05-31T16:57:22.258779+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c686ca2f3e94ff40dc100",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a18c120647c801a8108a2a0",
+            "18x24": "6a18c12ee9ec3a36737428db",
+            "24x36": "69f4bb5b9c429293b63a66d4"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c68714525ffd57310dcb0",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c14850f437c2c269ab32",
+            "15oz_mug": "6a18c14935b204a0364636d6"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/lepidodendron-massive-tree.png",
+          "print_size": "12x18",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "1791x2687"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/lepidodendron-massive-tree.png",
+          "print_size": "18x24",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "1792x2389"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/lepidodendron-massive-tree.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/lepidodendron-massive-tree.png @ 24x36"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/lepidodendron-massive-tree.png",
+          "print_size": "11oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1138x2688"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/flora_arthropods/lepidodendron-massive-tree.png",
+          "print_size": "15oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1264x2688"
+        }
+      }
+    },
+    "herbivores/brachiosaurus-misty-forest.png": {
+      "published_at": "2026-05-31T16:58:10.224460+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c68987e00ab6e36047419",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a18c15c76bcd1dea8ff0af3",
+            "18x24": "6a18c168c1158a300e7bdde7",
+            "24x36": "6a18c175868d366906fe2909"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c68a08e5b9b44da09cdaf",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c17f23081d6fcfac3233",
+            "15oz_mug": "6a18c1808aac7907d705c10f"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/brachiosaurus-misty-forest.png",
+          "print_size": "12x18",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "1791x2687"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/brachiosaurus-misty-forest.png",
+          "print_size": "18x24",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "1792x2389"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/brachiosaurus-misty-forest.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/brachiosaurus-misty-forest.png @ 24x36"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/brachiosaurus-misty-forest.png",
+          "print_size": "11oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1138x2688"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/brachiosaurus-misty-forest.png",
+          "print_size": "15oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1264x2688"
+        }
+      }
+    },
+    "herbivores/brachiosaurus-sunset.png": {
+      "published_at": "2026-05-31T16:59:07.931149+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c68d44525ffd57310dcef",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c1881ddae6e07c4295ce",
+            "24x18": "6a18c18975fab94b19a14b51",
+            "36x24": "6a18c19418b0123197d463af"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c68db206637ea210883bb",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c1a450f437c2c269ab38",
+            "15oz_mug": "6a18c1a6d89d9947d34b086f"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/brachiosaurus-sunset.png",
+          "print_size": "18x12",
+          "source_size": "3808x1280",
+          "effective_dpi_before": 211.6,
+          "effective_dpi_after": 211.6,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1920x1280"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/brachiosaurus-sunset.png",
+          "print_size": "24x18",
+          "source_size": "3808x1280",
+          "effective_dpi_before": 158.7,
+          "effective_dpi_after": 158.7,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1706x1280"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/brachiosaurus-sunset.png",
+          "print_size": "36x24",
+          "source_size": "3808x1280",
+          "effective_dpi_before": 105.8,
+          "effective_dpi_after": 211.6,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "1920x1280"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/brachiosaurus-sunset.png",
+          "print_size": "11oz_mug",
+          "source_size": "3808x1280",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "3022x1280"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/brachiosaurus-sunset.png",
+          "print_size": "15oz_mug",
+          "source_size": "3808x1280",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2720x1280"
+        }
+      }
+    },
+    "herbivores/herbivores-group-dinosaur.png": {
+      "published_at": "2026-05-31T17:01:15.343692+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c694f8e5b9b44da09ce22",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c1c0be34e88c385d6e8f",
+            "24x18": "6a18c1ec75fab94b19a14bb8",
+            "36x24": "6a18c1fb45cc86bd21fa5a97"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c6954206637ea21088407",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c204be34e88c385d6efe",
+            "15oz_mug": "6a18c20535b204a036463702"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/herbivores-group-dinosaur.png",
+          "print_size": "18x12",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2687x1791"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/herbivores-group-dinosaur.png",
+          "print_size": "24x18",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2389x1792"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/herbivores-group-dinosaur.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/herbivores-group-dinosaur.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/herbivores-group-dinosaur.png",
+          "print_size": "11oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1138"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/herbivores-group-dinosaur.png",
+          "print_size": "15oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1264"
+        }
+      }
+    },
+    "herbivores/stegosaurus-plated-herbivore-thagomi.png": {
+      "published_at": "2026-05-31T17:02:39.906825+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c69a74525ffd57310dda4",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a19b0a5e5a2d660bb89162c",
+            "24x18": "6a19b0b2e5a2d660bb89162e",
+            "36x24": "6a19b0c1725a198be163d7b8"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c69adefb0c6a8580cefc6",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a19b0d4e5a2d660bb891633",
+            "15oz_mug": "6a19b0d6dfa8d9700356d85a"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/stegosaurus-plated-herbivore-thagomi.png",
+          "print_size": "18x12",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2687x1791"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/stegosaurus-plated-herbivore-thagomi.png",
+          "print_size": "24x18",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2389x1792"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/stegosaurus-plated-herbivore-thagomi.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/stegosaurus-plated-herbivore-thagomi.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/stegosaurus-plated-herbivore-thagomi.png",
+          "print_size": "11oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1138"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/stegosaurus-plated-herbivore-thagomi.png",
+          "print_size": "15oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1264"
+        }
+      }
+    },
+    "herbivores/triceratops-front.png": {
+      "published_at": "2026-05-31T17:03:39.482163+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c69e6279ee4205a07c7f9",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c21c1ddae6e07c42962c",
+            "24x18": "6a18c231a8022e889f6cd065",
+            "36x24": "6a18c23f18b0123197d4641a"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c69ea1babc69aaa101a1e",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c24618b0123197d4641b",
+            "15oz_mug": "6a18c247c1158a300e7bddfe"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-front.png",
+          "print_size": "18x12",
+          "source_size": "1344x896",
+          "effective_dpi_before": 74.7,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "1343x895"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-front.png",
+          "print_size": "24x18",
+          "source_size": "1344x896",
+          "effective_dpi_before": 56.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "1194x896"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-front.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-front.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-front.png",
+          "print_size": "11oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 248.9,
+          "effective_dpi_after": 248.9,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x569"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-front.png",
+          "print_size": "15oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 224.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x632"
+        }
+      }
+    },
+    "herbivores/triceratops-side-view.png": {
+      "published_at": "2026-05-31T17:04:30.353649+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c6a157e00ab6e36047539",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c25b76bcd1dea8ff0b27",
+            "24x18": "6a18c2688aac7907d705c172",
+            "36x24": "6a18c27790fe3da198cb002a"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c6a1c1babc69aaa101a3f",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c27ed363ea855a6c68a2",
+            "15oz_mug": "6a18c27f108b0cfc41cb27dd"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-side-view.png",
+          "print_size": "18x12",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2687x1791"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-side-view.png",
+          "print_size": "24x18",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2389x1792"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-side-view.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-side-view.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-side-view.png",
+          "print_size": "11oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1138"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-side-view.png",
+          "print_size": "15oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1264"
+        }
+      }
+    },
+    "herbivores/triceratops-striding.png": {
+      "published_at": "2026-05-31T17:05:24.146263+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c6a491babc69aaa101a6c",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a18c29275fab94b19a14e73",
+            "18x24": "6a18c29e23081d6fcfac3315",
+            "24x36": "69f4bb9b010970f1c02b58f2"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c6a51efb0c6a8580cf048",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c2b4e9ec3a36737429d3",
+            "15oz_mug": "6a18c2b679e2a6391e6cbf8e"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-striding.png",
+          "print_size": "12x18",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "1791x2687"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-striding.png",
+          "print_size": "18x24",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "1792x2389"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-striding.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-striding.png @ 24x36"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-striding.png",
+          "print_size": "11oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1138x2688"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/herbivores/triceratops-striding.png",
+          "print_size": "15oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1264x2688"
+        }
+      }
+    },
+    "marine/ammonite-spiral-shelled-cephalopod-1.png": {
+      "published_at": "2026-05-31T17:06:12.401705+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c6a7ba0d9727f6503e3e6",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c2c7d8265d8ae38a204b",
+            "24x18": "6a18c2d3be34e88c385d6f36",
+            "36x24": "69d7c625068b6613b68f0aed"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c6a818e5b9b44da09cf4d",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c2e83795ff1940ba105e",
+            "15oz_mug": "6a18c2e95a539d11b40e765e"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/ammonite-spiral-shelled-cephalopod-1.png",
+          "print_size": "18x12",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2687x1791"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/ammonite-spiral-shelled-cephalopod-1.png",
+          "print_size": "24x18",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2389x1792"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/ammonite-spiral-shelled-cephalopod-1.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/marine/ammonite-spiral-shelled-cephalopod-1.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/ammonite-spiral-shelled-cephalopod-1.png",
+          "print_size": "11oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1138"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/ammonite-spiral-shelled-cephalopod-1.png",
+          "print_size": "15oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1264"
+        }
+      }
+    },
+    "marine/elasmosaurus-extremely-long-necked.png": {
+      "published_at": "2026-05-31T17:07:13.928358+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c6ab94525ffd57310de7c",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c6a9284b1a555c8321a3f",
+            "24x18": "6a18c316d89d9947d34b0ab0",
+            "36x24": "6a18c328d8265d8ae38a206e"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c6abea0d9727f6503e409",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c33345cc86bd21fa5aa5",
+            "15oz_mug": "6a18c33479e2a6391e6cbf98"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-extremely-long-necked.png",
+          "print_size": "18x12",
+          "source_size": "1344x896",
+          "effective_dpi_before": 74.7,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "1343x895"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-extremely-long-necked.png",
+          "print_size": "24x18",
+          "source_size": "1344x896",
+          "effective_dpi_before": 56.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "1194x896"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-extremely-long-necked.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-extremely-long-necked.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-extremely-long-necked.png",
+          "print_size": "11oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 248.9,
+          "effective_dpi_after": 248.9,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x569"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-extremely-long-necked.png",
+          "print_size": "15oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 224.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x632"
+        }
+      }
+    },
+    "marine/elasmosaurus-resting-sea-floor.png": {
+      "published_at": "2026-05-31T17:07:59.292207+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c6ae7279ee4205a07c8d0",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a18c349d7072d23455d7807",
+            "18x24": "6a18c3548aac7907d705c1bd",
+            "24x36": "6a18c361d7072d23455d7823"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c6aeda0d9727f6503e435",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c36bb999e8d4590c15a3",
+            "15oz_mug": "6a18c36cbe34e88c385d7047"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-resting-sea-floor.png",
+          "print_size": "12x18",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "1791x2687"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-resting-sea-floor.png",
+          "print_size": "18x24",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "1792x2389"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-resting-sea-floor.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-resting-sea-floor.png @ 24x36"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-resting-sea-floor.png",
+          "print_size": "11oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1138x2688"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/elasmosaurus-resting-sea-floor.png",
+          "print_size": "15oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1264x2688"
+        }
+      }
+    },
+    "marine/kronosaurus-braching-water.png": {
+      "published_at": "2026-05-31T17:08:45.141470+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c6b141babc69aaa101b12",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c37cd8265d8ae38a2075",
+            "24x18": "6a18c389c1158a300e7bde35",
+            "36x24": "6a18c396b999e8d4590c15a5"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c6b1aa2f3e94ff40dc30e",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c39f108b0cfc41cb28ea",
+            "15oz_mug": "6a18c3a0260381a771983fa7"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/kronosaurus-braching-water.png",
+          "print_size": "18x12",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2687x1791"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/kronosaurus-braching-water.png",
+          "print_size": "24x18",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2389x1792"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/kronosaurus-braching-water.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/marine/kronosaurus-braching-water.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/kronosaurus-braching-water.png",
+          "print_size": "11oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1138"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/kronosaurus-braching-water.png",
+          "print_size": "15oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1264"
+        }
+      }
+    },
+    "marine/liopleurodon-gliding-water.png": {
+      "published_at": "2026-05-31T17:09:38.214527+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c6b44206637ea210885a6",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c3b235b204a0364639a8",
+            "24x18": "6a18c3bed8265d8ae38a20be",
+            "36x24": "6a18c3cc1e37692f330094c7"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c6b4ac12928833e00e806",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c3d823081d6fcfac3413",
+            "15oz_mug": "6a18c3d91e37692f330094c8"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/liopleurodon-gliding-water.png",
+          "print_size": "18x12",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2687x1791"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/liopleurodon-gliding-water.png",
+          "print_size": "24x18",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2389x1792"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/liopleurodon-gliding-water.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/marine/liopleurodon-gliding-water.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/liopleurodon-gliding-water.png",
+          "print_size": "11oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1138"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/liopleurodon-gliding-water.png",
+          "print_size": "15oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1264"
+        }
+      }
+    },
+    "marine/mosasaurus-colorful-coral-.png": {
+      "published_at": "2026-05-31T17:10:18.465720+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c6b72ec6cc8a96c0b5893",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c3e01ddae6e07c4296b1",
+            "24x18": "6a18c3ed75fab94b19a14f15",
+            "36x24": "6a18c3fb45cc86bd21fa5ab2"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c6b78206637ea210885c1",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c4052f38cf61448e2428",
+            "15oz_mug": "6a18c4063795ff1940ba116b"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/mosasaurus-colorful-coral-.png",
+          "print_size": "18x12",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 160.0,
+          "effective_dpi_after": 160.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2400x1600"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/mosasaurus-colorful-coral-.png",
+          "print_size": "24x18",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 106.7,
+          "effective_dpi_after": 213.3,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2400x1800"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/mosasaurus-colorful-coral-.png",
+          "print_size": "36x24",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 80.0,
+          "effective_dpi_after": 160.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "2400x1600"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/mosasaurus-colorful-coral-.png",
+          "print_size": "11oz_mug",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 533.3,
+          "effective_dpi_after": 533.3,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2400x1016"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/mosasaurus-colorful-coral-.png",
+          "print_size": "15oz_mug",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 480.0,
+          "effective_dpi_after": 480.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2400x1129"
+        }
+      }
+    },
+    "marine/mosasaurus-mosasaur-upclose-personal.png": {
+      "published_at": "2026-05-31T17:11:37.905963+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c6bbd1babc69aaa101b87",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c6b8f240f32bbf8c48c60",
+            "24x18": "6a1c6ba8545c77d59890d7e4",
+            "36x24": "6a1c6bbb6cb9d23695b567df"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c6bc6a2f3e94ff40dc39d",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a1c6bc554e14865ec7ddddd",
+            "15oz_mug": "6a1c6bc56cb9d23695b567e0"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/mosasaurus-mosasaur-upclose-personal.png",
+          "print_size": "18x12",
+          "source_size": "1344x896",
+          "effective_dpi_before": 74.7,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "1343x895"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/mosasaurus-mosasaur-upclose-personal.png",
+          "print_size": "24x18",
+          "source_size": "1344x896",
+          "effective_dpi_before": 56.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "1194x896"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/mosasaurus-mosasaur-upclose-personal.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/marine/mosasaurus-mosasaur-upclose-personal.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/mosasaurus-mosasaur-upclose-personal.png",
+          "print_size": "11oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 248.9,
+          "effective_dpi_after": 248.9,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x569"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/marine/mosasaurus-mosasaur-upclose-personal.png",
+          "print_size": "15oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 224.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x632"
+        }
+      }
+    },
+    "predators/dinosaur-eye-upclose-detail.png": {
+      "published_at": "2026-05-31T17:35:12.485498+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c71428bd4e7de7f0e91db",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c40ed8265d8ae38a2195",
+            "24x18": "6a1c712efc107ebd53d4aa2c",
+            "36x24": "6a1c71415308ac65d19c2318"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c714b997906336607c99a",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c4328aac7907d705c246",
+            "15oz_mug": "6a18c433647c801a8108a4ee"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/dinosaur-eye-upclose-detail.png",
+          "print_size": "18x12",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 160.0,
+          "effective_dpi_after": 160.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2400x1600"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/dinosaur-eye-upclose-detail.png",
+          "print_size": "24x18",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 106.7,
+          "effective_dpi_after": 213.3,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "4800x3600"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/dinosaur-eye-upclose-detail.png",
+          "print_size": "36x24",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 80.0,
+          "effective_dpi_after": 160.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "4800x3200"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/dinosaur-eye-upclose-detail.png",
+          "print_size": "11oz_mug",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 533.3,
+          "effective_dpi_after": 533.3,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2400x1016"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/dinosaur-eye-upclose-detail.png",
+          "print_size": "15oz_mug",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 480.0,
+          "effective_dpi_after": 480.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2400x1129"
+        }
+      }
+    },
+    "predators/spinosaurus-sail-backed-1.png": {
+      "published_at": "2026-05-31T17:36:09.327290+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c7180efb0c6a8580cf623",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a1c7162d977c24aba3d29d3",
+            "18x24": "6a1c7170c3e6b986b011eaad",
+            "24x36": "6a18c461be34e88c385d70f6"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c71857e00ab6e36047b27",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c46a8aac7907d705c261",
+            "15oz_mug": "6a18c46b79e2a6391e6cbfe8"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed-1.png",
+          "print_size": "12x18",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "3583x5375"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed-1.png",
+          "print_size": "18x24",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "3584x4778"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed-1.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed-1.png @ 24x36"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed-1.png",
+          "print_size": "11oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1138x2688"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed-1.png",
+          "print_size": "15oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1264x2688"
+        }
+      }
+    },
+    "predators/spinosaurus-sail-backed2.png": {
+      "published_at": "2026-05-31T17:37:22.013899+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c71bcec6cc8a96c0b5da8",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c7198592709f3c7767495",
+            "24x18": "6a1c71a6a749c0663350815d",
+            "36x24": "6a18c4a7d7072d23455d78a3"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c71c6c12928833e00ed10",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c4aebe34e88c385d70fc",
+            "15oz_mug": "6a18c4b0c1529f3e1536c8fb"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed2.png",
+          "print_size": "18x12",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "5375x3583"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed2.png",
+          "print_size": "24x18",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "4778x3584"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed2.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed2.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed2.png",
+          "print_size": "11oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1138"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/spinosaurus-sail-backed2.png",
+          "print_size": "15oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1264"
+        }
+      }
+    },
+    "predators/tyrannosaurus-rex-storm-lightning-strike.png": {
+      "published_at": "2026-05-31T17:39:27.073046+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c7240997906336607ca56",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c722d1ac4145a443d7455",
+            "24x18": "6a18b564260381a771983c07",
+            "36x24": "6a18b564260381a771983c07"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c724befb0c6a8580cf6be",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18b59c5044c5447ba95896",
+            "15oz_mug": "6a18b59d45cc86bd21fa573a"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-lightning-strike.png",
+          "print_size": "18x12",
+          "source_size": "1344x896",
+          "effective_dpi_before": 74.7,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "5375x3583"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-lightning-strike.png",
+          "print_size": "24x18",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-lightning-strike.png @ 24x18"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-lightning-strike.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-lightning-strike.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-lightning-strike.png",
+          "print_size": "11oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 248.9,
+          "effective_dpi_after": 248.9,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x569"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-lightning-strike.png",
+          "print_size": "15oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 224.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x632"
+        }
+      }
+    },
+    "predators/tyrannosaurus-rex-storm-through-the-rain.png": {
+      "published_at": "2026-05-31T17:40:46.727067+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c7291997906336607ca9b",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c72686cb9d23695b568e9",
+            "24x18": "6a1c727d87133e722bab669e",
+            "36x24": "6a18b5aa23081d6fcfac300e"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c7299a0d9727f6503ea36",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18b5eca8022e889f6ccd70",
+            "15oz_mug": "6a18b5ed76bcd1dea8ff0780"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-through-the-rain.png",
+          "print_size": "18x12",
+          "source_size": "1344x896",
+          "effective_dpi_before": 74.7,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "5375x3583"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-through-the-rain.png",
+          "print_size": "24x18",
+          "source_size": "1344x896",
+          "effective_dpi_before": 56.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "4778x3584"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-through-the-rain.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-through-the-rain.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-through-the-rain.png",
+          "print_size": "11oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 248.9,
+          "effective_dpi_after": 248.9,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x569"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-rex-storm-through-the-rain.png",
+          "print_size": "15oz_mug",
+          "source_size": "1344x896",
+          "effective_dpi_before": 224.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1344x632"
+        }
+      }
+    },
+    "predators/tyrannosaurus-teeth-detail.png": {
+      "published_at": "2026-05-31T17:42:14.092368+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c72eba0d9727f6503eaaa",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c72ae8a66c83ec0c6724e",
+            "24x18": "6a1c72c4ddcad7f0b5ab16b7",
+            "36x24": "6a1c72ea6cb9d23695b568ed"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c72f1997906336607cb0a",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c4fad89d9947d34b0e58",
+            "15oz_mug": "6a18c4fae9ec3a3673742bdb"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-teeth-detail.png",
+          "print_size": "18x12",
+          "source_size": "1200x960",
+          "effective_dpi_before": 80.0,
+          "effective_dpi_after": 320.0,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "4800x3200"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-teeth-detail.png",
+          "print_size": "24x18",
+          "source_size": "1200x960",
+          "effective_dpi_before": 53.3,
+          "effective_dpi_after": 213.3,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "4800x3600"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-teeth-detail.png",
+          "print_size": "36x24",
+          "source_size": "1200x960",
+          "effective_dpi_before": 40.0,
+          "effective_dpi_after": 160.0,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "4800x3200"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-teeth-detail.png",
+          "print_size": "11oz_mug",
+          "source_size": "1200x960",
+          "effective_dpi_before": 266.7,
+          "effective_dpi_after": 266.7,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1200x508"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-teeth-detail.png",
+          "print_size": "15oz_mug",
+          "source_size": "1200x960",
+          "effective_dpi_before": 240.0,
+          "effective_dpi_after": 240.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1200x564"
+        }
+      }
+    },
+    "predators/tyrannosaurus-teeth-detail2.png": {
+      "published_at": "2026-05-31T17:43:20.326648+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c731f749110a5130f546e",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a18c50076bcd1dea8ff0ce4",
+            "24x18": "6a1c730487133e722bab66a2",
+            "36x24": "6a1c731cf10c7e06868510e2"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c7333206637ea21088c23",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c5283cb97e053717a475",
+            "15oz_mug": "6a18c52ac1529f3e1536c905"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-teeth-detail2.png",
+          "print_size": "18x12",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 160.0,
+          "effective_dpi_after": 160.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2400x1600"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-teeth-detail2.png",
+          "print_size": "24x18",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 106.7,
+          "effective_dpi_after": 213.3,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "4800x3600"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-teeth-detail2.png",
+          "print_size": "36x24",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 80.0,
+          "effective_dpi_after": 160.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "4800x3200"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-teeth-detail2.png",
+          "print_size": "11oz_mug",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 533.3,
+          "effective_dpi_after": 533.3,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2400x1016"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurus-teeth-detail2.png",
+          "print_size": "15oz_mug",
+          "source_size": "2400x1920",
+          "effective_dpi_before": 480.0,
+          "effective_dpi_after": 480.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2400x1129"
+        }
+      }
+    },
+    "predators/tyrannosaurusrex-aggresive-running.png": {
+      "published_at": "2026-05-31T17:44:21.414813+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c7367279ee4205a07cfad",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c734887133e722bab66a5",
+            "24x18": "6a1c735740581ccccd475c80",
+            "36x24": "6a18c575b999e8d4590c176a"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c736ea2f3e94ff40dca23",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c57f75fab94b19a14fd2",
+            "15oz_mug": "6a18c580be34e88c385d714c"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-aggresive-running.png",
+          "print_size": "18x12",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "5375x3583"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-aggresive-running.png",
+          "print_size": "24x18",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "4778x3584"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-aggresive-running.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-aggresive-running.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-aggresive-running.png",
+          "print_size": "11oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1138"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-aggresive-running.png",
+          "print_size": "15oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1264"
+        }
+      }
+    },
+    "predators/tyrannosaurusrex-mountain-roaming.png": {
+      "published_at": "2026-05-31T17:45:32.775670+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c73b1efb0c6a8580cf7f3",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a1c7389033217f122238bdf",
+            "18x24": "6a1c739d3e6a1692358ce96e",
+            "24x36": "69aa327a442040fb72c8a393"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c73b6997906336607cb6c",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c5c7d89d9947d34b0e67",
+            "15oz_mug": "6a18c5c8664d78b6eb714d75"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-mountain-roaming.png",
+          "print_size": "12x18",
+          "source_size": "896x1344",
+          "effective_dpi_before": 74.7,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "3583x5375"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-mountain-roaming.png",
+          "print_size": "18x24",
+          "source_size": "896x1344",
+          "effective_dpi_before": 56.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "replicate_real_esrgan_4x",
+          "decision": "center_crop",
+          "output_size": "3584x4778"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-mountain-roaming.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-mountain-roaming.png @ 24x36"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-mountain-roaming.png",
+          "print_size": "11oz_mug",
+          "source_size": "896x1344",
+          "effective_dpi_before": 248.9,
+          "effective_dpi_after": 248.9,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "569x1344"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-mountain-roaming.png",
+          "print_size": "15oz_mug",
+          "source_size": "896x1344",
+          "effective_dpi_before": 224.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "632x1344"
+        }
+      }
+    },
+    "predators/tyrannosaurusrex-resting-mud.png": {
+      "published_at": "2026-05-31T17:46:44.091278+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c73f5c12928833e00eea7",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c73cbc7bd274a8c24c085",
+            "24x18": "6a1c73dfc3e6b986b011ebee",
+            "36x24": "6a18c5faa8022e889f6cd1b9"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c73ffec6cc8a96c0b5f5d",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c602355e79cad5bdf615",
+            "15oz_mug": "6a18c604d8265d8ae38a228b"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-resting-mud.png",
+          "print_size": "18x12",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "5375x3583"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-resting-mud.png",
+          "print_size": "24x18",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "4778x3584"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-resting-mud.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-resting-mud.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-resting-mud.png",
+          "print_size": "11oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1138"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-resting-mud.png",
+          "print_size": "15oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1264"
+        }
+      }
+    },
+    "predators/tyrannosaurusrex-roaming-roaring.png": {
+      "published_at": "2026-05-31T17:47:42.693861+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c74309e99326692091caa",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c7410e4bf6ed23838223a",
+            "24x18": "6a1c741db2cd405b446ca06d",
+            "36x24": "69f370181ee12be3d6e2bcea"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c7438a0d9727f6503eb60",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c6381e37692f330095aa",
+            "15oz_mug": "6a18c639355e79cad5bdf61c"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-roaming-roaring.png",
+          "print_size": "18x12",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "5375x3583"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-roaming-roaring.png",
+          "print_size": "24x18",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "4778x3584"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-roaming-roaring.png",
+          "print_size": "36x24",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-roaming-roaring.png @ 36x24"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-roaming-roaring.png",
+          "print_size": "11oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1138"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/tyrannosaurusrex-roaming-roaring.png",
+          "print_size": "15oz_mug",
+          "source_size": "2688x1792",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "2688x1264"
+        }
+      }
+    },
+    "predators/velociraptor-face-feathered.png": {
+      "published_at": "2026-05-31T17:48:50.273799+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c7476749110a5130f5540",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a1c7453b62fe50e0ee513f4",
+            "18x24": "6a1c7461b2cd405b446ca070",
+            "24x36": "6a18c668355e79cad5bdf61d"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c7480efb0c6a8580cf84b",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a18c66f445831fea63c85f6",
+            "15oz_mug": "6a18c671108b0cfc41cb2a15"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/velociraptor-face-feathered.png",
+          "print_size": "12x18",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 149.3,
+          "effective_dpi_after": 298.7,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "3583x5375"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/velociraptor-face-feathered.png",
+          "print_size": "18x24",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 112.0,
+          "effective_dpi_after": 224.0,
+          "upscale_method": "pil_lanczos_2x",
+          "decision": "center_crop",
+          "output_size": "3584x4778"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/velociraptor-face-feathered.png",
+          "print_size": "24x36",
+          "warning": "image_fit.prepare_for_print returned None for /Users/ericeldridge/dino_art/site/src/assets/gallery/predators/velociraptor-face-feathered.png @ 24x36"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/velociraptor-face-feathered.png",
+          "print_size": "11oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 497.8,
+          "effective_dpi_after": 497.8,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1138x2688"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/site/src/assets/gallery/predators/velociraptor-face-feathered.png",
+          "print_size": "15oz_mug",
+          "source_size": "1792x2688",
+          "effective_dpi_before": 448.0,
+          "effective_dpi_after": 448.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "1264x2688"
+        }
+      }
+    },
+    "predators/tyrannosaurus-rex-coming-right-ya.png": {
+      "published_at": "2026-05-31T17:51:05.343567+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c74f38bd4e7de7f0e9475",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a1c74e16cb9d23695b56947",
+            "18x24": "6a1c74ea033217f122238bef",
+            "24x36": "6a1c74e16cb9d23695b56947"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/tyrannosaurus-rex-coming-right-ya.png",
+          "print_size": "12x18",
+          "source_size": "10800x10800",
+          "effective_dpi_before": 900.0,
+          "effective_dpi_after": 900.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "7200x10800"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/tyrannosaurus-rex-coming-right-ya.png",
+          "print_size": "18x24",
+          "source_size": "10800x10800",
+          "effective_dpi_before": 600.0,
+          "effective_dpi_after": 600.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "8100x10800"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/tyrannosaurus-rex-coming-right-ya.png",
+          "print_size": "24x36",
+          "source_size": "10800x10800",
+          "effective_dpi_before": 450.0,
+          "effective_dpi_after": 450.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "7200x10800"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/tyrannosaurus-rex-coming-right-ya.png",
+          "print_size": "11oz_mug",
+          "source_size": "10800x10800",
+          "effective_dpi_before": 3000.0,
+          "effective_dpi_after": 3000.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2160"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/tyrannosaurus-rex-coming-right-ya.png",
+          "print_size": "15oz_mug",
+          "source_size": "10800x10800",
+          "effective_dpi_before": 2700.0,
+          "effective_dpi_after": 2700.0,
           "upscale_method": "none",
           "decision": "center_crop",
           "output_size": "5100x2400"
