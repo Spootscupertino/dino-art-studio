@@ -15,6 +15,7 @@ Requires Ollama + llama3.2-vision for auto image analysis (optional):
 
 import argparse
 import json
+import shutil
 import sqlite3
 import sys
 from pathlib import Path
@@ -467,6 +468,11 @@ def run_interview(image_path: str, species: Optional[str], prompt_id: Optional[i
             conn.commit()
             print(f"  {C.green('✓')} Archived to results table.")
 
+    # 9+ auto-promote: copy to horizontal/ or vertical/ to fire the watcher pipeline
+    # (upscale → resize → Printify draft). No prompt needed — score speaks for itself.
+    if final_score >= 9.0:
+        _auto_promote_to_print(image_path)
+
     print()
 
 
@@ -778,6 +784,46 @@ def extract_species_from_filename(filename: str) -> Optional[str]:
         if species_key in haystack:
             return species_key.replace("-", " ").title()
     return None
+
+
+def _auto_promote_to_print(image_path: str) -> None:
+    """Copy a 9+ image into horizontal/ or vertical/ to trigger the watcher pipeline.
+
+    The launchd watcher (com.jurassinkart.printify-sync) fires on any file
+    landing in those folders and runs: slug rename → feedback log → Replicate
+    upscale → resize → Printify draft. The image is only copied if it isn't
+    already there (idempotent).
+    """
+    try:
+        from PIL import Image as _Image
+    except ImportError:
+        print(f"  {C.yellow('⚠')} PIL not available — skipping auto-promote. Install Pillow to enable.")
+        return
+
+    src = Path(image_path).resolve()
+    if not src.exists():
+        print(f"  {C.yellow('⚠')} Source image not found: {src}")
+        return
+
+    try:
+        with _Image.open(src) as img:
+            w, h = img.size
+        folder_name = "horizontal" if w >= h else "vertical"
+    except Exception:
+        folder_name = "horizontal"
+
+    root = Path(__file__).resolve().parent
+    dest_dir = root / "site" / "src" / "assets" / "gallery" / folder_name
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / src.name
+
+    if dest.exists():
+        print(f"  {C.dim(f'Already in {folder_name}/ — watcher will handle it.')}")
+        return
+
+    shutil.copy2(src, dest)
+    print(f"\n  {C.green('★  9+ WINNER')} → copied to {folder_name}/")
+    print(f"  {C.dim('Watcher will upscale → resize → create Printify draft automatically.')}\n")
 
 
 def auto_log_folder(db_path: Path, folder_path: str):

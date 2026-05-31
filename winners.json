@@ -66,6 +66,28 @@
       "user_accurate_notes": "teeth detail, curvuture, size",
       "user_caveats": "its a skeleton",
       "signal_type": "anatomy_ref"
+    },
+    {
+      "signal_type": "mj_composition",
+      "source": "mj",
+      "prompt": "n/a",
+      "score": 9.5,
+      "session_id": 36,
+      "timestamp": "2026-05-31T10:33:13.686360",
+      "mj_flags": {},
+      "image_path": "/Users/ericeldridge/Downloads/spootscupertino_httpss.mj.runyWOdvVjD_9g_httpss.mj.run3gKDstKGk_943246b0-2fcd-4c92-a736-4aeb67442c8f.png"
+    }
+  ],
+  "mosasaur": [
+    {
+      "signal_type": "mj_composition",
+      "source": "mj",
+      "prompt": "mosasaur",
+      "score": 9.38,
+      "session_id": 31,
+      "timestamp": "2026-05-31T09:53:40.282321",
+      "mj_flags": {},
+      "image_path": "/Users/ericeldridge/Downloads/spootscupertino_open_ocean_grey-green_water_light_filtering_f_c173f2c4-9e8c-4199-9778-3708a4cafa63_0.png"
     }
   ]
 }
