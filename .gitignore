@@ -60,3 +60,13 @@ flux/datasets/*.zip
 
 # High-res print masters — fed to Printify, never committed (large; outside Astro build)
 print_masters/
+
+# Generated docs (regenerated locally, not source of truth)
+/PROJECT_MAP.html
+/WORKFLOW.html
+
+# Stray worktree scratch dir
+.claire/
+
+# Flux eval renders — generated test images, regenerate via flux/generate.py
+assets/gallery/flux/evals/
