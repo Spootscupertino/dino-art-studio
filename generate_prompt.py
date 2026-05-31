@@ -128,7 +128,7 @@ def build_epic_negative(habitat: str) -> str:
               "studio background, controlled lighting, CGI, 3D render, illustration, "
               "fossil, skeleton, museum specimen")
     if habitat == "terrestrial":
-        common += (", melted feet, malformed hands, crocodile, Komodo dragon, "
+        common += (", melted feet, malformed hands, crocodile, "
                    "monitor lizard, sprawling lizard, splayed limbs, "
                    "modern grass, lawn, modern forest")
     elif habitat == "marine":
@@ -247,7 +247,7 @@ LIGHTING_SKY = {
     "dawn_first_light":    "clear",
     "sunset_warm":         "clear",
     "high_noon_flat":      "clear",
-    "moonlit":             "clear",
+    "moonlit":             "overcast",
     # overcast — no direct sun
     "overcast":            "overcast",
     "broken_cloud":        "mixed",
@@ -269,7 +269,7 @@ LIGHTING_SKY = {
     "reef_scatter":        "clear",
     "murk_glow":           "overcast",
     "dawn_surface":        "clear",
-    "moonlit_surface":     "clear",
+    "moonlit_surface":     "overcast",
     # aerial
     "open_sky_flat":       "overcast",
     "cloud_shadow":        "mixed",
@@ -303,6 +303,13 @@ WEATHER_SKY_COMPAT = {
     "hot_still_air":        ("clear",),
     "late_afternoon_cool":  ("clear", "mixed"),
     "overcast_flat":        ("overcast",),
+    # terrestrial beauty / dramatic atmosphere
+    "crepuscular_rays":     ("mixed", "storm"),
+    "rainbow_after_storm":  ("mixed", "overcast"),
+    "blue_hour_still":      ("overcast", "clear"),
+    "golden_haze":          ("clear",),
+    "crystal_morning":      ("clear",),
+    "stormy_backlight":     ("storm", "mixed"),
     # marine
     "calm_surface":         ("clear", "mixed"),
     "choppy_swell":         ("overcast", "storm", "mixed"),
@@ -716,26 +723,26 @@ TERRESTRIAL_CAMERA_BY_MODE = {
 }
 
 TERRESTRIAL_WEATHER_BY_MOOD = {
-    "heat_rest":         ["heat_haze",        "hot_still_air",     "humid_haze",         "clear_pristine",    "late_afternoon_cool"],
-    "serene":            ["clear_pristine",   "late_afternoon_cool","ground_mist",        "overcast_flat",     "post_storm_clearing"],
-    "menacing":          ["storm_approaching","wind_gusts_dry",    "volcanic_ash_fall",  "wildfire_smoke",    "dust_storm"],
-    "territorial_hold":  ["wind_gusts_dry",   "storm_approaching", "dust_storm",         "clear_pristine",    "heat_haze"],
-    "post_kill_pause":   ["hot_still_air",    "humid_haze",        "clear_pristine",     "heat_haze",         "wind_gusts_dry"],
+    "heat_rest":         ["heat_haze",        "hot_still_air",     "golden_haze",        "clear_pristine",    "late_afternoon_cool"],
+    "serene":            ["crystal_morning",  "late_afternoon_cool","ground_mist",        "rainbow_after_storm","blue_hour_still"],
+    "menacing":          ["storm_approaching","stormy_backlight",  "volcanic_ash_fall",  "wildfire_smoke",    "dust_storm"],
+    "territorial_hold":  ["stormy_backlight", "storm_approaching", "dust_storm",         "wind_gusts_dry",    "heat_haze"],
+    "post_kill_pause":   ["hot_still_air",    "golden_haze",       "stormy_backlight",   "heat_haze",         "wind_gusts_dry"],
     "scent_tracking":    ["ground_mist",      "cold_fog",          "humid_haze",         "rain_clearing",     "post_storm_clearing"],
-    "alert_scan":        ["wind_gusts_dry",   "ground_mist",       "clear_pristine",     "storm_approaching", "cold_fog"],
-    "feeding_focus":     ["clear_pristine",   "hot_still_air",     "humid_haze",         "overcast_flat",     "rain_clearing"],
-    "herd_grazing":      ["clear_pristine",   "overcast_flat",     "ground_mist",        "humid_haze",        "rain_clearing"],
-    "drinking":          ["ground_mist",      "clear_pristine",    "rain_clearing",      "post_storm_clearing","humid_haze"],
-    "dawn_waking":       ["ground_mist",      "frost_dawn",        "cold_fog",           "clear_pristine",    "humid_haze"],
-    "dusk_settling":     ["late_afternoon_cool","clear_pristine",  "ground_mist",        "humid_haze",        "overcast_flat"],
-    "dust_bath":         ["heat_haze",        "hot_still_air",     "dust_storm",         "wind_gusts_dry",    "clear_pristine"],
-    "wading_shallow":    ["ground_mist",      "post_storm_clearing","rain_clearing",     "humid_haze",        "drizzle_steady"],
-    "quiet_power":       ["clear_pristine",   "ground_mist",       "overcast_flat",      "wind_gusts_dry",    "humid_haze"],
-    "grooming":          ["clear_pristine",   "late_afternoon_cool","hot_still_air",     "overcast_flat",     "post_storm_clearing"],
-    "startled_freeze":   ["wind_gusts_dry",   "storm_approaching", "ground_mist",        "cold_fog",          "clear_pristine"],
-    "mid_stride":        ["clear_pristine",   "overcast_flat",     "ground_mist",        "wind_gusts_dry",    "post_storm_clearing"],
-    "eye_contact":       ["clear_pristine",   "overcast_flat",     "ground_mist",        "backlit_haze",      "cold_fog"],
-    "closed_mouth_resting":["hot_still_air",  "clear_pristine",   "late_afternoon_cool","overcast_flat",     "humid_haze"],
+    "alert_scan":        ["wind_gusts_dry",   "ground_mist",       "crystal_morning",    "storm_approaching", "cold_fog"],
+    "feeding_focus":     ["golden_haze",      "hot_still_air",     "humid_haze",         "overcast_flat",     "rain_clearing"],
+    "herd_grazing":      ["crystal_morning",  "overcast_flat",     "ground_mist",        "rainbow_after_storm","rain_clearing"],
+    "drinking":          ["ground_mist",      "rainbow_after_storm","rain_clearing",     "post_storm_clearing","crepuscular_rays"],
+    "dawn_waking":       ["crystal_morning",  "ground_mist",       "frost_dawn",         "crepuscular_rays",  "humid_haze"],
+    "dusk_settling":     ["blue_hour_still",  "late_afternoon_cool","golden_haze",       "ground_mist",       "crepuscular_rays"],
+    "dust_bath":         ["heat_haze",        "hot_still_air",     "dust_storm",         "wind_gusts_dry",    "golden_haze"],
+    "wading_shallow":    ["ground_mist",      "rainbow_after_storm","rain_clearing",     "crepuscular_rays",  "drizzle_steady"],
+    "quiet_power":       ["golden_haze",      "ground_mist",       "stormy_backlight",   "crystal_morning",   "blue_hour_still"],
+    "grooming":          ["golden_haze",      "late_afternoon_cool","crystal_morning",   "overcast_flat",     "post_storm_clearing"],
+    "startled_freeze":   ["wind_gusts_dry",   "storm_approaching", "ground_mist",        "cold_fog",          "stormy_backlight"],
+    "mid_stride":        ["crystal_morning",  "overcast_flat",     "ground_mist",        "wind_gusts_dry",    "crepuscular_rays"],
+    "eye_contact":       ["stormy_backlight", "golden_haze",       "ground_mist",        "blue_hour_still",   "cold_fog"],
+    "closed_mouth_resting":["blue_hour_still","golden_haze",      "late_afternoon_cool","overcast_flat",     "crystal_morning"],
 }
 
 TERRESTRIAL_INVALID_COMBOS = [
@@ -2105,6 +2112,8 @@ PREDATOR_PREY_INTERACTIONS = {
     "confrontation": "predator and prey locked in standoff, frozen moment of tension",
     "chase":         "predator in full pursuit, prey fleeing at speed, chase in motion",
     "ambush":        "predator mid-strike, explosive attack, prey reacting",
+    "attacking":     "predator lunging with open jaws, teeth bared, mid-bite, prey desperate to escape",
+    "feeding":       "predator tearing at prey, blood on teeth and scales, kill moment, raw primal violence",
 }
 
 
@@ -3071,11 +3080,17 @@ def _estimate_clip_tokens(text: str) -> int:
 # Lean prompt — anatomy-first, no camera/mood/condition complexity
 # ---------------------------------------------------------------------------
 
-def _lean_naturalism(habitat: str, anatomy) -> str:
-    """Pick a naturalism anchor that matches the species' actual integument.
+_WET_WEATHER   = {"monsoon_heavy", "drizzle_steady", "rain_clearing", "post_storm_clearing"}
+_STORM_WEATHER = {"storm_approaching", "stormy_backlight"}
+_COLD_WEATHER  = {"arctic_freeze", "frost_dawn", "light_snowfall"}
+_DARK_WEATHER  = {"cold_fog", "overcast_flat", "blue_hour_still", "wildfire_smoke", "volcanic_ash_fall", "dust_storm"}
 
-    Avoids the bug of putting "scales catching sunlight" on a feathered raptor
-    or "feathers catching wind" on a pycnofiber-covered pterosaur.
+
+def _lean_naturalism(habitat: str, anatomy, weather_name: str = "") -> str:
+    """Pick a naturalism anchor that matches integument AND current weather.
+
+    Rain/storm weather overrides the default "catching sunlight" phrase —
+    sunlight contradicts rain and actively fights the weather signal in MJ.
     """
     if habitat == "plant":
         return "living plant tissue in natural ecosystem"
@@ -3084,8 +3099,17 @@ def _lean_naturalism(habitat: str, anatomy) -> str:
     if habitat == "marine":
         return "wet skin catching light, living wild animal"
     if habitat == "aerial":
-        # Pterosaurs have pycnofibers, not feathers — Sordes confirmed 1971
         return "pycnofiber fuzz catching wind, living wild pterosaur"
+
+    # Weather-driven override — applied before integument check
+    if weather_name in _WET_WEATHER:
+        return "wet hide glistening with rain, water streaming off scales, living wild animal"
+    if weather_name in _STORM_WEATHER:
+        return "wet scales dark with rain, body braced against storm, living wild animal"
+    if weather_name in _COLD_WEATHER:
+        return "breath condensation in cold air, frost on scales, living wild animal"
+    if weather_name in _DARK_WEATHER:
+        return "hide catching diffuse light, living wild animal"
 
     # Terrestrial — derive from integument
     cov = ""
@@ -3457,7 +3481,7 @@ def assemble_prompt(
     # and pterosaurs get "pycnofiber fuzz catching wind" instead of the
     # default "scales catching sunlight" — which was wrong for ~10 species.
     if not suppress_detail and not is_group and habitat not in ("plant",):
-        subject_parts.append(_lean_naturalism(habitat, anatomy))
+        subject_parts.append(_lean_naturalism(habitat, anatomy, weather_name=weather_param.get("name", "")))
 
     # Session 11: style_param["value"] and HABITAT_REALISM are NOT injected
     # into the prose. The DB-stored style rows contain the full realism stack
@@ -3474,6 +3498,15 @@ def assemble_prompt(
         subject = build_multi_subject_block(
             species, secondary_species, interaction_type or "coexisting", output_mode
         )
+        # build_multi_subject_block replaces the whole subject block, discarding
+        # the weather-aware naturalism anchor appended above. Re-attach the wet
+        # signal for both species so rain/storm renders on the scene, not just
+        # the (now-overwritten) single-subject hide.
+        _ms_weather = weather_param["name"]
+        if _ms_weather in _WET_WEATHER:
+            subject += ", both animals' hides wet and glistening with rain, water streaming off scales"
+        elif _ms_weather in _STORM_WEATHER:
+            subject += ", both animals' scales dark and rain-slicked, braced against the storm"
 
     # ── SECTION 2: INTERACTION ────────────────────────────────────────────────
     # Habitat-specific contact/physics block.
@@ -3483,8 +3516,13 @@ def assemble_prompt(
         # Naturalism anchor — the subject block already contains the specific
         # hunt action.  This slot reinforces wildlife-photo realism and
         # physical grounding (water/ground contact, environmental debris).
+        # Weather-aware: in rain/storm, "dirt kicked up, dust and debris" is a
+        # dry-ground signal that fights the wet sky — flip it to mud/water spray.
+        _pp_weather = weather_param["name"]
         if habitat == "marine":
             interaction = "murky water, sediment particles, bubbles trailing, bodies moving through water"
+        elif _pp_weather in _WET_WEATHER or _pp_weather in _STORM_WEATHER:
+            interaction = "rain-soaked muddy ground, water spray kicked up underfoot, raw animal energy in the downpour"
         else:
             interaction = "dirt kicked up, dust and debris, muscles tensed, raw animal energy"
     elif output_mode == "perched":
@@ -3610,18 +3648,41 @@ def assemble_prompt(
         else:
             epic_lead = EPIC_SCALE_LEAD.get(habitat, EPIC_SCALE_LEAD_DEFAULT)
 
+    # ── WEATHER ATMOSPHERE ────────────────────────────────────────────────────
+    # Weather conditions inject physical atmosphere (precipitation, fog, dust,
+    # atmospheric beauty) into the scene. Skipped for clear_pristine (default
+    # sky — adds nothing visual) and epic marine underwater (the epic lead
+    # already defines a clear-water environment; weather would contradict it).
+    _skip_weather = (
+        weather_param["name"] == "clear_pristine"
+        or (epic_scale and habitat == "marine" and output_mode not in ("shoreline", "surface_break"))
+    )
+    if _skip_weather:
+        weather_section = ""
+    elif weather_param["name"] in _WET_WEATHER or weather_param["name"] in _STORM_WEATHER:
+        # Rain/storm needs a stronger signal than one buried phrase — MJ kept
+        # rendering dry scenes. Take the two strongest phrases and lead with an
+        # explicit precipitation token so the wet atmosphere isn't lost.
+        _wparts = weather_param["value"].split(", ")
+        weather_section = ", ".join(_wparts[:2])
+    else:
+        weather_section = weather_param["value"].split(", ")[0]
+
     if wide_mode:
         # Framing leads, subject demoted — so the "tiny in frame" intent wins on
         # MJ's early-token weighting instead of the hero-subject description.
         if perspective_lead:
-            sections = [perspective_lead, wide_lead, environment, subject, camera, interaction]
+            sections = [perspective_lead, wide_lead, weather_section, environment, subject, camera, interaction]
         else:
-            sections = [wide_lead, environment, subject, camera, interaction]
+            sections = [wide_lead, weather_section, environment, subject, camera, interaction]
     elif perspective_lead:
         # Perspective-first assembly: angle → subject → environment → details
-        sections = [perspective_lead, subject, camera, environment, interaction]
+        sections = [perspective_lead, subject, camera, weather_section, environment, interaction]
     else:
-        sections = [subject, interaction, environment, camera]
+        # Weather before environment so it isn't buried after 1000+ chars of anatomy.
+        # It also precedes the mode composition template so MJ commits to the
+        # atmospheric condition before locking in framing language.
+        sections = [subject, interaction, weather_section, environment, camera]
     # Epic lead goes FIRST of all — MJ commits to the vast composition + crisp
     # sky before any subject/angle detail can pull the camera in.
     if epic_lead:
@@ -3684,7 +3745,7 @@ def assemble_prompt(
         # wrong body plan — safe for all dinosaurs (none had a sprawling gait),
         # but deliberately NOT banning "four legs"/"quadruped" so overhead shots
         # of Triceratops, sauropods, ankylosaurs still work.
-        bodyplan_neg = (", crocodile, alligator, monitor lizard, Komodo dragon, "
+        bodyplan_neg = (", crocodile, alligator, monitor lizard, "
                         "iguana, sprawling lizard, sprawling reptile, splayed limbs, "
                         "belly flat on ground, lying down, basking reptile")
         neg = neg + overhead_neg + bodyplan_neg
@@ -4950,6 +5011,16 @@ def main() -> None:
     # --- Habitat selection ---
     habitat = select_habitat()
 
+    # --- Lighting: pick scene atmosphere before mode so it informs your choice ---
+    lighting_param = pick_parameter(conn, "lighting", name_only=True, habitat=habitat,
+                                    suggest_label="sets the sky state — filters weather options")
+    lighting_param = dict(lighting_param)
+
+    # --- Weather: pick atmosphere, filtered by lighting sky compatibility ---
+    weather_param = pick_weather(conn, lighting_param, habitat=habitat,
+                                 suggest_label="sets physical atmosphere")
+    weather_param = dict(weather_param)
+
     # --- Mode selection (filtered by habitat) ---
     output_mode = select_mode(habitat)
     mode_cfg    = OUTPUT_MODES[output_mode]
@@ -5052,8 +5123,9 @@ def main() -> None:
         "diet":         species["diet"] or "",
         "size_class":   species["size_class"] or "",
         "output_mode":  output_mode,
-        "lighting": None, "mood": None, "behavior": None,
-        "condition": None, "weather": None,
+        "lighting": lighting_param["name"],
+        "mood": None, "behavior": None,
+        "condition": None, "weather": weather_param["name"],
     }
 
     def _cpick(category, slabel=""):
@@ -5063,10 +5135,6 @@ def main() -> None:
         return pick_parameter(conn, category, name_only=True, habitat=habitat,
                               suggestions=sug, blocked=blk, suggest_label=slabel,
                               restrict_to_suggestions=True)
-
-    # --- Lighting: auto-selected from suggestion system (Session 14) ---
-    lighting_param = auto_pick_parameter(conn, "lighting", habitat, ctx)
-    ctx["lighting"] = lighting_param["name"]
 
     # --- Camera: auto-selected from suggestion system (Session 14) ---
     camera_param = auto_pick_parameter(conn, "camera", habitat, ctx)
@@ -5087,39 +5155,11 @@ def main() -> None:
         condition_param = _cpick("condition", f"for {species['name']} · {behavior_param['name'].replace('_', ' ')}")
         ctx["condition"] = condition_param["name"]
 
-    # --- Weather: auto-selected with sky-compat filtering (Session 14) ---
-    all_weather = fetch_parameters_by_category(conn, "weather", habitat=habitat)
-    sky = LIGHTING_SKY.get(lighting_param["name"], "mixed")
-    compatible_weather = [w for w in all_weather
-                         if "any" in WEATHER_SKY_COMPAT.get(w["name"], ("any",))
-                         or sky in WEATHER_SKY_COMPAT.get(w["name"], ())]
-    if not compatible_weather:
-        compatible_weather = all_weather
-    weather_sug = get_suggestions("weather", ctx)
-    weather_blk = get_blocked("weather", ctx)
-    weather_param = None
-    if weather_sug:
-        for sug_name in weather_sug:
-            for w in compatible_weather:
-                if w["name"] == sug_name and w["name"] not in weather_blk:
-                    weather_param = dict(w)
-                    break
-            if weather_param:
-                break
-    if not weather_param:
-        for w in compatible_weather:
-            if w["name"] not in weather_blk:
-                weather_param = dict(w)
-                break
-    if not weather_param:
-        weather_param = dict(compatible_weather[0])
-    ctx["weather"] = weather_param["name"]
-
     # --- Display all auto-applied scene settings together ---
     print(f"\n  {hdr('SCENE SETTINGS (auto-applied)')}")
     print(f"  {C.DIM}" + "─" * 60 + C.RESET)
     print(f"    {ok('+')} {dim('[camera]')} {C.WHITE}{camera_param['name'].replace('_', ' ')}{C.RESET}")
-    print(f"    {dim('(lighting + weather handed to MJ / reference image)')}")
+    print(f"    {dim('(lighting handed to MJ / reference image)')}")
     print()
 
     # --- Build prompt ---

@@ -108,7 +108,7 @@ ANATOMY = SpeciesAnatomy(
         "honey-gold teeth NOT bright white",
     ],
 
-    coloration_phrase="earth-toned olive-brown dorsal, tawny countershaded underbelly, drab Komodo-dragon palette",
+    coloration_phrase="earth-toned olive-brown dorsal, tawny countershaded underbelly, drab naturalistic palette",
 
     scale_anchor="12 meters long, 4m at hip, 8-tonne apex predator",
 
