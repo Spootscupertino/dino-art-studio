@@ -3804,6 +3804,118 @@
           "output_size": "5100x2400"
         }
       }
+    },
+    "predators/tyrannosaurus-rex-triceratops-eye-eachother.png": {
+      "published_at": "2026-05-31T19:47:14.029080+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c902d997906336607dc2a",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 3000,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c901ff10c7e06868517ef",
+            "24x18": "6a1c90241aa5f54f6b7ac478",
+            "36x24": "6a1c901ff10c7e06868517ef"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c903a8bd4e7de7f0ea4cc",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a1c903546adf6947da6a4d5",
+            "15oz_mug": "6a1c9039c266bcbdd561cdb8"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/tyrannosaurus-rex-triceratops-eye-eachother.png",
+          "print_size": "18x12",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 600.0,
+          "effective_dpi_after": 600.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "10800x7200"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/tyrannosaurus-rex-triceratops-eye-eachother.png",
+          "print_size": "24x18",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 450.0,
+          "effective_dpi_after": 450.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "9600x7200"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/tyrannosaurus-rex-triceratops-eye-eachother.png",
+          "print_size": "36x24",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 300.0,
+          "effective_dpi_after": 300.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "10800x7200"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/tyrannosaurus-rex-triceratops-eye-eachother.png",
+          "print_size": "11oz_mug",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 2000.0,
+          "effective_dpi_after": 2000.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2160"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/tyrannosaurus-rex-triceratops-eye-eachother.png",
+          "print_size": "15oz_mug",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 1800.0,
+          "effective_dpi_after": 1800.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2400"
+        }
+      }
     }
   }
 }

@@ -111,5 +111,17 @@
       "mj_flags": {},
       "image_path": "/Users/ericeldridge/Downloads/spootscupertino_httpss.mj.runfLBg_9H0R44_httpss.mj.runcOMHW1y_2fc8e374-e204-4105-b7e6-f8b33195620f_3.png"
     }
+  ],
+  "tyrannosaurus Rex": [
+    {
+      "signal_type": "mj_composition",
+      "source": "mj",
+      "prompt": "n/a",
+      "score": 9.7,
+      "session_id": 62,
+      "timestamp": "2026-05-31T12:38:21.151259",
+      "mj_flags": {},
+      "image_path": "/Users/ericeldridge/Downloads/spootscupertino_httpss.mj.runV0cg2aPBR18_httpss.mj.run98ijnkr_8f5e034d-1a28-4fdc-86a5-83b03e8fa894_1.png"
+    }
   ]
 }

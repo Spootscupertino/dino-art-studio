@@ -489,14 +489,16 @@ def cmd_bootstrap_config(_args) -> int:
     return 0
 
 
-def _wait_for_complete_image(path: Path, retries: int = 5, delay: float = 2.0) -> bool:
+def _wait_for_complete_image(path: Path, retries: int = 60, delay: float = 2.0) -> bool:
     """Block until ``path`` is a fully-written, decodable PNG.
 
-    The launchd watcher fires the moment a winner lands in the gallery, but the
-    52MB print-master may still be mid-write from the upscale step. Reading it
-    then yields a truncated file that Printify rejects with 400/10300. We poll
-    the file: it must (a) stop growing and (b) fully decode with truncation
-    detection ON. Returns True once stable, False if it never settles.
+    The launchd watcher fires the moment the small web copy lands in the gallery,
+    but the ~50MB print-master is still being written by the (slow) upscale step
+    — real-esrgan on a master can take well over a minute. Reading it early
+    yields a truncated file that Printify rejects with 400/10300. We poll until
+    the file (a) stops growing and (b) fully decodes with truncation detection
+    ON. Default ceiling is retries*delay = 120s, enough to outlast the upscale.
+    Returns True once stable, False if it never settles.
     """
     try:
         from PIL import Image, ImageFile
@@ -773,6 +775,14 @@ def cmd_publish(args) -> int:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    # Line-buffer output so the launchd watcher log stays truthful even when
+    # redirected to a file — a killed/slow run must not lose its trail.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(line_buffering=True)
+        except (AttributeError, ValueError):
+            pass
+
     ap = argparse.ArgumentParser(description="Printify publisher")
     ap.add_argument("--dry-run", action="store_true", default=True,
                     help="Default. Print plan without API writes.")
