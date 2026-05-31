@@ -224,6 +224,74 @@ def upscale(src_path: str) -> Tuple[str, str]:
     return path, "pil_lanczos_2x"
 
 
+# Long edge (px) the master must reach so the largest poster (36in @ 300 DPI)
+# clears Printify's quality check with headroom. 36 * 300 = 10800.
+MASTER_LONG_EDGE = 10800
+
+# real-esrgan on Replicate rejects inputs above its GPU pixel budget
+# (~2,096,704 px observed). Stay safely under it, and never feed it its own 4×
+# output (which is always over the cap → 413/429). One AI pass max, then LANCZOS.
+REALESRGAN_MAX_PIXELS = 2_000_000
+
+
+def upscale_to_master(
+    src_path: str,
+    dest_path: str,
+    target_long_edge: int = MASTER_LONG_EDGE,
+) -> Dict[str, Any]:
+    """Upscale src into a high-res print master at dest_path (PNG).
+
+    Strategy: one real-esrgan 4× pass (only when the source fits under the
+    model's pixel cap), then LANCZOS-resize to exactly target_long_edge on the
+    long edge. real-esrgan is never called more than once — its 4× output always
+    exceeds the cap, so repeat calls just 413/429. Sources already over the cap
+    skip AI entirely and go straight to LANCZOS.
+
+    Returns metadata: {source_size, master_size, passes, methods}.
+    """
+    if not _PIL_AVAILABLE:
+        raise ImportError("Pillow (PIL) is required for image_fit.")
+
+    with Image.open(src_path) as _im:
+        src_w, src_h = _im.size
+    meta: Dict[str, Any] = {
+        "source_size": f"{src_w}x{src_h}",
+        "passes": 0,
+        "methods": [],
+    }
+
+    work_path = src_path
+    long_edge = max(src_w, src_h)
+
+    # One guarded AI pass: only if it helps (still below target) and fits the cap.
+    if long_edge < target_long_edge and (src_w * src_h) <= REALESRGAN_MAX_PIXELS:
+        up_path, method = upscale(work_path)
+        with Image.open(up_path) as up:
+            new_long = max(up.size)
+        if new_long > long_edge:
+            work_path, long_edge = up_path, new_long
+            meta["methods"].append(method)
+            meta["passes"] += 1
+    elif (src_w * src_h) > REALESRGAN_MAX_PIXELS:
+        meta["methods"].append("ai_skipped_over_cap")
+
+    master = Image.open(work_path).convert("RGB")
+    mw, mh = master.size
+    # Resize to exactly target on the long edge — LANCZOS up the remainder, or
+    # down if a 4× pass overshot. Upsizing past source is acceptable for a print
+    # master (geometric DPI is what Printify checks); it's still real detail.
+    if max(mw, mh) != target_long_edge:
+        scale = target_long_edge / max(mw, mh)
+        master = master.resize((round(mw * scale), round(mh * scale)), Image.LANCZOS)
+        meta["methods"].append("pil_lanczos_finish")
+        meta["passes"] += 1
+
+    Path(dest_path).parent.mkdir(parents=True, exist_ok=True)
+    master.save(dest_path, format="PNG", optimize=True)
+    meta["master_size"] = f"{master.width}x{master.height}"
+    return meta
+
+
 # ---------- C. Smart fit to portrait ----------
 
 def _edge_median_color(img: Image.Image) -> Tuple[int, int, int]:
@@ -302,27 +370,14 @@ def prepare_for_print(
     img = Image.open(src_path)
     src_w, src_h = img.size
 
-    # Orientation match: print sizes are catalogued portrait (W<=H), but a
-    # landscape source should produce a landscape print, not a cropped portrait
-    # one. Swap the print dimensions to follow the source orientation so a 3:2
-    # landscape fits a 36x24 poster with no crop instead of being sliced to 24x36.
-    if (src_w >= src_h) != (print_w_in >= print_h_in):
+    # Orientation match: a clearly-landscape source should produce a landscape
+    # print (and vice versa), so swap the print dims to follow it — a 3:2
+    # landscape fits 36x24 with no crop instead of being sliced to 24x36.
+    # A *square* source has no orientation, so honor the requested print size
+    # as-is (the publisher already chose portrait vs landscape from the gallery
+    # folder); only swap when the source is strictly one way or the other.
+    if src_w != src_h and (src_w > src_h) != (print_w_in > print_h_in):
         print_w_in, print_h_in = print_h_in, print_w_in
-
-    # Target pixel dimensions at target_dpi (default 600 — 2x Printify's 300 DPI
-    # requirement, so its quality check clears with headroom). DPI_FLOOR remains
-    # the reject threshold below which we refuse to publish.
-    target_w_px = int(print_w_in * target_dpi)
-    target_h_px = int(print_h_in * target_dpi)
-
-    # Never upscale: if the target exceeds what the master can supply for this
-    # aspect (scale-to-fill), shrink the target to the master's limit. So a
-    # 36x24 from an 18000x12000 master lands at 18000x12000 (500 DPI), not an
-    # upscaled 21600x14400 (600 DPI). Still well above the 300 DPI requirement.
-    fill_scale = max(target_w_px / src_w, target_h_px / src_h)
-    if fill_scale > 1.0:
-        target_w_px = int(target_w_px / fill_scale)
-        target_h_px = int(target_h_px / fill_scale)
 
     dpi_before = effective_dpi(src_w, src_h, print_w_in, print_h_in)
     meta: Dict[str, Any] = {
@@ -331,9 +386,11 @@ def prepare_for_print(
         "effective_dpi_before": round(dpi_before, 1),
     }
 
-    working_path = src_path
+    # Upscale FIRST (when below the floor), then size the target against the
+    # *upscaled* image. Doing it the other way clamps the target to the small
+    # source, so fit_to_print would shrink the upscaled pixels right back down
+    # and the upscale would be wasted (the 37-DPI bug).
     upscale_method = "none"
-
     if dpi_before < dpi_floor:
         print(
             f"[image_fit] DPI {dpi_before:.0f} < floor {dpi_floor} for {src_path} "
@@ -341,16 +398,12 @@ def prepare_for_print(
         )
         upscaled_path, upscale_method = upscale(src_path)
         if upscale_method == "pil_lanczos_2x":
-            print(
-                f"[image_fit] NOTE: PIL LANCZOS is 2× only — may still be below DPI floor."
-            )
-        working_path = upscaled_path
-        img = Image.open(working_path)
-        src_w2, src_h2 = img.size
-        dpi_after = effective_dpi(src_w2, src_h2, print_w_in, print_h_in)
+            print("[image_fit] NOTE: PIL LANCZOS is 2× only — may still be below DPI floor.")
+        img = Image.open(upscaled_path)
+        src_w, src_h = img.size
+        dpi_after = effective_dpi(src_w, src_h, print_w_in, print_h_in)
         meta["effective_dpi_after"] = round(dpi_after, 1)
         meta["upscale_method"] = upscale_method
-
         if dpi_after < dpi_floor:
             print(
                 f"[image_fit] SKIP: DPI floor not met after upscale "
@@ -366,6 +419,17 @@ def prepare_for_print(
                 f"[image_fit] NOTE: DPI {dpi_before:.0f} is above floor but below preferred "
                 f"{DPI_PREFERRED} for {src_path} @ {print_size_str}"
             )
+
+    # Target pixel dimensions at target_dpi (default 600 — 2x Printify's 300 DPI
+    # requirement). Computed against the (possibly upscaled) working image so we
+    # never throw away resolution. The clamp below only prevents going *beyond*
+    # the working image's real pixels (no synthetic upscaling past what we have).
+    target_w_px = int(print_w_in * target_dpi)
+    target_h_px = int(print_h_in * target_dpi)
+    fill_scale = max(target_w_px / src_w, target_h_px / src_h)
+    if fill_scale > 1.0:
+        target_w_px = int(target_w_px / fill_scale)
+        target_h_px = int(target_h_px / fill_scale)
 
     # Scale-to-fill + center-crop.
     fitted, decision = fit_to_print(img, target_w_px, target_h_px)

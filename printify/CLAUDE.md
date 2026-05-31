@@ -4,10 +4,17 @@ Owns the bridge from finished gallery art to live Etsy product listings.
 
 ## Mission
 
-When an image lands in `site/src/assets/gallery/<category>/`, generate two
-Printify products (Poster + Wrapped Canvas) and publish them into the user's
+When an image lands in `site/src/assets/gallery/<category>/`, generate the
+Printify products its orientation supports and publish them into the user's
 existing Etsy shop via Printify's Etsy sales channel. Keep an idempotent ledger
 so the same image is never published twice.
+
+**Orientation → product rules (locked):**
+- **Landscape** art → Poster (horizontal blueprint 284) **+ Mug** (478).
+- **Portrait** art → Poster only (blueprint 282). No mug — a vertical crop
+  reads badly on a wide mug wrap.
+
+Wrapped Canvas was retired 2026-05-28; the store ships posters + mugs.
 
 ## Scope
 

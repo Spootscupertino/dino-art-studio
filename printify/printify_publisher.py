@@ -87,7 +87,7 @@ CATEGORY_PRODUCTS: Dict[str, List[str]] = {
 DEFAULT_PRODUCTS: List[str] = ["poster", "mug"]
 
 KIND_CONTEXT = {
-    "poster": ("Dinosaur Wall Art", "Fine Art Print"),
+    "poster": ("Dinosaur Wall Art", "Poster Print"),
     "wrapped_canvas": ("Dinosaur Wall Art", "Wrapped Canvas"),
     "mug": ("Dinosaur Mug", "Coffee Mug"),
 }
@@ -407,6 +407,11 @@ def plan_publish(image_rel: str, feed_entry: Dict[str, Any], cfg: Dict[str, Any]
     # sheet. Detect from the gallery entry's dimensions.
     is_landscape = int(feed_entry.get("width", 0)) > int(feed_entry.get("height", 0))
 
+    # Mugs are wide-format wraps — a portrait crop reads badly on them, so only
+    # landscape art becomes a mug. Vertical art is poster-only.
+    if not is_landscape:
+        enabled_kinds = [k for k in enabled_kinds if k != "mug"]
+
     plan = {
         "image": image_rel,
         "category": category,
@@ -632,7 +637,21 @@ def cmd_publish(args) -> int:
                 return 2
             print(f"[print-file] uploading master {abs_path.name} (not the gallery web copy)")
         else:
-            abs_path = GALLERY_DIR / rel
+            # Auto-discover a high-res print master written by promote_winner.
+            # It's stored once per slug (under horizontal/ or vertical/), but the
+            # same winner may also be mirrored into a category folder, so match by
+            # filename stem anywhere under print_masters/. Falls back to web copy.
+            masters_dir = REPO_ROOT / "print_masters"
+            stem = Path(rel).stem
+            direct = masters_dir / Path(rel).with_suffix(".png")
+            master = direct if direct.exists() else next(
+                iter(masters_dir.rglob(f"{stem}.png")), None
+            ) if masters_dir.exists() else None
+            if master is not None:
+                abs_path = master
+                print(f"[master] uploading print master {master.name} (not the gallery web copy)")
+            else:
+                abs_path = GALLERY_DIR / rel
 
         # Use the first print size across all product kinds for the shared upload.
         # Each product kind may get a differently-fitted version; we upload once
@@ -741,6 +760,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         ),
     )
     args = ap.parse_args(argv)
+
+    # --live overrides the default --dry-run, so --live --draft actually works
+    if args.live:
+        args.dry_run = False
 
     if args.bootstrap_config:
         return cmd_bootstrap_config(args)

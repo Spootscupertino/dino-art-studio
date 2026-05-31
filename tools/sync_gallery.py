@@ -179,17 +179,16 @@ def _article(word: str) -> str:
 def derive_alt(title: str, meta: dict) -> str:
     art = _article(meta["traits"])
     return (
-        f"Scientifically accurate paleoart of {meta['scientific_name']}, "
+        f"Realistic paleoart of {meta['scientific_name']}, "
         f"{art} {meta['traits']} from the {meta['era']}, "
-        f"rendered in cinematic prehistoric detail."
+        f"with accurate proportions and natural color."
     )
 
 
 def derive_description(title: str, meta: dict) -> str:
     return (
-        f"{title} — fine-art paleoart print depicting {meta['scientific_name']}, "
-        f"{meta['traits']}, native to the {meta['era']}. "
-        f"Museum-quality dinosaur wall art for collectors and natural-history enthusiasts."
+        f"{title} — {meta['scientific_name']}, {meta['traits']} from the {meta['era']}. "
+        f"Detailed, realistic paleoart, printed sharp enough to hang up close."
     )
 
 

@@ -47,4 +47,4 @@ Decomposition is happening in phases (see `RECAP.md` for the full plan). Current
 - Two GitHub remotes: `dino-art-studio` (dev mirror) and `jurassinkart.com` (Vercel-connected). `origin` dual-pushes to both.
 - Watcher: launchd agent `com.jurassinkart.sync-gallery` watches the 5 gallery subfolders
 - Domain DNS: Network Solutions (`ns99.worldnic.com`); Vercel project handles deploys but not DNS
-- `.env` at root holds: PRINTIFY_API_TOKEN, MIDJOURNEY_*, DISCORD_WEBHOOK_URL
+- `.env` at root holds: PRINTIFY_API_KEY, PRINTIFY_SHOP_ID, MIDJOURNEY_*, DISCORD_WEBHOOK_URL

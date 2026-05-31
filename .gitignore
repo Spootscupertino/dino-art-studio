@@ -57,3 +57,6 @@ reference_images/**/*.png
 
 # Flux training dataset zips — large binaries, regenerate via flux/export_dataset.py
 flux/datasets/*.zip
+
+# High-res print masters — fed to Printify, never committed (large; outside Astro build)
+print_masters/

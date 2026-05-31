@@ -12,6 +12,7 @@ Usage:
 import argparse
 import json
 import re
+import shutil
 import sqlite3
 import sys
 from pathlib import Path
@@ -625,6 +626,221 @@ def show_trends_inline(conn: sqlite3.Connection, species: str):
         print(f"    {score_color(sc)}{sc:.1f}{C.RESET}{C.dim('/10')}  {C.dim(f'(×{n})')}  {C.teal(flag_str)}")
 
 
+# ─── 9+ winner promotion → fires the watcher pipeline ──────────────────────────────
+
+PROMOTE_THRESHOLD = 9.0
+
+# Words that carry no SEO/slug value — dropped from slugs and keyword lists.
+_SLUG_FILLER = {
+    "the", "of", "with", "and", "a", "an", "in", "on", "at", "to", "from",
+    "into", "through", "over", "under", "its", "his", "her", "their", "this",
+    "that", "scene", "moment", "shot", "image", "art", "piece", "dinosaur",
+}
+
+# Base SEO keywords every print carries (mirrors sync_gallery.derive_keywords).
+_BASE_KEYWORDS = [
+    "paleoart", "dinosaur art", "prehistoric art",
+    "natural history illustration", "wall art print",
+]
+
+
+def _ask_text(prompt: str, hint: str = "", required: bool = False) -> str:
+    """Single free-text question. Re-asks if required and left blank."""
+    suffix = f"  {C.dim('(' + hint + ')')}" if hint else ""
+    while True:
+        val = input(f"  {C.BLUE}{prompt}{C.RESET}{suffix}\n  {C.TEAL}›{C.RESET} ").strip()
+        if val or not required:
+            return val
+        print(f"  {C.yellow('Please enter something.')}")
+
+
+def _canonical_species(species: Optional[str]) -> Optional[str]:
+    """Map a free-form species ('Mosasaur') to a canonical slug key ('mosasaurus').
+
+    The downstream routers (web_promote, sync_gallery) match on full keys via
+    substring, so 'mosasaur' alone would miss 'mosasaurus' and mis-route. We
+    resolve to the longest key that prefixes or is prefixed by the input.
+    """
+    if not species:
+        return None
+    s = species.strip().lower()
+    for key in sorted(SPECIES_KEYS, key=len, reverse=True):
+        if key in s or s in key or key.startswith(s) or s.startswith(key):
+            return key
+    return s or None
+
+
+def _slug_words(text: str) -> List[str]:
+    return [w for w in re.split(r"[^a-z0-9]+", text.lower())
+            if w and w not in _SLUG_FILLER and not w.isdigit()]
+
+
+def _build_promo(species: Optional[str], answers: Dict[str, str]) -> Dict:
+    """Turn the 4 winner answers into slug + curated .meta.json fields."""
+    canon = _canonical_species(species)
+    sp_words = canon.split() if canon else []
+    display = (canon or species or "prehistoric creature").title()
+    display = display.replace("T-Rex", "T. rex").replace("T Rex", "T. rex")
+    display = re.sub(r"\bRex\b", "rex", display)
+
+    title = answers["title"].strip() or display
+    moment = answers.get("moment", "").strip()
+    setting = answers.get("setting", "").strip()
+    buyer = answers.get("buyer", "").strip()
+
+    # Slug: species token(s) + up to 3 distinctive words from the answers.
+    extra = [w for w in _slug_words(f"{title} {moment} {setting}") if w not in sp_words]
+    seen, dedup = set(), []
+    for w in extra:
+        if w not in seen:
+            seen.add(w)
+            dedup.append(w)
+    slug = "-".join((sp_words + dedup[:3])[:6]) or "prehistoric-art"
+    slug = re.sub(r"-+", "-", slug).strip("-")
+
+    # Strip species words the user repeated in their free-text answers (e.g.
+    # they typed "t rex walking" while species is already Tyrannosaurus rex), so
+    # the sentence doesn't read "a Tyrannosaurus rex t rex walking".
+    species_aliases = set(sp_words) | {"t", "rex", "trex", "dino", "dinosaur", "dinosaurs"}
+    def _strip_species(text: str) -> str:
+        kept = [w for w in text.split() if w.lower().strip(".,;:") not in species_aliases]
+        return " ".join(kept).strip(" ,")
+
+    clean_moment = _strip_species(moment)
+    clean_setting = _strip_species(setting)
+    scene_bits = [b for b in (clean_moment, clean_setting) if b]
+    scene = ", ".join(scene_bits)
+
+    # Visible caption: the human headline + what's happening. No marketing fluff.
+    caption = f"{title} — {scene}." if scene else f"{title}."
+
+    # Description: lead with the animal and the moment (dinosaur-forward), then a
+    # plain, honest line about the print. No "museum-quality" / "fine-art" /
+    # "for collectors" filler — people are tired of it.
+    lead = f"A {display} {scene}." if scene else f"A {display}."
+    description = (
+        f"{lead} Detailed, realistic paleoart — accurate proportions and natural "
+        f"color, printed sharp enough to hang up close."
+    )
+
+    # Keywords: real SEO phrases only — never split answers into single words
+    # ('t', 'you', 'river'). Use the cleaned scene phrases + buyer terms verbatim.
+    extra_kw: List[str] = []
+    if clean_setting:
+        extra_kw.append(clean_setting)
+    for b in re.split(r"[;,]", buyer):
+        b = b.strip()
+        if b:
+            extra_kw.append(b)
+
+    keywords, kseen = [], set()
+    for k in _BASE_KEYWORDS + [display, title] + extra_kw:
+        kl = k.lower()
+        if kl and kl not in kseen:
+            kseen.add(kl)
+            keywords.append(k)
+
+    return {
+        "slug": slug,
+        "meta": {
+            "title": title,
+            "caption": caption,
+            "description": description,
+            "keywords": keywords[:13],
+        },
+    }
+
+
+def promote_winner(image_path: str, species: Optional[str]) -> None:
+    """On a 9+, interview the human for SEO intent, write slug + .meta.json,
+    then copy into horizontal/ or vertical/ to trip the watcher pipeline."""
+    src = Path(image_path).resolve()
+    if not src.exists():
+        print(f"  {C.yellow('⚠')} Source image not found — skipping promote: {src}")
+        return
+
+    section("★  9+ WINNER — SET IT UP FOR THE WEBSITE & PRINTIFY")
+    print(f"  {C.dim('These four answers become the SEO slug, title, caption and tags.')}")
+    print(f"  {C.dim('They flow to both jurassinkart.com and the Printify listing.')}\n")
+
+    answers = {
+        "title":   _ask_text("Title for this piece?", "e.g. 'Mosasaurus — Storm Breach'", required=True),
+        "moment":  _ask_text("The moment — what's it doing?", "breaching, ambushing, cruising the depths…"),
+        "setting": _ask_text("Setting / mood — where & when?", "storm-lashed surface, deep blue, golden shallows…"),
+        "buyer":   _ask_text("Buyer keywords? (optional)", "e.g. 'sea monster wall art' — Enter to skip"),
+    }
+
+    promo = _build_promo(species, answers)
+    slug = promo["slug"]
+
+    # Orientation → folder. Clear landscape/portrait is auto-detected; a
+    # square or near-square image (within 5%) is genuinely ambiguous, so ask
+    # the human rather than silently defaulting to horizontal.
+    folder = "horizontal"
+    w = h = None
+    try:
+        from PIL import Image as _Image
+        with _Image.open(src) as im:
+            w, h = im.size
+    except Exception:
+        pass
+
+    if w and h:
+        if w > h * 1.05:
+            folder = "horizontal"
+        elif h > w * 1.05:
+            folder = "vertical"
+        else:
+            ans = _ask_text(
+                f"Orientation? Image is {w}x{h} (near-square) — "
+                "[h]orizontal or [v]ertical?",
+                "h = landscape poster, v = portrait poster", required=True,
+            ).strip().lower()
+            folder = "vertical" if ans.startswith("v") else "horizontal"
+    else:
+        folder = _ask_text(
+            "Orientation? [h]orizontal or [v]ertical?",
+            "couldn't read image size", required=True,
+        ).strip().lower()
+        folder = "vertical" if folder.startswith("v") else "horizontal"
+
+    dest_dir = Path(__file__).resolve().parent / "site" / "src" / "assets" / "gallery" / folder
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / f"{slug}{src.suffix.lower()}"
+    if dest.exists():
+        print(f"\n  {C.dim(f'{dest.name} already in {folder}/ — watcher will handle it.')}")
+        return
+
+    shutil.copy2(src, dest)
+    meta_path = dest.with_suffix(dest.suffix + ".meta.json")
+    meta_path.write_text(json.dumps(promo["meta"], indent=2, ensure_ascii=False), encoding="utf-8")
+
+    # Upscale once to a high-res print master (kept outside git/LFS). The Printify
+    # publisher auto-discovers it so uploads clear 300 DPI; the gallery keeps only
+    # the small web copy above. MJ sources (~1344px) can't reach 300 DPI on a 36in
+    # poster without this single upscale-to-master step.
+    root = Path(__file__).resolve().parent
+    master_path = root / "print_masters" / folder / f"{slug}.png"
+    try:
+        sys.path.insert(0, str(root / "printify"))
+        import image_fit  # lazy: pulls in Pillow only on a real promote
+        print(f"\n  {C.dim('Upscaling to print master (this can take a minute)…')}")
+        m = image_fit.upscale_to_master(str(src), str(master_path))
+        passes = m["passes"]
+        print(f"  {C.green('✓')} master {C.teal(m['master_size'])} "
+              f"{C.dim(f'({passes} upscale pass(es))')} → "
+              f"print_masters/{folder}/{master_path.name}")
+    except Exception as e:
+        print(f"  {C.yellow('⚠')} master upscale failed ({e}); "
+              f"publisher will fall back to the web copy.")
+
+    print(f"\n  {C.green('★  PROMOTED')} → {folder}/{dest.name}")
+    print(f"  {C.dim('title   ')} {C.teal(promo['meta']['title'])}")
+    print(f"  {C.dim('caption ')} {C.teal(promo['meta']['caption'])}")
+    print(f"  {C.dim('tags    ')} {C.teal(', '.join(promo['meta']['keywords']))}")
+    print(f"\n  {C.dim('Watcher will: slug → web SEO → upscale → resize → Printify draft.')}\n")
+
+
 # ─── Main interview flow ──────────────────────────────────────────────────────────
 
 def run_interview(image_path: str, db_path: Path):
@@ -795,6 +1011,10 @@ def run_interview(image_path: str, db_path: Path):
         )
         conn.commit()
         print(f"  {C.green('✓')} Archived.")
+
+    # ── Step 7c: 9+ auto-promote → website + Printify pipeline ───────────────────
+    if final >= PROMOTE_THRESHOLD:
+        promote_winner(image_path, species)
 
     # ── Step 8: Species insights ─────────────────────────────────────────────────
     section(f"INSIGHTS — {species.upper()}")
