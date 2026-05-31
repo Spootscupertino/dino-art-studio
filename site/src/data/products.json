@@ -1,5 +1,33 @@
 [
   {
+    "filename": "marine/mosasaurus-mosasaur-upclose-personal.png",
+    "title": "Mosasaur upclose and personal",
+    "width": 1344,
+    "height": 896,
+    "type": "image",
+    "category": "marine",
+    "scientific_name": "Mosasaurus hoffmannii",
+    "era": "Late Cretaceous",
+    "alt": "Scientifically accurate paleoart of Mosasaurus hoffmannii, an apex marine lizard predator from the Late Cretaceous, rendered in cinematic prehistoric detail.",
+    "description": "Mosasaur upclose and personal — fine-art paleoart print of Mosasaurus snapping its jaws, rushing through open water. Museum-quality prehistoric wall art for collectors and natural-history enthusiasts.",
+    "keywords": [
+      "paleoart",
+      "dinosaur art",
+      "prehistoric art",
+      "natural history illustration",
+      "wall art print",
+      "Mosasaurus",
+      "Mosasaur upclose and personal",
+      "snapping",
+      "jaws",
+      "rushing",
+      "open",
+      "water",
+      "mosasaur"
+    ],
+    "caption": "Mosasaur upclose and personal: a Mosasaurus snapping its jaws — rushing through open water. Photorealistic paleoart for posters and canvas prints."
+  },
+  {
     "filename": "predators/tyrannosaurus-rex-storm-through-the-rain.png",
     "title": "T. rex Storm — Through the Rain",
     "width": 1344,
@@ -24,6 +52,7 @@
       "prehistoric downpour",
       "natural history wall art"
     ],
+    "custom_note": "A Tyrannosaurus rex in heavy rain — photorealistic Late Cretaceous paleoart for posters and canvas prints.",
     "caption": "Tyrannosaurus rex advances through a torrential Late Cretaceous downpour — ground-level perspective captures the full scale of the apex predator in this cinematic paleoart print."
   },
   {
@@ -51,6 +80,7 @@
       "prehistoric storm",
       "natural history wall art"
     ],
+    "custom_note": "A Tyrannosaurus rex in a violent storm — photorealistic Late Cretaceous paleoart for posters and canvas prints.",
     "caption": "Tyrannosaurus rex stands in a violent Late Cretaceous storm — lightning illuminates the apex predator from ground level in this cinematic paleoart print."
   },
   {
