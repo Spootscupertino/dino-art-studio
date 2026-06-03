@@ -318,15 +318,55 @@ def _edge_median_color(img: Image.Image) -> Tuple[int, int, int]:
     )
 
 
+def _energy_profile(edge: Image.Image, axis: str) -> list:
+    """Collapse a single-channel edge map to a 1-D energy profile.
+
+    axis='x' -> per-column mean energy (length = width)
+    axis='y' -> per-row mean energy (length = height)
+
+    Uses PIL's BOX resize to average the perpendicular dimension, so no numpy
+    is needed. Returns a list of floats.
+    """
+    w, h = edge.size
+    if axis == "x":
+        collapsed = edge.resize((w, 1), Image.BOX)
+    else:
+        collapsed = edge.resize((1, h), Image.BOX)
+    return list(collapsed.getdata())
+
+
+def _best_offset(profile: list, window: int) -> int:
+    """Slide a window of `window` cells over `profile`; return the start offset
+    whose window holds the most total energy. Ties resolve toward center."""
+    n = len(profile)
+    if window >= n:
+        return 0
+    # Prefix sums for O(n) sliding-window totals.
+    prefix = [0.0] * (n + 1)
+    for i, v in enumerate(profile):
+        prefix[i + 1] = prefix[i] + v
+    best_off, best_sum = 0, -1.0
+    center_off = (n - window) // 2
+    for off in range(0, n - window + 1):
+        total = prefix[off + window] - prefix[off]
+        # Strictly-greater keeps the first (left-most) max; bias ties toward the
+        # center so a flat/low-detail image behaves like the old center-crop.
+        if total > best_sum or (total == best_sum and abs(off - center_off) < abs(best_off - center_off)):
+            best_sum, best_off = total, off
+    return best_off
+
+
 def fit_to_print(
     img: Image.Image,
     target_w_px: int,
     target_h_px: int,
 ) -> Tuple[Image.Image, str]:
-    """Scale-to-fill then center-crop. Never pads — no color bars ever.
+    """Scale-to-fill then saliency-crop. Never pads — no color bars ever.
 
-    Landscape into portrait = crop the sides and keep the center.
-    Returns (fitted_image, 'center_crop').
+    Instead of a blind center-crop, the crop window slides to the region of
+    highest edge energy, so a high-detail subject (e.g. a dinosaur's head and
+    snout near a frame edge) is kept rather than sliced off. Falls back to a
+    center-crop if the energy map is flat. Returns (fitted_image, decision).
     """
     src_w, src_h = img.size
 
@@ -337,10 +377,38 @@ def fit_to_print(
     scaled_h = int(src_h * fill_scale)
     scaled = img.convert("RGB").resize((scaled_w, scaled_h), Image.LANCZOS)
 
-    left = (scaled_w - target_w_px) // 2
-    top = (scaled_h - target_h_px) // 2
+    crop_x = scaled_w - target_w_px  # >0 means we crop horizontally
+    crop_y = scaled_h - target_h_px  # >0 means we crop vertically
+
+    # Default to center; only run the saliency pass on the axis that's cropped.
+    left = crop_x // 2
+    top = crop_y // 2
+    decision = "center_crop"
+
+    if crop_x > 0 or crop_y > 0:
+        # A downscaled grayscale edge map is enough to locate the subject and is
+        # fast regardless of master size. FIND_EDGES highlights detailed regions
+        # (scales, teeth, claws) over smooth sky/ground.
+        probe_long = 512
+        pscale = min(1.0, probe_long / max(scaled_w, scaled_h))
+        pw, ph = max(1, int(scaled_w * pscale)), max(1, int(scaled_h * pscale))
+        edge = scaled.convert("L").resize((pw, ph), Image.LANCZOS).filter(ImageFilter.FIND_EDGES)
+
+        if crop_x > 0:
+            prof = _energy_profile(edge, "x")
+            win = max(1, round(target_w_px * pscale))
+            left = round(_best_offset(prof, win) / pscale)
+            left = max(0, min(left, crop_x))
+            decision = "saliency_crop"
+        if crop_y > 0:
+            prof = _energy_profile(edge, "y")
+            win = max(1, round(target_h_px * pscale))
+            top = round(_best_offset(prof, win) / pscale)
+            top = max(0, min(top, crop_y))
+            decision = "saliency_crop"
+
     result = scaled.crop((left, top, left + target_w_px, top + target_h_px))
-    return result, "center_crop"
+    return result, decision
 
 
 # ---------- Main entry point ----------
