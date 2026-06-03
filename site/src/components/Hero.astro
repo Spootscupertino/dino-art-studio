@@ -18,25 +18,14 @@ if (clips.length === 0) clips = ['/assets/forest-canopy-loop.mp4'];
 const single = clips.length === 1;
 ---
 
-<section class="hero">
-  <!-- Parallax container needs overflow hidden which is set on .hero -->
-  <div class="hero-bg parallax-layer">
-    <!-- Two stacked videos crossfade through the playlist. A single clip just loops. -->
-    <video id="hero-vid-a" class="hero-vid is-active" autoplay muted playsinline
-           poster="/assets/prehistoric-tree.png" loop={single}>
+<section class="hero-stage">
+  <!-- The video plays at full detail inside a framed "movie screen", floating
+       above the tree backdrop (the page background). -->
+  <div class="hero-screen">
+    <video id="hero-vid-a" class="hero-vid is-active" autoplay muted playsinline preload="auto" loop={single}>
       <source src={clips[0]} type="video/mp4" />
     </video>
-    <video id="hero-vid-b" class="hero-vid" muted playsinline aria-hidden="true"></video>
-
-    <img class="hero-fallback" src="/assets/prehistoric-tree.png" alt="Prehistoric jungle canopy" loading="eager" decoding="async" />
-    <div class="hero-overlay"></div>
-  </div>
-</section>
-
-<section class="hero-intro">
-  <div class="hero-content parallax-content">
-    <h1>Step into a Dino day dream and a world of prehistoric wonder.</h1>
-    <a class="btn magnetic-btn" href="https://www.etsy.com/shop/Jurassinkart" target="_blank" rel="noopener">Shop the Collection</a>
+    <video id="hero-vid-b" class="hero-vid" muted playsinline preload="auto" aria-hidden="true"></video>
   </div>
 </section>
 
@@ -47,68 +36,104 @@ const single = clips.length === 1;
     const b = document.getElementById('hero-vid-b');
     if (!a || !b) return;
     const vids = [a, b];
-    let active = 0;
-    let idx = 0;
+    const FADE = 1.2;          // seconds — must match the CSS opacity transition
+    let active = 0;            // index of the on-screen video
+    let idx = 0;               // clip index currently showing
+    let nextIdx = 1 % clips.length;
+    let transitioning = false;
 
-    function preloadNext() {
-      const next = vids[1 - active];
-      idx = (idx + 1) % clips.length;
-      next.src = clips[idx];
-      next.load();
+    // Buffer the upcoming clip into the off-screen element a full clip ahead,
+    // so it's decoded and ready before we ever fade to it.
+    function queue(slot, clipIndex) {
+      const el = vids[slot];
+      if (el.dataset.clip !== String(clipIndex)) {
+        el.src = clips[clipIndex];
+        el.dataset.clip = String(clipIndex);
+        el.load();
+      }
     }
-    function advance() {
+    queue(1 - active, nextIdx);
+
+    function crossfade() {
+      if (transitioning) return;
+      transitioning = true;
       const cur = vids[active];
       const next = vids[1 - active];
       next.currentTime = 0;
       next.play().catch(() => {});
-      next.classList.add('is-active');
-      cur.classList.remove('is-active');
-      active = 1 - active;
-      preloadNext();
+
+      let revealed = false;
+      const reveal = () => {
+        if (revealed) return;
+        revealed = true;
+        next.classList.add('is-active');   // both play & dissolve together
+        cur.classList.remove('is-active');
+        window.setTimeout(() => {
+          cur.pause();
+          active = 1 - active;
+          idx = nextIdx;
+          nextIdx = (idx + 1) % clips.length;
+          queue(1 - active, nextIdx);      // preload the following clip
+          transitioning = false;
+        }, FADE * 1000);
+      };
+
+      // Only dissolve once the next clip has a real frame decoded — otherwise we
+      // reveal the element while it's still painting its previous (stale) clip.
+      if (next.readyState >= 2) {
+        reveal();
+      } else {
+        next.addEventListener('canplay', reveal, { once: true });
+        window.setTimeout(reveal, 2000); // safety net if canplay never fires
+      }
     }
-    vids.forEach((v) => v.addEventListener('ended', () => { if (v.classList.contains('is-active')) advance(); }));
-    // a already has clips[0] + autoplay; queue clips[1] into b.
-    preloadNext();
+
+    // Begin the dissolve ~FADE seconds before the current clip ends, so the two
+    // clips overlap while both are moving (no frozen last-frame glitch).
+    function maybeCrossfade() {
+      const cur = vids[active];
+      if (transitioning || !cur.duration || isNaN(cur.duration)) return;
+      if (cur.duration - cur.currentTime <= FADE) crossfade();
+    }
+
+    vids.forEach((v) => {
+      v.addEventListener('timeupdate', maybeCrossfade);
+      // Fallback for clips shorter than the fade window.
+      v.addEventListener('ended', () => { if (v.classList.contains('is-active')) crossfade(); });
+    });
   })();
 </script>
 
   <style>
-    .hero-bg {
-      position: absolute;
-      top: -10%; left: -10%;
-      width: 120%; height: 120%;
-      will-change: transform;
+    .hero-stage {
+      position: relative;
+      z-index: 2;
+      padding: clamp(44px, 8vh, 104px) clamp(16px, 4vw, 56px) clamp(36px, 6vh, 80px);
+    }
+
+    /* Framed cinema screen — full-detail video, lifted off the tree backdrop */
+    .hero-screen {
+      position: relative;
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      aspect-ratio: 16 / 9;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #04070b;
+      box-shadow:
+        0 42px 90px rgba(0, 0, 0, 0.78),
+        0 0 0 1px rgba(193, 165, 110, 0.22),
+        0 0 0 9px rgba(6, 10, 16, 0.6);     /* subtle screen bezel */
     }
     .hero-vid {
       position: absolute;
       inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;          /* fill the screen, full detail, no transparency */
       opacity: 0;
       transition: opacity 1.2s ease-in-out;
     }
-    .hero-vid.is-active {
-      opacity: 0.72;
-    }
-    .hero-fallback {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.28;
-      filter: saturate(0.9) brightness(0.8);
-      z-index: -1;
-    }
-    .hero-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        to bottom,
-        rgba(9,14,23,0.3) 0%,
-        rgba(9,14,23,0.6) 60%,
-        #090e17 100%
-      );
-    }
-    /* Hide scrollbar / extra styles applied via index.astro */
+    .hero-vid.is-active { opacity: 1; }
   </style>

@@ -52,6 +52,20 @@ const products = await Promise.all(
 
 const imageProducts = products.filter((p) => !p.isVideo);
 
+// Group pieces into their category sections (fixed display order + labels).
+const CATEGORY_ORDER = [
+  { key: 'predators', label: 'Predators' },
+  { key: 'herbivores', label: 'Herbivores' },
+  { key: 'marine', label: 'Marine' },
+  { key: 'aerial', label: 'Aerial' },
+  { key: 'flora_arthropods', label: 'Flora & Arthropods' },
+];
+const grouped = {};
+for (const p of products) {
+  (grouped[p.category] ??= []).push(p);
+}
+const sections = CATEGORY_ORDER.filter((c) => grouped[c.key]?.length);
+
 const itemListSchema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
@@ -104,78 +118,85 @@ const itemListSchema = {
 ---
 <link rel="stylesheet" href="https://unpkg.com/photoswipe@5.4.4/dist/photoswipe.css" />
 <section class="gallery">
-  <h2 class="gallery-title">Featured Works</h2>
   <p class="gallery-sub">Click any piece to step inside.</p>
 
-  <div class="gallery-filters" role="tablist" aria-label="Filter by category">
-    <button class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">All</button>
-    <button class="filter-btn" data-filter="predators" role="tab">Predators</button>
-    <button class="filter-btn" data-filter="herbivores" role="tab">Herbivores</button>
-    <button class="filter-btn" data-filter="aerial" role="tab">Aerial</button>
-    <button class="filter-btn" data-filter="marine" role="tab">Marine</button>
-    <button class="filter-btn" data-filter="flora_arthropods" role="tab">Flora &amp; Arthropods</button>
+  {sections.length > 0 && (
+    <nav class="cat-nav" aria-label="Browse by category">
+      {sections.map((cat) => (
+        <a class="cat-nav-link" href={`#${cat.key}`}>{cat.label}</a>
+      ))}
+    </nav>
+  )}
+
+  <div class="cat-shop">
+    <a class="btn magnetic-btn" href={ETSY_SHOP_URL} target="_blank" rel="noopener">Shop the Collection</a>
   </div>
 
-  {products.length > 0 ? (
-    <div class="gallery-grid" id="masonry-grid">
-      {products.map((product) => (
-        product.isVideo ? (
-          <figure class="gallery-card video-card" data-category={product.category}>
-            <video
-              src={product.src}
-              autoplay
-              muted
-              loop
-              playsinline
-              preload="metadata"
-              class="product-image"
-              aria-label={product.alt}
-            ></video>
-            <figcaption class="card-overlay">
-              <span class="card-title">{product.title}</span>
-              <span class="card-cue">Available as a print &nbsp;→</span>
-            </figcaption>
-          </figure>
-        ) : (
-          <figure class="gallery-figure" data-category={product.category}>
-            <a
-              class="gallery-card"
-              href={product.fullSrc}
-              data-pswp-width={product.fullWidth}
-              data-pswp-height={product.fullHeight}
-              data-title={product.title}
-              data-alt={product.alt}
-              data-scientific={product.scientific_name}
-              data-era={product.era}
-              target="_blank"
-              rel="noopener"
-              aria-label={`Open ${product.title} — ${product.scientific_name}`}
-            >
-              <Image
-                src={product.asset}
-                alt={product.alt}
-                widths={[400, 800, 1200]}
-                sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
-                formats={['avif', 'webp']}
-                loading="lazy"
-                decoding="async"
-                class="product-image"
-              />
-              <figcaption class="card-overlay">
-                <span class="card-title">{product.title}</span>
-                <span class="card-cue">View &amp; shop &nbsp;→</span>
-              </figcaption>
-            </a>
-            {product.caption && (
-              <figcaption class="gallery-caption">{product.caption}</figcaption>
-            )}
-            <figcaption class="visually-hidden">
-              {product.title} — {product.scientific_name}, {product.era}. {product.description}
-            </figcaption>
-          </figure>
-        )
-      ))}
-    </div>
+  {sections.length > 0 ? (
+    sections.map((cat) => (
+      <div class="cat-section" id={cat.key}>
+        <h3 class="cat-heading">{cat.label}</h3>
+        <div class="gallery-grid cat-grid">
+          {grouped[cat.key].map((product) => (
+            product.isVideo ? (
+              <figure class="gallery-card video-card">
+                <video
+                  src={product.src}
+                  autoplay
+                  muted
+                  loop
+                  playsinline
+                  preload="metadata"
+                  class="product-image"
+                  aria-label={product.alt}
+                ></video>
+                <figcaption class="card-overlay">
+                  <span class="card-title">{product.title}</span>
+                  <span class="card-cue">Available as a print &nbsp;→</span>
+                </figcaption>
+              </figure>
+            ) : (
+              <figure class="gallery-figure">
+                <a
+                  class="gallery-card"
+                  href={product.fullSrc}
+                  data-pswp-width={product.fullWidth}
+                  data-pswp-height={product.fullHeight}
+                  data-title={product.title}
+                  data-alt={product.alt}
+                  data-scientific={product.scientific_name}
+                  data-era={product.era}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={`Open ${product.title} — ${product.scientific_name}`}
+                >
+                  <Image
+                    src={product.asset}
+                    alt={product.alt}
+                    widths={[400, 800, 1200]}
+                    sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+                    formats={['avif', 'webp']}
+                    loading="lazy"
+                    decoding="async"
+                    class="product-image"
+                  />
+                  <figcaption class="card-overlay">
+                    <span class="card-title">{product.title}</span>
+                    <span class="card-cue">View &amp; shop &nbsp;→</span>
+                  </figcaption>
+                </a>
+                {product.caption && (
+                  <figcaption class="gallery-caption">{product.caption}</figcaption>
+                )}
+                <figcaption class="visually-hidden">
+                  {product.title} — {product.scientific_name}, {product.era}. {product.description}
+                </figcaption>
+              </figure>
+            )
+          ))}
+        </div>
+      </div>
+    ))
   ) : (
     <p class="empty-state">Curating featured posters and canvas works — check back soon.</p>
   )}
@@ -189,40 +210,35 @@ const itemListSchema = {
   import PhotoSwipeLightbox from 'https://esm.sh/photoswipe@5.4.4/lightbox';
 
   function initGallery() {
-    const grid = document.getElementById('masonry-grid');
-    if (!grid) return;
+    const grids = document.querySelectorAll('.cat-grid');
+    if (!grids.length) return;
 
-    const masonry = new Masonry(grid, {
-      itemSelector: '.gallery-figure, .video-card',
-      columnWidth: '.gallery-figure, .video-card',
-      percentPosition: true,
-      gutter: 20,
-      transitionDuration: '0.3s',
+    // Each category section lays out independently.
+    grids.forEach((grid) => {
+      const masonry = new Masonry(grid, {
+        itemSelector: '.gallery-figure, .video-card',
+        columnWidth: '.gallery-figure, .video-card',
+        percentPosition: true,
+        gutter: 20,
+        transitionDuration: '0.3s',
+      });
+      imagesLoaded(grid).on('progress', () => masonry.layout());
     });
 
-    imagesLoaded(grid).on('progress', () => masonry.layout());
-
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const cards = grid.querySelectorAll('.gallery-figure, .video-card');
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const filter = btn.dataset.filter;
-        filterBtns.forEach(b => {
-          const active = b === btn;
-          b.classList.toggle('is-active', active);
-          b.setAttribute('aria-selected', active ? 'true' : 'false');
-        });
-        cards.forEach(c => {
-          const match = filter === 'all' || c.dataset.category === filter;
-          c.classList.toggle('is-hidden', !match);
-        });
-        masonry.layout();
+    // Horizontal category nav → smooth-scroll to each section.
+    document.querySelectorAll('.cat-nav-link').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = link.getAttribute('href').slice(1);
+        const target = document.getElementById(id);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
 
+    // One lightbox spanning every section; navigation stays within a section.
     const lightbox = new PhotoSwipeLightbox({
-      gallery: '#masonry-grid',
-      children: '.gallery-figure:not(.is-hidden) > a.gallery-card',
+      gallery: '.cat-grid',
+      children: '.gallery-figure > a.gallery-card',
       pswpModule: () => import('https://esm.sh/photoswipe@5.4.4'),
       bgOpacity: 0.96,
       showHideAnimationType: 'fade',
@@ -298,44 +314,66 @@ const itemListSchema = {
     letter-spacing: 0.04em;
   }
 
-  .gallery-filters {
+  /* ── Horizontal category nav (under the video) ── */
+  .cat-nav {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 6px;
-    margin: 0 auto 2.5rem;
+    align-items: center;
+    gap: 0.6rem 1.6rem;
+    margin: 0.5rem auto 1.8rem;
     padding: 0 1rem;
   }
-  .filter-btn {
-    background: transparent;
-    color: #a89e89;
-    border: 1px solid rgba(193, 165, 110, 0.18);
-    padding: 8px 18px;
+  .cat-nav-link {
+    position: relative;
     font-family: 'Cinzel', 'Georgia', serif;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-weight: 500;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: color 0.25s ease, border-color 0.25s ease,
-                background 0.25s ease, transform 0.25s ease;
+    color: #b7ac95;
+    text-decoration: none;
+    padding: 4px 2px;
+    transition: color 0.25s ease;
   }
-  .filter-btn:hover {
-    color: #e6dccb;
-    border-color: rgba(193, 165, 110, 0.5);
-    transform: translateY(-1px);
+  .cat-nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: -2px;
+    height: 1px;
+    background: #c9b988;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
   }
-  .filter-btn.is-active {
+  .cat-nav-link:hover {
     color: #f5ecd9;
-    border-color: rgba(193, 165, 110, 0.7);
-    background: rgba(193, 165, 110, 0.08);
-    box-shadow: 0 0 0 1px rgba(193, 165, 110, 0.25),
-                0 6px 16px rgba(0,0,0,0.3);
   }
-  .gallery-figure.is-hidden,
-  .video-card.is-hidden {
-    display: none !important;
+  .cat-nav-link:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* Shop CTA under the categories */
+  .cat-shop {
+    text-align: center;
+    margin: 0 auto 3.5rem;
+  }
+
+  /* ── Category sections ── */
+  .cat-section {
+    margin: 0 auto 3.5rem;
+    scroll-margin-top: 80px;
+  }
+  .cat-heading {
+    font-family: 'Cinzel', 'Georgia', serif;
+    font-weight: 500;
+    font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #c9b988;
+    margin: 0 0 1.4rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid rgba(193, 165, 110, 0.18);
+    text-shadow: 0 2px 14px rgba(0,0,0,0.5);
   }
 
   .gallery-grid {
