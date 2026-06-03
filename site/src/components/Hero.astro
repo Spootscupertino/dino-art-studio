@@ -1,21 +1,76 @@
-    <section class="hero">
-    <!-- Parallax container needs overflow hidden which is set on .hero -->
-    <div class="hero-bg parallax-layer">
-      <!-- Fixed Video path: using Astro's best static usage or fixing typo -->
-        <video autoplay muted loop playsinline poster="/assets/prehistoric-tree.png">
-    <source src="/assets/hero-loop.mp4" type="video/mp4" />
-  </video>
-      <img class="hero-fallback" src="/assets/prehistoric-tree.png" alt="Prehistoric jungle canopy" loading="eager" decoding="async" />
-      <div class="hero-overlay"></div>
-    </div>
-  </section>
+---
+import fs from 'node:fs';
+import path from 'node:path';
 
-  <section class="hero-intro">
-    <div class="hero-content parallax-content">
-      <h1>Step into a Dino day dream and a world of prehistoric wonder.</h1>
-      <a class="btn magnetic-btn" href="https://www.etsy.com/shop/Jurassinkart" target="_blank" rel="noopener">Shop the Collection</a>
-    </div>
-  </section>
+// Build-time playlist: every .mp4 dropped into public/assets/hero/ joins the
+// rotation automatically (sorted by filename — prefix 01-, 02- to order them).
+const heroDir = path.join(process.cwd(), 'public', 'assets', 'hero');
+let clips: string[] = [];
+try {
+  clips = fs.readdirSync(heroDir)
+    .filter((f) => f.toLowerCase().endsWith('.mp4'))
+    .sort()
+    .map((f) => `/assets/hero/${f}`);
+} catch {
+  /* folder missing — fall through to fallback below */
+}
+if (clips.length === 0) clips = ['/assets/forest-canopy-loop.mp4'];
+const single = clips.length === 1;
+---
+
+<section class="hero">
+  <!-- Parallax container needs overflow hidden which is set on .hero -->
+  <div class="hero-bg parallax-layer">
+    <!-- Two stacked videos crossfade through the playlist. A single clip just loops. -->
+    <video id="hero-vid-a" class="hero-vid is-active" autoplay muted playsinline
+           poster="/assets/prehistoric-tree.png" loop={single}>
+      <source src={clips[0]} type="video/mp4" />
+    </video>
+    <video id="hero-vid-b" class="hero-vid" muted playsinline aria-hidden="true"></video>
+
+    <img class="hero-fallback" src="/assets/prehistoric-tree.png" alt="Prehistoric jungle canopy" loading="eager" decoding="async" />
+    <div class="hero-overlay"></div>
+  </div>
+</section>
+
+<section class="hero-intro">
+  <div class="hero-content parallax-content">
+    <h1>Step into a Dino day dream and a world of prehistoric wonder.</h1>
+    <a class="btn magnetic-btn" href="https://www.etsy.com/shop/Jurassinkart" target="_blank" rel="noopener">Shop the Collection</a>
+  </div>
+</section>
+
+<script is:inline define:vars={{ clips }}>
+  (function rotateHero() {
+    if (!Array.isArray(clips) || clips.length <= 1) return; // single clip already loops
+    const a = document.getElementById('hero-vid-a');
+    const b = document.getElementById('hero-vid-b');
+    if (!a || !b) return;
+    const vids = [a, b];
+    let active = 0;
+    let idx = 0;
+
+    function preloadNext() {
+      const next = vids[1 - active];
+      idx = (idx + 1) % clips.length;
+      next.src = clips[idx];
+      next.load();
+    }
+    function advance() {
+      const cur = vids[active];
+      const next = vids[1 - active];
+      next.currentTime = 0;
+      next.play().catch(() => {});
+      next.classList.add('is-active');
+      cur.classList.remove('is-active');
+      active = 1 - active;
+      preloadNext();
+    }
+    vids.forEach((v) => v.addEventListener('ended', () => { if (v.classList.contains('is-active')) advance(); }));
+    // a already has clips[0] + autoplay; queue clips[1] into b.
+    preloadNext();
+  })();
+</script>
 
   <style>
     .hero-bg {
@@ -24,11 +79,15 @@
       width: 120%; height: 120%;
       will-change: transform;
     }
-    .hero-bg video {
+    .hero-vid {
       position: absolute;
       inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
+      opacity: 0;
+      transition: opacity 1.2s ease-in-out;
+    }
+    .hero-vid.is-active {
       opacity: 0.72;
     }
     .hero-fallback {
