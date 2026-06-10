@@ -1947,6 +1947,10 @@ PREDATOR_PREY_PAIRINGS = {
     # Late Cretaceous
     "Tyrannosaurus rex": ["Triceratops", "Parasaurolophus", "Ankylosaurus"],
     "Velociraptor":      ["Parasaurolophus"],
+    # Carnotaurus's true Patagonian prey (small ornithopods, juvenile titanosaurs)
+    # isn't modeled; Parasaurolophus is the closest fit — a fleeing ornithopod that
+    # suits a fast, weak-bite chaser. Same period, different continent (cf. Velociraptor).
+    "Carnotaurus sastrei": ["Parasaurolophus"],
     # Early–Mid Cretaceous
     "Spinosaurus":       ["Cretoxyrhina", "Xiphactinus"],
     # Late Cretaceous marine
@@ -2827,6 +2831,16 @@ def make_feet_fix_prompt(species, mj_style: str, stylize: int = 20) -> str:
             "natural wear and small tears at trailing edge, "
             "pycnofibre texture on forearm, real wildlife photograph of bat wing reference"
         )
+    elif name.split()[0] in CURSORIAL_THEROPOD_GENERA:
+        core = (
+            f"extreme close-up of {name} foot, slender cursorial running foot built for speed, "
+            "three forward weight-bearing toes spread on the ground, "
+            "small raised first-toe dewclaw held off the ground at the back, "
+            "elongated digitigrade foot, sharp recurved claws each a different length and wear, "
+            "tight scaly skin over lean tendons, visible knuckle joints, "
+            "dark worn keratin with cracks and chips, grit between digits, "
+            "large ground-bird ratite foot reference, real wildlife photograph of reptile foot"
+        )
     elif diet in ("Carnivore", "Piscivore"):
         core = (
             f"extreme close-up of {name} foot, each toe individually separated gripping ground, "
@@ -2990,6 +3004,17 @@ def make_mouth_fix_prompt(species, mj_style: str, stylize: int = 20) -> str:
 # Tyrannosaurids are didactyl (two-fingered); other terrestrial theropods default to tridactyl.
 DIDACTYL_GENERA = {"Tyrannosaurus", "Tarbosaurus", "Albertosaurus", "Daspletosaurus", "Gorgosaurus", "Nanotyrannus"}
 
+# Abelisaurids have four-fingered (tetradactyl) but extremely reduced, near-functionless
+# hands — short stubby splayed digits, mostly clawless, with a backward-projecting splint-
+# like fourth digit and an arm that barely projects from the body. NOT tridactyl raptor
+# hands and NOT didactyl tyrannosaurid hands.
+TETRADACTYL_GENERA = {"Carnotaurus", "Aucasaurus", "Majungasaurus", "Skorpiovenator", "Rajasaurus", "Abelisaurus", "Ekrixinatosaurus"}
+
+# Fast cursorial theropods whose feet read best as a slender running foot (three
+# forward weight-bearing toes + raised back dewclaw, ratite-like) rather than the
+# heavy gripping komodo-style foot the generic carnivore branch describes.
+CURSORIAL_THEROPOD_GENERA = {"Carnotaurus", "Aucasaurus", "Skorpiovenator"}
+
 
 def make_hand_fix_prompt(species, mj_style: str, stylize: int = 20):
     """Vary Region prompt for forelimb/hands. Paint over arm/hand area, paste this prompt.
@@ -3020,6 +3045,18 @@ def make_hand_fix_prompt(species, mj_style: str, stylize: int = 20):
             "real wildlife photograph of reptile forelimb"
         )
         no_extra = "three-fingered, four-fingered, extra fingers, fused digits, missing claws, oversized arms, human hand, mammalian hand"
+    elif genus in TETRADACTYL_GENERA:
+        core = (
+            f"extreme close-up of {name} forelimb, "
+            "tiny vestigial four-fingered hand, four thin digits splayed outward in a fan, "
+            "reduced near-functionless manus barely projecting from the body, "
+            "divergent fingers not curled, blunt coned fingertips with no recurved claws, "
+            "outermost fourth digit reduced to a short splint, "
+            "very short forearm, tight scaly skin over slender finger bones, "
+            "drab earth-toned hide, "
+            "real wildlife photograph of reptile forelimb"
+        )
+        no_extra = "two-fingered, three-fingered, five-fingered, curled grasping fingers, long arms, large hands, raptor sickle claw, human hand, mammalian hand"
     else:
         core = (
             f"extreme close-up of {name} forelimb, "
@@ -5096,6 +5133,18 @@ def main() -> None:
                 interaction_type = pick_interaction_type()
             else:
                 interaction_type = "coexisting"
+        else:
+            # No compatible pairing: downgrade to a solo composition. Without this,
+            # output_mode stays a multi-subject mode and the encounter composition +
+            # anti-fusion negatives fire around a single described animal, producing a
+            # prompt that tells MJ "two animals" but only describes one.
+            # output_mode="" routes to a neutral solo prompt: assemble_prompt falls
+            # back to portrait config, but "" (not "portrait") avoids the close-up
+            # CLOSE_MODES framing. Recompute mode_cfg so the later full_body check
+            # (canvas extras) reflects the downgrade, not the stale encounter mode.
+            print(f"  {warn('No pairing available — generating a solo composition instead')}")
+            output_mode = ""
+            mode_cfg = OUTPUT_MODES["portrait"]
 
     required_params = fetch_species_required_params(conn, species["id"])
     if required_params:

@@ -13,6 +13,7 @@ from species.brachiosaurus    import ANATOMY as _brachiosaurus
 from species.ankylosaurus     import ANATOMY as _ankylosaurus
 from species.parasaurolophus  import ANATOMY as _parasaurolophus
 from species.dilophosaurus    import ANATOMY as _dilophosaurus
+from species.carnotaurus      import ANATOMY as _carnotaurus
 
 # ── Marine ───────────────────────────────────────────────────────────
 from species.mosasaurus       import ANATOMY as _mosasaurus
@@ -70,6 +71,7 @@ SPECIES_REGISTRY: dict[str, SpeciesAnatomy] = {
     "Ankylosaurus":        _ankylosaurus,
     "Parasaurolophus":     _parasaurolophus,
     "Dilophosaurus":       _dilophosaurus,
+    "Carnotaurus sastrei": _carnotaurus,
     # Marine
     "Mosasaurus":          _mosasaurus,
     "Elasmosaurus":        _elasmosaurus,

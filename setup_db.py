@@ -36,6 +36,10 @@ SEED_SPECIES = [
      "marine"),
     ("Parasaurolophus",     "Para",        "Cretaceous", "Herbivore", "Large",   "Crested hadrosaur",                              None, "terrestrial"),
     ("Dilophosaurus",       "Dilopho",     "Jurassic",   "Carnivore", "Medium",  "Double-crested early theropod",                  None, "terrestrial"),
+    ("Carnotaurus sastrei", "Carnotaurus", "Cretaceous", "Carnivore", "Large",   "Horned speed-running theropod, the 'meat-eating bull'",
+     "short deep bulldog skull with two bull-like brow horns, tiny vestigial four-fingered arms even smaller than T. rex, "
+     "slender lightweight fast-runner build, scaly pebbly hide with rows of conical raised bumps along the flanks",
+     "terrestrial"),
     # Marine species
     ("Mosasaurus",          "Mosasaur",    "Cretaceous", "Carnivore", "Massive", "Large marine reptile, elongated body, four short flippers, deep laterally compressed tail",
      "fully aquatic, keeled scales along back, rounded snout, conical teeth varying in size, loose jaw hinge allowing wide gape, barrel-shaped torso tapering to crescent tail fin", "marine"),
