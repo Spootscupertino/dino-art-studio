@@ -31,6 +31,16 @@
       "session_id": 2,
       "timestamp": "2025-05-06T10:15:00Z",
       "anatomy_analysis": "Good digit structure, feather distribution realistic, sickle claw detail correct"
+    },
+    {
+      "signal_type": "mj_composition",
+      "source": "mj",
+      "prompt": "n/a",
+      "score": 9.75,
+      "session_id": 163,
+      "timestamp": "2026-06-10T12:09:08.298355",
+      "mj_flags": {},
+      "image_path": "/Users/ericeldridge/Downloads/spootscupertino_httpss.mj.runEUuZ1peV9RA_httpss.mj.rune_grBl5_334ff8e8-0008-49e8-8b31-5ac45b1557dd_0.png"
     }
   ],
   "Mosasaurus": [
@@ -49,6 +59,16 @@
       "session_id": 3,
       "timestamp": "2025-05-06T10:30:00Z",
       "anatomy_analysis": "Serpentine body proportions correct, flipper angle realistic, jaw structure accurate"
+    },
+    {
+      "signal_type": "mj_composition",
+      "source": "mj",
+      "prompt": "dramatic low hero angle looking upward as a colossal fantastical Mosasaurus banks down through the single brightest shaft of god-ray light, sleek snake-lizard body with SHORT thick neck and head in line with the long body, rounded snout with jaws slightly parted, four short paddle flippers, deep vertical crescent tail fluke, keeled scales blazing with iridescent peacock color - emerald shifting to sapphire and violet with gold highlights catching the light beams, one eye lit by a sunbeam as the focal point, a scattering school of fish fleeing in the foreground and a tiny sea turtle far below for scale, deep blue haze and darkness behind, immense depth and scale, cinematic poster, hyperrealism",
+      "score": 9.62,
+      "session_id": 150,
+      "timestamp": "2026-06-10T10:55:30.800862",
+      "mj_flags": {},
+      "image_path": "/Users/ericeldridge/Downloads/spootscupertino_httpss.mj.runWKsZG_ywPHs_httpss.mj.runZIZG7O1_89ace8df-7206-4361-914c-033a12164092_3.png"
     }
   ],
   "tyrannosaurus rex": [
@@ -122,6 +142,50 @@
       "timestamp": "2026-05-31T12:38:21.151259",
       "mj_flags": {},
       "image_path": "/Users/ericeldridge/Downloads/spootscupertino_httpss.mj.runV0cg2aPBR18_httpss.mj.run98ijnkr_8f5e034d-1a28-4fdc-86a5-83b03e8fa894_1.png"
+    },
+    {
+      "signal_type": "mj_composition",
+      "source": "mj",
+      "prompt": "n/a",
+      "score": 9.1,
+      "session_id": 81,
+      "timestamp": "2026-05-31T19:30:43.100145",
+      "mj_flags": {},
+      "image_path": "/Users/ericeldridge/Downloads/spootscupertino_httpss.mj.run98ijnkrbFKc_epic_drone_ladnscape_e9bf2088-6429-4944-b504-c22b0a4d646c_1.png"
+    }
+  ],
+  "Dimorphodon": [
+    {
+      "signal_type": "mj_composition",
+      "source": "mj",
+      "prompt": "n/a",
+      "score": 9.75,
+      "session_id": 71,
+      "timestamp": "2026-05-31T12:52:55.467234",
+      "mj_flags": {},
+      "image_path": "/Users/ericeldridge/Downloads/spootscupertino_epic_aerial_photograph_from_200m_altitude_vas_177d0267-30c7-4701-a332-c11d2b918db4_1.png"
+    }
+  ],
+  "Carnotaurus": [
+    {
+      "signal_type": "mj_composition",
+      "source": "mj",
+      "prompt": "n/a",
+      "score": 10.0,
+      "session_id": 138,
+      "timestamp": "2026-06-10T10:35:37.705193",
+      "mj_flags": {},
+      "image_path": "/Users/ericeldridge/Downloads/spootscupertino_httpss.mj.runC6E1Qtj8NWI_httpss.mj.runRJYqHiS_9521c601-69f4-4404-90d4-638f30058cdd_1.png"
+    },
+    {
+      "signal_type": "mj_composition",
+      "source": "mj",
+      "prompt": "n/a",
+      "score": 9.62,
+      "session_id": 127,
+      "timestamp": "2026-06-10T10:09:04.830868",
+      "mj_flags": {},
+      "image_path": "/Users/ericeldridge/Downloads/spootscupertino_httpss.mj.runL-CT98TVJVI_a_vast_dramatic_Late_fd6829f1-935f-4661-879f-f023d98364fa_1.png"
     }
   ]
 }

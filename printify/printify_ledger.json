@@ -3916,6 +3916,614 @@
           "output_size": "5100x2400"
         }
       }
+    },
+    "aerial/dimorphodon-soaring-high-above.png": {
+      "published_at": "2026-05-31T19:54:44.660004+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1c91f3a0d9727f6503fce6",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 3000,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a1c91ebc266bcbdd561ce3d",
+            "24x18": "6a1c91ef65c7cdb0ca4e15b7",
+            "36x24": "6a1c91ebc266bcbdd561ce3d"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a1c91fd643735248007d4bc",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a1c91f97c55349c2e4c5de0",
+            "15oz_mug": "6a1c91fbd292c3722f12b789"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/dimorphodon-soaring-high-above.png",
+          "print_size": "18x12",
+          "source_size": "10800x5400",
+          "effective_dpi_before": 600.0,
+          "effective_dpi_after": 600.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "8100x5400"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/dimorphodon-soaring-high-above.png",
+          "print_size": "24x18",
+          "source_size": "10800x5400",
+          "effective_dpi_before": 450.0,
+          "effective_dpi_after": 450.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "7200x5400"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/dimorphodon-soaring-high-above.png",
+          "print_size": "36x24",
+          "source_size": "10800x5400",
+          "effective_dpi_before": 300.0,
+          "effective_dpi_after": 300.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "8100x5400"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/dimorphodon-soaring-high-above.png",
+          "print_size": "11oz_mug",
+          "source_size": "10800x5400",
+          "effective_dpi_before": 1500.0,
+          "effective_dpi_after": 1500.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2160"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/dimorphodon-soaring-high-above.png",
+          "print_size": "15oz_mug",
+          "source_size": "10800x5400",
+          "effective_dpi_before": 1350.0,
+          "effective_dpi_after": 1350.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "5100x2400"
+        }
+      }
+    },
+    "predators/tyrannosaurus-rex-running-you-ground.png": {
+      "published_at": "2026-06-01T02:32:44.811041+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a1cef48279ee4205a0822b3",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 3000,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a1cef3b5408dc403f4a928d",
+            "18x24": "6a1cef42f1f25e947d40259b",
+            "24x36": "6a1cef3b5408dc403f4a928d"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/tyrannosaurus-rex-running-you-ground.png",
+          "print_size": "12x18",
+          "source_size": "8135x10800",
+          "effective_dpi_before": 677.9,
+          "effective_dpi_after": 677.9,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "7200x10800"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/tyrannosaurus-rex-running-you-ground.png",
+          "print_size": "18x24",
+          "source_size": "8135x10800",
+          "effective_dpi_before": 451.9,
+          "effective_dpi_after": 451.9,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "8100x10800"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/tyrannosaurus-rex-running-you-ground.png",
+          "print_size": "24x36",
+          "source_size": "8135x10800",
+          "effective_dpi_before": 339.0,
+          "effective_dpi_after": 339.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "7200x10800"
+        }
+      }
+    },
+    "predators/carnptaurus-fierce-carnotaurus-gaze.png": {
+      "published_at": "2026-06-10T16:55:08.718515+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a2996e167f98a3d3e03176a",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 3000,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a2996d3a04f1be7f8db7b47",
+            "24x18": "6a2996d96b75e455fc2f664c",
+            "36x24": "6a2996d3a04f1be7f8db7b47"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a2996eb67f98a3d3e03176d",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a2996e6691536ae9cf6fa52",
+            "15oz_mug": "6a2996eaf5210f6dfa4aa9c7"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/carnptaurus-fierce-carnotaurus-gaze.png",
+          "print_size": "18x12",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 600.0,
+          "effective_dpi_after": 600.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "10800x7200"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/carnptaurus-fierce-carnotaurus-gaze.png",
+          "print_size": "24x18",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 450.0,
+          "effective_dpi_after": 450.0,
+          "upscale_method": "none",
+          "decision": "saliency_crop",
+          "output_size": "9600x7200"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/carnptaurus-fierce-carnotaurus-gaze.png",
+          "print_size": "36x24",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 300.0,
+          "effective_dpi_after": 300.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "10800x7200"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/carnptaurus-fierce-carnotaurus-gaze.png",
+          "print_size": "11oz_mug",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 2000.0,
+          "effective_dpi_after": 2000.0,
+          "upscale_method": "none",
+          "decision": "saliency_crop",
+          "output_size": "5100x2160"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/carnptaurus-fierce-carnotaurus-gaze.png",
+          "print_size": "15oz_mug",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 1800.0,
+          "effective_dpi_after": 1800.0,
+          "upscale_method": "none",
+          "decision": "saliency_crop",
+          "output_size": "5100x2400"
+        }
+      }
+    },
+    "predators/carnotaurus-scans-epic-scenery.png": {
+      "published_at": "2026-06-10T17:11:10.980200+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a299aaab68139813c0690e2",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 3000,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a299aa175c06a02b3443d2f",
+            "18x24": "6a299aa51a723ac5e0182e3f",
+            "24x36": "6a299aa175c06a02b3443d2f"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/carnotaurus-scans-epic-scenery.png",
+          "print_size": "12x18",
+          "source_size": "7200x10800",
+          "effective_dpi_before": 600.0,
+          "effective_dpi_after": 600.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "7200x10800"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/carnotaurus-scans-epic-scenery.png",
+          "print_size": "18x24",
+          "source_size": "7200x10800",
+          "effective_dpi_before": 450.0,
+          "effective_dpi_after": 450.0,
+          "upscale_method": "none",
+          "decision": "saliency_crop",
+          "output_size": "7200x9600"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/carnotaurus-scans-epic-scenery.png",
+          "print_size": "24x36",
+          "source_size": "7200x10800",
+          "effective_dpi_before": 300.0,
+          "effective_dpi_after": 300.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "7200x10800"
+        }
+      }
+    },
+    "predators/carnotaurus-portrait-upclose.png": {
+      "published_at": "2026-06-10T17:37:28.237647+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a29a0ce832a56fc0a039b42",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 3000,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a29a0c45bdbe0daf44b5d15",
+            "18x24": "6a29a0c943126648b4332825",
+            "24x36": "6a29a0c45bdbe0daf44b5d15"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/carnotaurus-portrait-upclose.png",
+          "print_size": "12x18",
+          "source_size": "7200x10800",
+          "effective_dpi_before": 600.0,
+          "effective_dpi_after": 600.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "7200x10800"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/carnotaurus-portrait-upclose.png",
+          "print_size": "18x24",
+          "source_size": "7200x10800",
+          "effective_dpi_before": 450.0,
+          "effective_dpi_after": 450.0,
+          "upscale_method": "none",
+          "decision": "saliency_crop",
+          "output_size": "7200x9600"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/carnotaurus-portrait-upclose.png",
+          "print_size": "24x36",
+          "source_size": "7200x10800",
+          "effective_dpi_before": 300.0,
+          "effective_dpi_after": 300.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "7200x10800"
+        }
+      }
+    },
+    "marine/mosasaurus-upclose-personal-curious.png": {
+      "published_at": "2026-06-10T17:58:17.090941+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a29a5a9bbf0294ff40c4edf",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43166,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "18x12"
+            },
+            {
+              "id": 43172,
+              "price": 3000,
+              "is_enabled": true,
+              "size": "24x18"
+            },
+            {
+              "id": 43178,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "36x24"
+            }
+          ],
+          "image_ids_by_size": {
+            "18x12": "6a29a59e2de7d8c160579dc3",
+            "24x18": "6a29a5a36d977f9f8b40b7f0",
+            "36x24": "6a29a59e2de7d8c160579dc3"
+          },
+          "draft": true
+        },
+        {
+          "kind": "mug",
+          "product_id": "6a29a5b34ffd8c96a80b056e",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 65216,
+              "price": 2000,
+              "is_enabled": true,
+              "size": "11oz_mug"
+            },
+            {
+              "id": 104692,
+              "price": 2200,
+              "is_enabled": true,
+              "size": "15oz_mug"
+            }
+          ],
+          "image_ids_by_size": {
+            "11oz_mug": "6a29a5affcf1b491a283ff4e",
+            "15oz_mug": "6a29a5b29306199c942fc86e"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:18x12": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/mosasaurus-upclose-personal-curious.png",
+          "print_size": "18x12",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 600.0,
+          "effective_dpi_after": 600.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "10800x7200"
+        },
+        "poster:24x18": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/mosasaurus-upclose-personal-curious.png",
+          "print_size": "24x18",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 450.0,
+          "effective_dpi_after": 450.0,
+          "upscale_method": "none",
+          "decision": "saliency_crop",
+          "output_size": "9600x7200"
+        },
+        "poster:36x24": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/mosasaurus-upclose-personal-curious.png",
+          "print_size": "36x24",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 300.0,
+          "effective_dpi_after": 300.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "10800x7200"
+        },
+        "mug:11oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/mosasaurus-upclose-personal-curious.png",
+          "print_size": "11oz_mug",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 2000.0,
+          "effective_dpi_after": 2000.0,
+          "upscale_method": "none",
+          "decision": "saliency_crop",
+          "output_size": "5100x2160"
+        },
+        "mug:15oz_mug": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/horizontal/mosasaurus-upclose-personal-curious.png",
+          "print_size": "15oz_mug",
+          "source_size": "10800x7200",
+          "effective_dpi_before": 1800.0,
+          "effective_dpi_after": 1800.0,
+          "upscale_method": "none",
+          "decision": "saliency_crop",
+          "output_size": "5100x2400"
+        }
+      }
+    },
+    "predators/velociraptor-jumping-you-mid.png": {
+      "published_at": "2026-06-10T19:11:06.908825+00:00",
+      "products": [
+        {
+          "kind": "poster",
+          "product_id": "6a29b6c68670cc0a0505061b",
+          "external_url": null,
+          "variants": [
+            {
+              "id": 43138,
+              "price": 2500,
+              "is_enabled": true,
+              "size": "12x18"
+            },
+            {
+              "id": 43144,
+              "price": 3000,
+              "is_enabled": true,
+              "size": "18x24"
+            },
+            {
+              "id": 43150,
+              "price": 4000,
+              "is_enabled": true,
+              "size": "24x36"
+            }
+          ],
+          "image_ids_by_size": {
+            "12x18": "6a29b6bc6d977f9f8b40bf5b",
+            "18x24": "6a29b6c03539c125ce13f094",
+            "24x36": "6a29b6bc6d977f9f8b40bf5b"
+          },
+          "draft": true
+        }
+      ],
+      "image_fit": {
+        "poster:12x18": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/velociraptor-jumping-you-mid.png",
+          "print_size": "12x18",
+          "source_size": "7200x10800",
+          "effective_dpi_before": 600.0,
+          "effective_dpi_after": 600.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "7200x10800"
+        },
+        "poster:18x24": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/velociraptor-jumping-you-mid.png",
+          "print_size": "18x24",
+          "source_size": "7200x10800",
+          "effective_dpi_before": 450.0,
+          "effective_dpi_after": 450.0,
+          "upscale_method": "none",
+          "decision": "saliency_crop",
+          "output_size": "7200x9600"
+        },
+        "poster:24x36": {
+          "original": "/Users/ericeldridge/dino_art/print_masters/vertical/velociraptor-jumping-you-mid.png",
+          "print_size": "24x36",
+          "source_size": "7200x10800",
+          "effective_dpi_before": 300.0,
+          "effective_dpi_after": 300.0,
+          "upscale_method": "none",
+          "decision": "center_crop",
+          "output_size": "7200x10800"
+        }
+      }
     }
   }
 }
